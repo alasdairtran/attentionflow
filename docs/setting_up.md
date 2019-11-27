@@ -17,11 +17,12 @@ sudo systemctl start docker
 
 # Set up django backend
 django-admin startproject backend
+cd backend && python manage.py startapp vevo
+docker-compose run backend python manage.py migrate --noinput
 
 # Set up React frontend
 yarn create react-app frontend
 
-# Start the databases
+# Start the app
 docker-compose up
-docker-compose run backend python manage.py migrate --noinput
 ```

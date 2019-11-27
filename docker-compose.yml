@@ -7,8 +7,8 @@ services:
   neo4j:
     build: ./neo4j
     ports:
-      - "7475:7474" # HTTPS host:container
-      - "7688:7687" # BOLT host:container
+      - "7474:7474" # HTTPS host:container
+      - "7687:7687" # BOLT host:container
     environment:
       - NEO4J_AUTH=none # WARNING: Disable authentication in development
     volumes:

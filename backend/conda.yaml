@@ -7,6 +7,7 @@ dependencies:
   - psycopg2 # connects to Postgres
   - pytest
   - pip:
+      - neo4j
       - django
       - djangorestframework
       - django-cors-headers
