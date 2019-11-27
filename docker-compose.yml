@@ -47,6 +47,8 @@ services:
   frontend:
     build: ./frontend
     command: ["yarn", "start"]
+    environment:
+      - HOST=0.0.0.0
     volumes:
       - ./frontend:/usr/src/app
     ports:
