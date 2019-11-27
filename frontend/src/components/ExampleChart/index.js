@@ -1,11 +1,6 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 
-const color = d => {
-  const scale = d3.scaleOrdinal(d3.schemeCategory10);
-  return d => scale(d.group);
-};
-
 const drag = simulation => {
   function dragstarted(d) {
     if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -90,7 +85,7 @@ class BarChart extends Component {
       .enter()
       .append('g');
 
-    const circles = node
+    node
       .append('circle')
       .call(drag(simulation))
       .attr('r', 10)
