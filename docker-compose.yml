@@ -43,3 +43,13 @@ services:
     depends_on:
       - neo4j
       - postgres
+
+  frontend:
+    build: ./frontend
+    command: ["yarn", "start"]
+    volumes:
+      - ./frontend:/usr/src/app
+    ports:
+      - 3001:3000 # host:container
+    depends_on:
+      - backend
