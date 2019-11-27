@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import ExampleChart from './components/ExampleChart';
 
 class App extends Component {
   constructor(props) {
@@ -18,7 +19,7 @@ class App extends Component {
     document.body.classList.add('bg-light');
   }
 
-  fetchCaption = e => {
+  fetchExample = e => {
     e.preventDefault();
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = {
@@ -46,7 +47,7 @@ class App extends Component {
         }
       })
       .catch(function(error) {
-        console.log(error);
+        console.error(error);
       });
   };
 
@@ -63,7 +64,7 @@ class App extends Component {
           <button
             type="submit"
             className="btn btn-lg btn-primary"
-            onClick={this.fetchCaption}
+            onClick={this.fetchExample}
             disabled={this.state.isLoading}
           >
             {this.state.isLoading ? 'Fetching data...' : 'Get an example'}
@@ -77,16 +78,14 @@ class App extends Component {
 
         {this.state.isLoaded && (
           <div className="row">
-            <div className="col-md-6 mb-4 alert alert-secondary">
+            <div className="col-md-4 mb-4">
               <h4 className="mb-3">{this.state.title}</h4>
-
-              <div className="mb-3">by </div>
             </div>
 
-            <div className="col-md-6 mb-4">
-              <div className="alert alert-success">
-                <h4 className="mb-3">Graph</h4>
-              </div>
+            <div className="col-md-8 mb-4">
+              <h4 className="mb-3">
+                <ExampleChart title={this.state.title} cast={this.state.cast} />
+              </h4>
             </div>
           </div>
         )}
