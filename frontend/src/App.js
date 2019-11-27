@@ -10,7 +10,7 @@ class App extends Component {
       hasError: false,
       errorMessage: "",
       title: "",
-      artist: ""
+      cast: []
     };
   }
 
@@ -41,7 +41,7 @@ class App extends Component {
             isLoaded: true,
             isLoading: false,
             title: res.data.title,
-            artist: res.data.artist
+            cast: res.data.cast
           });
         }
       })
@@ -80,7 +80,7 @@ class App extends Component {
             <div className="col-md-6 mb-4 alert alert-secondary">
               <h4 className="mb-3">{this.state.title}</h4>
 
-              <div className="mb-3">by {this.state.artist}</div>
+              <div className="mb-3">by </div>
             </div>
 
             <div className="col-md-6 mb-4">
