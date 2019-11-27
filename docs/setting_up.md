@@ -1,7 +1,9 @@
 # Setting Up
 
 ```sh
-# Setup django backend
+# Set up django backend
 django-admin startproject backend
 
+# Set up React frontend
+yarn create react-app frontend
 ```
