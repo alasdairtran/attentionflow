@@ -11,4 +11,5 @@ Before making a commit, ensure that you format the code properly
 isort **/*.py && autoflake --remove-all-unused-imports --ignore-init-module-imports -i -r . && autopep8 -i **/*.py
 
 # Format JavaScript code
+cd frontend && yarn pretty
 ```

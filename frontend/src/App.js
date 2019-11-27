@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import axios from "axios";
+import React, { Component } from 'react';
+import axios from 'axios';
 
 class App extends Component {
   constructor(props) {
@@ -8,14 +8,14 @@ class App extends Component {
       isLoaded: false,
       isLoading: false,
       hasError: false,
-      errorMessage: "",
-      title: "",
-      cast: []
+      errorMessage: '',
+      title: '',
+      cast: [],
     };
   }
 
   componentDidMount() {
-    document.body.classList.add("bg-light");
+    document.body.classList.add('bg-light');
   }
 
   fetchCaption = e => {
@@ -23,25 +23,25 @@ class App extends Component {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = {
       params: {
-        ID: 12345
-      }
+        ID: 12345,
+      },
     };
     axios
-      .get("/vevo/example/", options)
+      .get('/vevo/example/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
             isLoading: false,
             hasError: true,
             isLoaded: false,
-            errorMessage: res.data.error
+            errorMessage: res.data.error,
           });
         } else {
           this.setState({
             isLoaded: true,
             isLoading: false,
             title: res.data.title,
-            cast: res.data.cast
+            cast: res.data.cast,
           });
         }
       })
@@ -66,7 +66,7 @@ class App extends Component {
             onClick={this.fetchCaption}
             disabled={this.state.isLoading}
           >
-            {this.state.isLoading ? "Fetching data..." : "Get an example"}
+            {this.state.isLoading ? 'Fetching data...' : 'Get an example'}
           </button>
         </div>
         {this.state.hasError && (
