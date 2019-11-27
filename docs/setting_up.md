@@ -23,4 +23,5 @@ yarn create react-app frontend
 
 # Start the databases
 docker-compose up
+docker-compose run backend python manage.py migrate --noinput
 ```

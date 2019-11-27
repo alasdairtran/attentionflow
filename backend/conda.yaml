@@ -1,0 +1,16 @@
+name: base
+channels:
+  - defaults
+dependencies:
+  - anaconda
+  - pip
+  - psycopg2 # connects to Postgres
+  - pytest
+  - pip:
+      - django
+      - djangorestframework
+      - django-cors-headers
+      - docopt
+      - ptvsd
+      - pudb
+      - schema # validates Python structures

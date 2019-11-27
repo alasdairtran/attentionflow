@@ -7,10 +7,10 @@ services:
   neo4j:
     build: ./neo4j
     ports:
-      - "7474:7474" # HTTPS
-      - "7687:7687" # BOLT
+      - "7475:7474" # HTTPS host:container
+      - "7688:7687" # BOLT host:container
     environment:
-      - NEO4J_AUTH=none # Disable authentication in development
+      - NEO4J_AUTH=none # WARNING: Disable authentication in development
     volumes:
       - ./neo4j/data:/data
       - ./neo4j/logs:/logs
@@ -25,3 +25,21 @@ services:
       - "5433:5432" # host:container
     volumes:
       - ./postgres:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    command:
+      - /backend/tcp-port-wait.sh
+      - postgres
+      - "5432"
+      - python
+      - /backend/manage.py
+      - runserver
+      - 0.0.0.0:8000
+    volumes:
+      - ./backend:/backend
+    ports:
+      - 8001:8000 # host:container
+    depends_on:
+      - neo4j
+      - postgres
