@@ -1,0 +1,27 @@
+# Docker compose YAML file
+# Documentation: https://docs.docker.com/compose/compose-file/
+
+version: "3"
+
+services:
+  neo4j:
+    build: ./neo4j
+    ports:
+      - "7474:7474" # HTTPS
+      - "7687:7687" # BOLT
+    environment:
+      - NEO4J_AUTH=none # Disable authentication in development
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/import:/var/lib/neo4j/import
+
+  postgres:
+    build: ./postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432" # host:container
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
