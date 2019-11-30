@@ -5,26 +5,17 @@ from django.views.decorators.csrf import csrf_exempt
 from neo4j import GraphDatabase
 
 
-def serialize_cast(cast):
-    return {
-        'name': cast[0],
-        'job': cast[1],
-        'role': cast[2]
-    }
-
-
 @csrf_exempt
 def get_example(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687", auth=("neo4j", ""))
 
-    title = 'The Green Mile'
+    title = 'Adele - Hello'
     with driver.session() as session:
-        results = session.run("MATCH (movie:Movie {title:{title}}) "
-                              "OPTIONAL MATCH (movie)<-[r]-(person:Person) "
-                              "RETURN movie.title as title,"
-                              "collect([person.name, "
-                              "         head(split(lower(type(r)), '_')), r.roles]) as cast "
-                              "LIMIT 1", {"title": title})
+        results = session.run("MATCH (v:Vedio {title:{title}}) "
+                              "OPTIONAL MATCH (v)-[r]-(w:Vedio) "
+                              "RETURN v.title as title,"
+                              "collect(w.title) as others ",
+                              {"title": title})
 
         result = results.single()
 
@@ -32,7 +23,7 @@ def get_example(request):
 
     output = {
         "title": result['title'],
-        "cast": [serialize_cast(member) for member in result['cast']]
+        "others": result['others'],
     }
 
     return JsonResponse(output)

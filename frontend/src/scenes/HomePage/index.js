@@ -11,7 +11,7 @@ class HomePage extends Component {
       hasError: false,
       errorMessage: '',
       title: '',
-      cast: [],
+      others: [],
     };
   }
 
@@ -42,7 +42,7 @@ class HomePage extends Component {
             isLoaded: true,
             isLoading: false,
             title: res.data.title,
-            cast: res.data.cast,
+            others: res.data.others,
           });
         }
       })
@@ -84,7 +84,10 @@ class HomePage extends Component {
 
             <div className="col-md-8 mb-4">
               <h4 className="mb-3">
-                <ExampleChart title={this.state.title} cast={this.state.cast} />
+                <ExampleChart
+                  title={this.state.title}
+                  others={this.state.others}
+                />
               </h4>
             </div>
           </div>

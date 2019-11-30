@@ -29,7 +29,7 @@ const drag = simulation => {
 class BarChart extends Component {
   componentDidMount() {
     this.drawBarChart();
-    console.log(this.props.cast);
+    console.log(this.props.others);
   }
 
   drawBarChart() {
@@ -42,16 +42,15 @@ class BarChart extends Component {
       .attr('height', canvasHeight)
       .style('border', '1px solid black');
 
-    const nodes = this.props.cast.map(person => ({
-      id: person.name,
-      job: person.job,
+    const nodes = this.props.others.map(video => ({
+      id: video,
     }));
     nodes.push({
       id: this.props.title,
     });
 
-    const links = this.props.cast.map(person => ({
-      source: person.name,
+    const links = this.props.others.map(video => ({
+      source: video,
       target: this.props.title,
       value: 1,
     }));
