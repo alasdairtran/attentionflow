@@ -2,7 +2,7 @@
 
 ```sh
 # Install essential packages on Centos
-sudo yum install -y tmux zsh util-linux-user gcc-c++ make nodejs nginx ufw
+sudo yum install -y tmux zsh util-linux-user gcc-c++ make nodejs nginx ufw rsync
 sudo systemctl enable nginx
 sudo systemctl start nginx
 
