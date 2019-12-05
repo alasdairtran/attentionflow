@@ -30,8 +30,11 @@ git clone git@github.com:alasdairtran/vevoviz.git
 # Download the dependencies on the front-end
 cd $HOME/projects/vevoviz/frontend && yarn
 
-# Start the local database and server, start docker-compose
+# Start the local database and server
 cd $HOME/projects/vevoviz && docker-compose up
+
+# Migrate the postgres database
+docker-compose run backend python manage.py migrate --noinput
 ```
 
 and access the frontend at [http://localhost:3001/](http://localhost:3001/)
