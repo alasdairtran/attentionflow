@@ -31,7 +31,10 @@ sudo ufw status verbose
 # Set up django backend
 django-admin startproject backend
 cd backend && python manage.py startapp vevo
-docker-compose run backend python manage.py migrate --noinput
+sudo docker-compose run backend python manage.py migrate --noinput
+
+# Create superuser
+sudo docker-compose run backend python manage.py createsuperuser
 
 # Set up React frontend
 yarn create react-app frontend
