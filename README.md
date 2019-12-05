@@ -2,32 +2,48 @@
 
 An interactive visualisation exploring how YouTube music videos drive attention to each other.
 
-## Production
+## Services
 
-| Service       | URL                              |
-| ------------- | -------------------------------- |
-| Frontend App  | http://130.56.248.102:3001       |
-| Neo4j Browser | http://130.56.248.102:7474/      |
-| Django server | http://130.56.248.102:8001/admin |
+| Service       | Production                       | Development                 |
+| ------------- | -------------------------------- | --------------------------- |
+| Frontend App  | http://130.56.248.102:3001       | http://localhost:3001       |
+| Neo4j Browser | http://130.56.248.102:7474/      | http://localhost:7474       |
+| Django server | http://130.56.248.102:8001/admin | http://localhost:8001/admin |
 
-## Local Development
+## Getting Started
 
-To start the local database and server, start docker-compose
+Instructions on how to set up the local development on your Mac machine:
 
 ```sh
-docker-compose up
+# Download brew
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+# Download yarn
+brew install yarn
+
+# Download Docker from https://docs.docker.com/docker-for-mac/install/
+
+# Clone the repo
+mkdir $HOME/projects && cd $HOME/projects
+git clone git@github.com:alasdairtran/vevoviz.git
+
+# Download the dependencies on the front-end
+cd $HOME/projects/vevoviz/frontend && yarn
+
+# Start the local database and server, start docker-compose
+cd $HOME/projects/vevoviz && docker-compose up
 ```
 
 and access the frontend at [http://localhost:3001/](http://localhost:3001/)
 
-Before making a commit, ensure that you format the code properly
+Before making a commit, ensure that you format the code properly:
 
 ```sh
 # Format Python code
 isort **/*.py && autoflake --remove-all-unused-imports --ignore-init-module-imports -i -r . && autopep8 -i **/*.py
 
 # Format JavaScript code
-cd frontend && yarn pretty
+cd $HOME/projects/vevoviz/frontend && yarn pretty
 ```
 
 ## Maintenance
