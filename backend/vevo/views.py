@@ -1,13 +1,17 @@
 import json
+import os
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from neo4j import GraphDatabase
 
+NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
+
 
 @csrf_exempt
 def get_example(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687", auth=("neo4j", ""))
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
 
     title = 'Adele - Hello'
     with driver.session() as session:

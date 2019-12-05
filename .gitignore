@@ -11,3 +11,6 @@ __pycache__
 /neo4j/data
 /neo4j/logs
 /postgres/pgdata
+
+# Passwords and credentials
+/secrets

@@ -9,8 +9,7 @@ services:
     ports:
       - "7474:7474" # HTTPS host:container
       - "7687:7687" # BOLT host:container
-    environment:
-      - NEO4J_AUTH=none # WARNING: Disable authentication in development
+    env_file: secrets/.env
     volumes:
       - ./neo4j/data:/data
       - ./neo4j/logs:/logs
@@ -28,6 +27,7 @@ services:
 
   backend:
     build: ./backend
+    env_file: secrets/.env
     command:
       - /backend/tcp-port-wait.sh
       - postgres
