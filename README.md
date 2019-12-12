@@ -54,6 +54,8 @@ cd $HOME/projects/vevoviz/frontend && yarn pretty
 To back up the Neo4j database in the server:
 
 ```sh
+cd /vevoviz
+
 # Shut down database
 sudo docker-compose stop neo4j
 
@@ -65,11 +67,16 @@ neo4j:3.5.12 bin/neo4j-admin dump --database=graph.db --to=/data/backups/graph.d
 
 # Restart database
 sudo docker-compose start neo4j
+
+# Delete the backup container
+sudo docker rm neo4j-dump
 ```
 
 To restore the Neo4j database on our local machine:
 
 ```sh
+cd $HOME/projects/vevoviz
+
 # Download the backup
 rsync -rlptzhe ssh --info=progress2 <username>@130.56.248.102:/vevoviz/neo4j/data/backups neo4j/data/
 
@@ -84,4 +91,7 @@ neo4j:3.5.12 bin/neo4j-admin load --database=graph.db --from=/data/backups/graph
 
 # Start the database again
 docker-compose start neo4j
+
+# Delete the restore container
+docker rm neo4j-restore
 ```
