@@ -14,6 +14,7 @@ services:
       - ./neo4j/data:/data
       - ./neo4j/logs:/logs
       - ./neo4j/import:/var/lib/neo4j/import
+      - ./neo4j/conf:/var/lib/neo4j/conf
 
   postgres:
     build: ./postgres
