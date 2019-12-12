@@ -34,8 +34,8 @@ class BarChart extends Component {
   }
 
   drawBarChart() {
-    const canvasHeight = 700;
-    const canvasWidth = 700;
+    const canvasHeight = 400;
+    const canvasWidth = 400;
     const svg = d3
       .select(this.refs.canvas)
       .append('svg')
@@ -138,7 +138,7 @@ class BarChart extends Component {
       .selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke-width', d => Math.sqrt(d.value));
+      .attr('stroke-width', d => d.value);
 
     const node = svg
       .append('g')

@@ -124,9 +124,9 @@ class EgoGraph extends Component {
           .forceLink(links)
           .id(d => d.id)
           .distance(150)
-          .strength(0.1)
+          .strength(0)
       )
-      .force('charge', d3.forceManyBody())
+      .force('charge', d3.forceManyBody().strength(0))
       .force(
         'x',
         d3.forceX().x(function(d) {
@@ -181,15 +181,20 @@ class EgoGraph extends Component {
       .attr('r', d => d.radius)
       .attr('fill', d => d.colour);
 
-    node.append('title').text(d => d.id);
-
+    const centreTitle = this.props.title[0];
     node
       .append('text')
       .text(function(d) {
-        return d.id;
+        if (d.id === centreTitle) {
+          return d.id;
+        }
+        return d.id.substring(0, d.id.length - 1);
       })
-      .attr('x', 6)
-      .attr('y', 3)
+      .attr('text-anchor', d =>
+        d.type === 'I' ? 'end' : d.type === 'O' ? 'start' : 'middle'
+      )
+      .attr('x', d => (d.type === 'I' ? -6 : d.type === 'O' ? 6 : 0))
+      .attr('y', d => (d.type === 'C' ? -15 : 3))
       .style('font-size', '10px');
 
     node.on('click', function(d) {
