@@ -213,6 +213,14 @@ class EgoGraph extends Component {
       .attr('font-size', '10px')
       .attr('fill', 'black')
       .attr('text-anchor', 'end');
+
+    let dragHandler = d3.drag().on('drag', function() {
+      d3.select(this)
+        .attr('x', d3.event.x)
+        .attr('y', d3.event.y);
+    });
+
+    dragHandler(svg.selectAll('use'));
   }
 
   render() {

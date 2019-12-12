@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import ExampleChart from '../../components/ExampleChart';
 import EgoGraph from '../../components/EgoGraph';
+import EgoGraphDrag from '../../components/EgoGraphDrag';
 
 class HomePage extends Component {
   constructor(props) {
@@ -54,10 +55,6 @@ class HomePage extends Component {
             level2: res.data.level2,
             linksArr1: res.data.linksArr1,
             linksArr2: res.data.linksArr2,
-            incoming: res.data.incoming,
-            outgoing: res.data.outgoing,
-            linksArrIncoming: res.data.linksArrIncoming,
-            linksArrOutgoing: res.data.linksArrOutgoing,
           });
         }
       })
@@ -89,14 +86,8 @@ class HomePage extends Component {
             isLoaded: true,
             isLoading: false,
             title: res.data.title,
-            level1: res.data.level1,
-            level2: res.data.level2,
-            linksArr1: res.data.linksArr1,
-            linksArr2: res.data.linksArr2,
             incoming: res.data.incoming,
             outgoing: res.data.outgoing,
-            linksArrIncoming: res.data.linksArrIncoming,
-            linksArrOutgoing: res.data.linksArrOutgoing,
           });
         }
       })
@@ -118,7 +109,7 @@ class HomePage extends Component {
           <button
             type="submit"
             className="btn btn-lg btn-primary"
-            onClick={this.fetchExample}
+            onClick={this.fetchEgo}
             disabled={this.state.isLoading}
           >
             {this.state.isLoading ? 'Fetching data...' : 'Get an example'}
@@ -137,7 +128,7 @@ class HomePage extends Component {
             </div>
             <div className="col-md-8 mb-4">
               <h4 className="mb-3">
-                <ExampleChart
+                <EgoGraphDrag
                   title={this.state.title}
                   level1={this.state.level1}
                   level2={this.state.level2}

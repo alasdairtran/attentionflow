@@ -45,7 +45,7 @@ def get_ego(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
-    title = "Adele - Hello"
+    title = "Mary J. Blige - Family Affair"
     with driver.session() as session:
         results = session.run("MATCH (v:V {title:{title}}) "
                               "OPTIONAL MATCH (v)-[s]->(w:V) "
