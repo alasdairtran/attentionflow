@@ -80,6 +80,9 @@ cd $HOME/projects/vevoviz
 # Download the backup
 rsync -rlptzhe ssh --info=progress2 <username>@130.56.248.102:/vevoviz/neo4j/data/backups neo4j/data/
 
+## if you see this error: rsync: --info=progress2: unknown option
+## make sure to add export /usr/bin/local:$PATH in your ~./bash_profile
+
 # Shut down neo4j
 docker-compose stop neo4j
 
