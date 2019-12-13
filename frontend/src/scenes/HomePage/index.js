@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import ExampleChart from '../../components/ExampleChart';
-import EgoGraph from '../../components/EgoGraph';
-import EgoGraphDrag from '../../components/EgoGraphDrag';
 
 class HomePage extends Component {
   constructor(props) {
@@ -17,10 +15,6 @@ class HomePage extends Component {
       level2: [],
       linksArr1: [],
       linksArr2: [],
-      incoming: [],
-      outgoing: [],
-      linksArrIncoming: [],
-      linksArrOutgoing: [],
     };
   }
 
@@ -33,7 +27,7 @@ class HomePage extends Component {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = {
       params: {
-        ID: 12345,
+        title: 'Adele - Hello',
       },
     };
     axios
@@ -63,39 +57,6 @@ class HomePage extends Component {
       });
   };
 
-  fetchEgo = e => {
-    e.preventDefault();
-    this.setState({ isLoaded: false, isLoading: true, hasError: false });
-    const options = {
-      params: {
-        ID: 12345,
-      },
-    };
-    axios
-      .get('/vevo/ego/', options)
-      .then(res => {
-        if (res.data.error) {
-          this.setState({
-            isLoading: false,
-            hasError: true,
-            isLoaded: false,
-            errorMessage: res.data.error,
-          });
-        } else {
-          this.setState({
-            isLoaded: true,
-            isLoading: false,
-            title: res.data.title,
-            incoming: res.data.incoming,
-            outgoing: res.data.outgoing,
-          });
-        }
-      })
-      .catch(function(error) {
-        console.error(error);
-      });
-  };
-
   render() {
     return (
       <div className="container">
@@ -109,7 +70,7 @@ class HomePage extends Component {
           <button
             type="submit"
             className="btn btn-lg btn-primary"
-            onClick={this.fetchEgo}
+            onClick={this.fetchExample}
             disabled={this.state.isLoading}
           >
             {this.state.isLoading ? 'Fetching data...' : 'Get an example'}
@@ -128,16 +89,12 @@ class HomePage extends Component {
             </div>
             <div className="col-md-8 mb-4">
               <h4 className="mb-3">
-                <EgoGraphDrag
+                <ExampleChart
                   title={this.state.title}
                   level1={this.state.level1}
                   level2={this.state.level2}
                   linksArr1={this.state.linksArr1}
                   linksArr2={this.state.linksArr2}
-                  incoming={this.state.incoming}
-                  outgoing={this.state.outgoing}
-                  linksArrIncoming={this.state.linksArrIncoming}
-                  linksArrOutgoing={this.state.linksArrOutgoing}
                 />
               </h4>
             </div>
