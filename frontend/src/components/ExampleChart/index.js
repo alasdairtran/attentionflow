@@ -29,20 +29,20 @@ const drag = simulation => {
 
 class BarChart extends Component {
   componentDidMount() {
-    this.drawBarChart();
+    var oWidth = document.getElementById('graphContainer').offsetWidth;
+    this.drawBarChart(oWidth);
   }
 
-  drawBarChart() {
-    const canvasHeight = 600;
-    const canvasWidth = 800;
+  drawBarChart(oWidth) {
+    const canvasHeight = oWidth / 2;
+    const canvasWidth = oWidth;
     const horizontalMargin = canvasWidth / 2 - 100;
     const verticalMargin = 130;
     const svg = d3
       .select(this.refs.canvas)
       .append('svg')
       .attr('width', canvasWidth)
-      .attr('height', canvasHeight)
-      .style('border', '1px solid black');
+      .attr('height', canvasHeight);
 
     let nodeSet = this.props.level1.concat(this.props.level2);
     nodeSet.push(this.props.title);
@@ -165,16 +165,9 @@ class BarChart extends Component {
       .attr('y', 3)
       .style('font-size', '10px');
 
-    const title = svg
-      .append('text')
-      .attr('x', canvasWidth / 2)
-      .attr('y', 50)
-      .text(this.props.title[0]);
-
     node.on('click', d => {
       node.remove();
       link.remove();
-      title.remove();
       getEgo(d.id);
     });
 
