@@ -16,4 +16,4 @@ __pycache__
 /secrets
 
 #Local docker-compose
-/docker-compose.yml
+*.yml
