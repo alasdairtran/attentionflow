@@ -4,10 +4,15 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 
-RUN apt-get update && apt-get install -yq --no-install-recommends \
+RUN apt update && apt install -yq --no-install-recommends \
     netcat \
     texlive-xetex \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    gnupg2 \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt/ `sed 's/VERSION_CODENAME=//;t;d' /etc/os-release`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
+    && apt update \
+    && apt install -y postgresql-client-12 \
+    && apt clean && rm -rf /var/lib/apt/lists/*
 COPY conda.yaml /backend/
 RUN conda env update -f=/backend/conda.yaml
 

@@ -30,9 +30,9 @@ services:
     build: ./backend
     env_file: secrets/.env
     command:
-      - /backend/tcp-port-wait.sh
+      - /backend/wait-for-postgres.sh
       - postgres
-      - "5432"
+      - --
       - python
       - /backend/manage.py
       - runserver
