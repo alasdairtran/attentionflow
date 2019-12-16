@@ -126,11 +126,21 @@ class BarChart extends Component {
         d3
           .forceLink(links)
           .id(d => d.id)
-          .distance(100)
           .strength(0.1)
       )
-      .force('charge', d3.forceManyBody())
-      .force('center', d3.forceCenter(canvasWidth / 2, canvasHeight / 2));
+      .force(
+        'collide',
+        d3
+          .forceCollide()
+          .radius(function(d) {
+            return d.radius + 1.5;
+          })
+          .iterations(2)
+      )
+      .force('charge', d3.forceManyBody().strength(-200))
+      .force('center', d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
+      .force('x', d3.forceX(0.0002))
+      .force('y', d3.forceY(0.0001));
 
     const link = svg
       .append('g')
@@ -151,7 +161,7 @@ class BarChart extends Component {
     node
       .append('circle')
       .call(drag(simulation))
-      .attr('r', d => d.radius)
+      .attr('r', d => 2 * d.radius)
       .attr('fill', d => d.colour);
 
     node.append('title').text(d => d.id);
