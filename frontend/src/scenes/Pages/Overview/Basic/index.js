@@ -143,6 +143,40 @@ export default class AnalyticsDashboard1 extends Component {
       });
   };
 
+  // For search box
+  display = d => {
+    d.preventDefault();
+    this.setState({ isLoaded: false, hasError: false });
+    const options = {
+      params: {
+        title: document.getElementById('search-text').value,
+      },
+    };
+    axios
+      .get('/vevo/example/', options)
+      .then(res => {
+        if (res.data.error) {
+          this.setState({
+            hasError: true,
+            errorMessage: res.data.error,
+          });
+        } else {
+          this.setState({
+            isLoaded: true,
+            isLoading: false,
+            title: res.data.title,
+            level1: res.data.level1,
+            level2: res.data.level2,
+            linksArr1: res.data.linksArr1,
+            linksArr2: res.data.linksArr2,
+          });
+        }
+      })
+      .catch(function(error) {
+        console.error(error);
+      });
+  };
+
   render() {
     return (
       <Fragment>
@@ -168,6 +202,11 @@ export default class AnalyticsDashboard1 extends Component {
             >
               {this.state.isLoading ? 'Fetching data...' : 'Get an example'}
             </button>
+            <button
+              id="display"
+              hidden="hidden"
+              onClick={this.display}
+            ></button>
             {this.state.hasError && (
               <div class="alert alert-danger" role="alert">
                 {this.state.errorMessage}

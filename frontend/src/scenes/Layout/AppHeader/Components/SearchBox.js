@@ -1,6 +1,9 @@
 import React, { Fragment } from 'react';
+import axios from 'axios';
 
 import cx from 'classnames';
+import Autocomplete from '@material-ui/lab/useAutocomplete';
+import '../../../Pages/Overview/Basic';
 
 class SearchBox extends React.Component {
   constructor(props) {
@@ -20,20 +23,23 @@ class SearchBox extends React.Component {
           })}
         >
           <div className="input-holder">
-            <input type="text" className="search-input" />
+            <input type="text" className="search-input" id="search-text" />
             <button
-              onClick={() =>
-                this.setState({ activeSearch: !this.state.activeSearch })
-              }
+              onClick={() => {
+                if (this.state.activeSearch) {
+                  document.getElementById('display').click();
+                }
+                this.setState({ activeSearch: !this.state.activeSearch });
+              }}
               className="search-icon"
             >
               <span />
             </button>
           </div>
           <button
-            onClick={() =>
-              this.setState({ activeSearch: !this.state.activeSearch })
-            }
+            onClick={() => {
+              this.setState({ activeSearch: !this.state.activeSearch });
+            }}
             className="close"
           />
         </div>
