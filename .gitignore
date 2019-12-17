@@ -14,6 +14,3 @@ __pycache__
 
 # Passwords and credentials
 /secrets
-
-#Local docker-compose
-*.yml
