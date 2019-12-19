@@ -25,7 +25,7 @@ SECRET_KEY = 'w8!c(pm^4_!5hjmw+j3@)ap09bp9#u5#9k4blh@qgcbmn9465u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['backend', '130.56.248.102']
+ALLOWED_HOSTS = ['backend', '43.240.97.170']
 
 
 # Application definition
@@ -140,4 +140,5 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',  # for local development
     'http://localhost:3001',  # for local development
+    'http://localhost:3002',  # for local development
 )
