@@ -4,11 +4,11 @@ An interactive visualisation exploring how YouTube music videos drive attention 
 
 ## Services
 
-| Service       | Production                       | Development                 |
-| ------------- | -------------------------------- | --------------------------- |
-| Frontend App  | http://130.56.248.102:3001       | http://localhost:3001       |
-| Neo4j Browser | http://130.56.248.102:7474/      | http://localhost:7474       |
-| Django server | http://130.56.248.102:8001/admin | http://localhost:8001/admin |
+| Service       | Production                      | Development                     | Local                       |
+| ------------- | ------------------------------- | ------------------------------- | --------------------------- |
+| Frontend App  | http://43.240.97.170:3001       | http://43.240.97.170:3002       | http://localhost:3002       |
+| Neo4j Browser | http://43.240.97.170:7474/      | http://43.240.97.170:7475       | http://localhost:7475       |
+| Django server | http://43.240.97.170:8001/admin | http://43.240.97.170:8002/admin | http://localhost:8002/admin |
 
 ## Getting Started
 
@@ -30,14 +30,15 @@ git clone git@github.com:alasdairtran/vevoviz.git
 # Download the dependencies on the front-end
 cd $HOME/projects/vevoviz/frontend && yarn
 
-# Start the local database and server
-cd $HOME/projects/vevoviz && docker-compose up
-
 # Migrate the postgres database
-docker-compose run backend python manage.py migrate --noinput
+cd $HOME/projects/vevoviz && docker-compose run backend python manage.py migrate --noinput
+
+# Start the local database and server
+cd $HOME/projects/vevoviz
+docker-compose up
 ```
 
-and access the frontend at [http://localhost:3001/](http://localhost:3001/)
+and access the frontend at [http://localhost:3001/](http://localhost:3002/)
 
 Before making a commit, ensure that you format the code properly:
 
@@ -47,6 +48,16 @@ isort **/*.py && autoflake --remove-all-unused-imports --ignore-init-module-impo
 
 # Format JavaScript code
 cd $HOME/projects/vevoviz/frontend && yarn pretty
+```
+
+## Working Remotely
+
+```sh
+# Inside the CentOS virtual machine, to start the production app
+cd /mnt/vevoviz_prod && sudo docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# To start the development app
+cd /mnt/vevoviz_dev && sudo docker-compose up -d
 ```
 
 ## Maintenance

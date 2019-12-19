@@ -7,8 +7,8 @@ services:
   neo4j:
     build: ./neo4j
     ports:
-      - "7474:7474" # HTTPS host:container
-      - "7687:7687" # BOLT host:container
+      - "7475:7474" # HTTPS host:container
+      - "7688:7687" # BOLT host:container
     env_file: secrets/.env
     volumes:
       - ./neo4j/data:/data
@@ -22,7 +22,7 @@ services:
       - POSTGRES_USER=postgres
       - PGDATA=/var/lib/postgresql/data/pgdata
     ports:
-      - "5433:5432" # host:container
+      - "5434:5432" # host:container
     volumes:
       - ./postgres:/var/lib/postgresql/data
 
@@ -40,7 +40,7 @@ services:
     volumes:
       - ./backend:/backend
     ports:
-      - 8001:8000 # host:container
+      - 8002:8000 # host:container
     depends_on:
       - neo4j
       - postgres
@@ -53,6 +53,6 @@ services:
     volumes:
       - ./frontend:/usr/src/app
     ports:
-      - 3001:3000 # host:container
+      - 3002:3000 # host:container
     depends_on:
       - backend

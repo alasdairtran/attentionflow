@@ -1,0 +1,22 @@
+# Docker compose YAML file
+# Documentation: https://docs.docker.com/compose/compose-file/
+
+version: "3"
+
+services:
+  neo4j:
+    ports:
+      - "7474:7474" # HTTPS host:container
+      - "7687:7687" # BOLT host:container
+
+  postgres:
+    ports:
+      - "5433:5432" # host:container
+
+  backend:
+    ports:
+      - 8001:8000 # host:container
+
+  frontend:
+    ports:
+      - 3001:3000 # host:container
