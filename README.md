@@ -54,7 +54,7 @@ cd $HOME/projects/vevoviz/frontend && yarn pretty
 
 ```sh
 # Inside the CentOS virtual machine, to start the production app
-cd /mnt/vevoviz_prod && sudo docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+cd /mnt/vevoviz_prod && sudo docker-compose -f docker-compose.prod.yml up -d
 
 # To start the development app
 cd /mnt/vevoviz_dev && sudo docker-compose up -d
