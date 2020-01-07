@@ -65,3 +65,22 @@ def get_ego(request):
     }
 
     return JsonResponse(output)
+
+
+@csrf_exempt
+def get_suggestions(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    title = request.GET["title"]
+    with driver.session() as session:
+        results = session.run("MATCH (v:V) WHERE toLower(v.title) CONTAINS \'" + title + "\' RETURN v.title AS title LIMIT 3")
+        records = list(results.records())
+        result = [record[0] for record in records]
+
+    driver.close()
+
+    output = {
+        "title": result
+    }
+    return JsonResponse(output)
