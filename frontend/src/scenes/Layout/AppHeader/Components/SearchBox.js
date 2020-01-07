@@ -97,7 +97,6 @@ class SearchBox extends React.Component {
             <button
               onClick={() => {
                 if (this.state.activeSearch) {
-                  alert('clicked');
                   document.getElementById('display').click();
                 }
                 this.setState({ activeSearch: !this.state.activeSearch });
@@ -115,24 +114,6 @@ class SearchBox extends React.Component {
           />
         </div>
         <Autosuggest
-          theme={{
-            container: 'input-holder',
-            containerOpen: 'input-holder',
-            input: 'search-input',
-            inputOpen: 'search-input',
-            inputFocused: 'search-input',
-            suggestionsContainer: 'react-autosuggest__suggestions-container',
-            suggestionsContainerOpen:
-              'react-autosuggest__suggestions-container--open',
-            suggestionsList: 'react-autosuggest__suggestions-list',
-            suggestion: 'react-autosuggest__suggestion',
-            suggestionFirst: 'react-autosuggest__suggestion--first',
-            suggestionHighlighted: 'react-autosuggest__suggestion--highlighted',
-            sectionContainer: 'react-autosuggest__section-container',
-            sectionContainerFirst:
-              'react-autosuggest__section-container--first',
-            sectionTitle: 'react-autosuggest__section-title',
-          }}
           suggestions={suggestions}
           onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
           onSuggestionsClearRequested={this.onSuggestionsClearRequested}
