@@ -5,7 +5,7 @@ the virtual machine.
 
 ```sh
 # Install essential packages on Centos
-sudo yum install -y git tmux zsh util-linux-user gcc-c++ make nodejs nginx ufw rsync
+sudo yum install -y git tmux zsh util-linux-user gcc-c++ make nodejs nginx ufw rsync vim
 sudo systemctl enable nginx
 sudo systemctl start nginx
 
