@@ -11569,16 +11569,27 @@ button,
   border-top: 0;
   border-bottom: #dee2e6 solid 1px;
 }
-
+.react-autosuggest__suggestions-container--open {
+  margin-top: 42px;
+  padding: 20px 25px 10px 0;
+  position: fixed;
+  background-color: #fff;
+  border-radius: 20px;
+  border: #dee2e6 solid 1px;
+}
+.react-autosuggest__suggestions-container--open ul {
+  list-style-type: none;
+}
 .search-wrapper {
   position: relative;
   margin-right: 0.6666666667rem;
 }
 .search-wrapper .input-holder {
-  height: 42px;
-  width: 42px;
-  overflow: hidden;
-  position: relative;
+  height: auto;
+  width: 400px;
+  overflow: visible;
+  position: fixed;
+  margin-top: -20px;
   transition: all 0.3s ease-in-out;
 }
 .search-wrapper .input-holder .search-input {

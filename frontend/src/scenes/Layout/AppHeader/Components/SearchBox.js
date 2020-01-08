@@ -73,6 +73,8 @@ class SearchBox extends React.Component {
 
     // default place holder
     const inputProps = {
+      className: 'search-input',
+      id: 'search-text',
       placeholder: 'Type the title',
       value: value,
       onChange: this.onChangeValue,
@@ -80,20 +82,17 @@ class SearchBox extends React.Component {
 
     return (
       <Fragment>
-        <div
-          className={cx('search-wrapper', {
-            active: this.state.activeSearch,
-          })}
-        >
+        <div class="search-wrapper active">
           <div className="input-holder">
-            <input
-              type="text"
-              className="search-input"
-              id="search-text"
-              onChange={this.onChangeValue}
-              value={this.state.value}
-              placeholder="Type the title"
-            />
+            <Autosuggest
+              suggestions={suggestions}
+              onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+              onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+              getSuggestionValue={getSuggestionValue}
+              renderSuggestion={renderSuggestion}
+              inputProps={inputProps}
+            ></Autosuggest>
+
             <button
               onClick={() => {
                 if (this.state.activeSearch) {
@@ -106,21 +105,7 @@ class SearchBox extends React.Component {
               <span />
             </button>
           </div>
-          <button
-            onClick={() => {
-              this.setState({ activeSearch: !this.state.activeSearch });
-            }}
-            className="close"
-          />
         </div>
-        <Autosuggest
-          suggestions={suggestions}
-          onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-          getSuggestionValue={getSuggestionValue}
-          renderSuggestion={renderSuggestion}
-          inputProps={inputProps}
-        ></Autosuggest>
       </Fragment>
     );
   }
