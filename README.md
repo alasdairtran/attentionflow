@@ -65,7 +65,7 @@ cd /mnt/vevoviz_dev && sudo docker-compose up -d
 To back up the Neo4j database in the server:
 
 ```sh
-cd /vevoviz
+cd /mnt/vevoviz_prod
 
 # Shut down database
 sudo docker-compose stop neo4j
@@ -73,7 +73,7 @@ sudo docker-compose stop neo4j
 # Back up
 sudo docker run \
 --name neo4j-dump \
---mount type=bind,source=/vevoviz/neo4j/data,target=/data \
+--mount type=bind,source=/mnt/vevoviz_prod/neo4j/data,target=/data \
 neo4j:3.5.12 bin/neo4j-admin dump --database=graph.db --to=/data/backups/graph.db.dump
 
 # Restart database
@@ -89,7 +89,7 @@ To restore the Neo4j database on our local machine:
 cd $HOME/projects/vevoviz
 
 # Download the backup
-rsync -rlptzhe ssh --info=progress2 <username>@130.56.248.102:/vevoviz/neo4j/data/backups neo4j/data/
+rsync -rlptzhe ssh --info=progress2 <username>@130.56.248.102:/mnt/vevoviz_prod/neo4j/data/backups neo4j/data/
 
 ## if you see this error: rsync: --info=progress2: unknown option
 ## make sure to add export /usr/bin/local:$PATH in your ~./bash_profile
