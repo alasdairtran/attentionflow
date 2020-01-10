@@ -19,9 +19,9 @@ def get_example(request):
                               "OPTIONAL MATCH (v)-[s]-(w:V) "
                               "OPTIONAL MATCH (w)-[r]-(x:V) "
                               "OPTIONAL MATCH (x)-[t]-(z:V) "
-                              "RETURN [v.title, v.totalView, size(()-->(v))] as title,"
-                              "collect(distinct [w.title, w.totalView, size(()-->(w)), s.weight]) as level1,"
-                              "collect(distinct [x.title, x.totalView, size(()-->(x))]) as level2,"
+                              "RETURN [v.title, v.totalView, size(()-->(v)), v.dailyView] as title,"
+                              "collect(distinct [w.title, w.totalView, size(()-->(w)), w.dailyView, s.weight]) as level1,"
+                              "collect(distinct [x.title, x.totalView, size(()-->(x)), x.dailyView]) as level2,"
                               "collect(distinct [w.title, x.title, r.weight]) as linksArr1,"
                               "collect(distinct [x.title, z.title, t.weight]) as linksArr2 ",
                               {"title": title})
@@ -50,9 +50,9 @@ def get_ego(request):
         results = session.run("MATCH (v:V {title:{title}}) "
                               "OPTIONAL MATCH (v)-[s]->(w:V) "
                               "OPTIONAL MATCH (x:V)-[r]->(v) "
-                              "RETURN [v.title, v.totalView, size(()-->(v))] as title,"
-                              "collect(distinct [w.title, w.totalView, size(()-->(w)), s.weight]) as outgoing,"
-                              "collect(distinct[x.title, x.totalView, size(()-->(x)), r.weight]) as incoming ",
+                              "RETURN [v.title, v.totalView, size(()-->(v)), v.dailyView] as title,"
+                              "collect(distinct [w.title, w.totalView, size(()-->(w)), s.weight, w.dailyView]) as outgoing,"
+                              "collect(distinct[x.title, x.totalView, size(()-->(x)), r.weight, x.dailyView]) as incoming ",
                               {"title": title})
         result = results.single()
 

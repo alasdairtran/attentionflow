@@ -29,7 +29,7 @@ const drag = simulation => {
 
 class BarChart extends Component {
   componentDidMount() {
-    var oWidth = document.getElementById('graphContainer').offsetWidth;
+    let oWidth = document.getElementById('graphContainer').offsetWidth;
     this.drawBarChart(oWidth);
   }
 
@@ -46,7 +46,7 @@ class BarChart extends Component {
 
     let nodeSet = this.props.level1.concat(this.props.level2);
     nodeSet.push(this.props.title);
-    nodeSet = nodeSet.map(video => [video[0], video[1], video[2]]);
+    nodeSet = nodeSet.map(video => [video[0], video[1], video[2], video[3]]);
     let nodeTitles = nodeSet.map(video => video[0]);
     nodeSet = nodeSet.filter(
       (node, index) => nodeTitles.indexOf(node[0]) === index
@@ -57,7 +57,7 @@ class BarChart extends Component {
     );
 
     const strokeList = this.props.level1
-      .map(d => d[3])
+      .map(d => d[4])
       .concat(
         this.props.linksArr1.map(d => d[2]),
         filteredLinksArr2.map(d => d[2])
@@ -95,6 +95,7 @@ class BarChart extends Component {
       id: video[0],
       radius: radiusScale(video[1]),
       colour: colourScale(video[2]),
+      dailyViews: video[3],
     }));
 
     const links = this.props.linksArr1.map(video => ({
@@ -107,7 +108,7 @@ class BarChart extends Component {
       ...this.props.level1.map(video => ({
         source: video[0],
         target: this.props.title[0],
-        value: strokeScale(video[3]),
+        value: strokeScale(video[4]),
       }))
     );
 
@@ -175,10 +176,97 @@ class BarChart extends Component {
       .attr('y', 3)
       .style('font-size', '10px');
 
+    let tooltip = d3
+      .select(this.refs.canvas)
+      .append('div')
+      .style('position', 'absolute')
+      .style('z-index', '100')
+      .style('padding', '10px')
+      .style('background', 'white')
+      .style('border', '2px solid black')
+      .style('color', 'black')
+      .style('top', '0px')
+      .style('left', '0px')
+      .style('width', '250px')
+      .style('visibility', 'hidden');
+
     node.on('click', d => {
+      tooltip.style('visibility', 'hidden');
       node.remove();
       link.remove();
       getEgo(d.id);
+    });
+
+    node.on('mouseover', function(d) {
+      tooltip
+        .html(
+          '<b>' +
+            d.id +
+            '</b>' +
+            '<br/>' +
+            'Daily Views' +
+            '<br/>' +
+            "<div id='dailyViewsGraph'></div>"
+        )
+        .style('visibility', 'visible');
+
+      let graphWidth = 200;
+      let graphHeight = 100;
+      let viewsArray = JSON.parse(d.dailyViews);
+
+      let dailyViewsGraph = d3
+        .select('#dailyViewsGraph')
+        .append('svg')
+        .attr('width', graphWidth)
+        .attr('height', graphHeight);
+
+      let x = d3
+        .scaleLinear()
+        .domain([0, viewsArray.length])
+        .range([40, graphWidth - 1]);
+      let y = d3
+        .scaleLinear()
+        .domain([0, d3.max(viewsArray)])
+        .range([graphHeight - 10, 10]);
+
+      let xAxis = d3
+        .axisBottom()
+        .scale(x)
+        .tickValues([]);
+      let yAxis = d3
+        .axisLeft()
+        .scale(y)
+        .ticks(7)
+        .tickFormat(d3.format('.3s'));
+      dailyViewsGraph
+        .append('g')
+        .attr('transform', 'translate(0,90)')
+        .call(xAxis);
+      dailyViewsGraph
+        .append('g')
+        .attr('transform', 'translate(40,0)')
+        .call(yAxis);
+
+      dailyViewsGraph
+        .append('path')
+        .datum(viewsArray)
+        .attr('fill', 'none')
+        .attr('stroke', 'steelblue')
+        .attr('stroke-width', 1.5)
+        .attr(
+          'd',
+          d3
+            .line()
+            .x((d, i) => x(i))
+            .y(d => y(d))
+        );
+
+      d3.select(this).style('stroke', 'black');
+    });
+
+    node.on('mouseleave', function() {
+      tooltip.style('visibility', 'hidden');
+      d3.select(this).style('stroke', 'none');
     });
 
     simulation.on('tick', () => {
@@ -268,6 +356,7 @@ class BarChart extends Component {
             ? colourScaleLessViews(video[1])
             : colourScaleMoreViews(video[1]),
         type: 'I',
+        dailyViews: video[4],
       }));
 
       nodes.push(
@@ -279,6 +368,7 @@ class BarChart extends Component {
               ? colourScaleLessViews(video[1])
               : colourScaleMoreViews(video[1]),
           type: 'O',
+          dailyViews: video[4],
         }))
       );
       nodes.push({
@@ -286,6 +376,7 @@ class BarChart extends Component {
         radius: (maxRadius + minRadius) / 2,
         colour: 'rgb(128,128,128)',
         type: 'C',
+        dailyViews: title[3],
       });
 
       const simulation = d3
@@ -348,17 +439,83 @@ class BarChart extends Component {
         .attr('y', d => (d.type === 'C' ? -15 : 3))
         .style('font-size', '10px');
 
-      const egoTitle = svg
-        .append('text')
-        .attr('x', canvasWidth / 2)
-        .attr('y', 50)
-        .attr('text-anchor', 'middle')
-        .text(title[0]);
-
       node.on('click', d => {
+        tooltip.style('visibility', 'hidden');
         node.remove();
-        egoTitle.remove();
+        link.remove();
         getEgo(d.id);
+      });
+
+      node.on('mouseover', function(d) {
+        tooltip
+          .html(
+            '<b>' +
+              d.id +
+              '</b>' +
+              '<br/>' +
+              'Daily Views' +
+              '<br/>' +
+              "<div id='dailyViewsGraph'></div>"
+          )
+          .style('visibility', 'visible');
+
+        let graphWidth = 200;
+        let graphHeight = 100;
+        let viewsArray = JSON.parse(d.dailyViews);
+
+        let dailyViewsGraph = d3
+          .select('#dailyViewsGraph')
+          .append('svg')
+          .attr('width', graphWidth)
+          .attr('height', graphHeight);
+
+        let x = d3
+          .scaleLinear()
+          .domain([0, viewsArray.length])
+          .range([40, graphWidth - 1]);
+        let y = d3
+          .scaleLinear()
+          .domain([0, d3.max(viewsArray)])
+          .range([graphHeight - 10, 10]);
+
+        let xAxis = d3
+          .axisBottom()
+          .scale(x)
+          .tickValues([]);
+        let yAxis = d3
+          .axisLeft()
+          .scale(y)
+          .ticks(7)
+          .tickFormat(d3.format('.3s'));
+        dailyViewsGraph
+          .append('g')
+          .attr('transform', 'translate(0,90)')
+          .call(xAxis);
+        dailyViewsGraph
+          .append('g')
+          .attr('transform', 'translate(40,0)')
+          .call(yAxis);
+
+        dailyViewsGraph
+          .append('path')
+          .datum(viewsArray)
+          .attr('fill', 'none')
+          .attr('stroke', 'steelblue')
+          .attr('stroke-width', 1)
+          .attr(
+            'd',
+            d3
+              .line()
+              .x((d, i) => x(i))
+              .y(d => y(d))
+          );
+
+        d3.select(this).style('stroke', 'black');
+      });
+
+      node.on('mouseleave', function() {
+        tooltip.style('visibility', 'hidden');
+        d3.select(this).style('stroke', 'none');
       });
 
       simulation.on('tick', () => {
