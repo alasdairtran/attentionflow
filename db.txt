@@ -1,24 +1,29 @@
 // Create node and basic attribute
-load csv from 'file:///node.csv' as n
+load csv from 'file:///video_node.csv' as n
 CREATE (p:V {embed: toInteger([1]), vid: n[2], title: n[3], totalView: n[4]})
 
 // Set index to optimise loading edges
 CREATE INDEX ON :V(embed)
 
 // Create edge
-load csv from 'file:///edge.csv' as e
+load csv from 'file:///video_edge.csv' as e
 match (a:V)
 match (b:V)
 where a.embed = toInteger(e[1]) and b.embed = toInteger(e[2])
 create (a)-[r:L]->(b)
+set r.weight = toFloat(e[3])
 return r
 
-// Add attribute for edge
-load csv from 'file:///edge.csv' as e
-match (a:V)-[r:L]->(b:V)
-where a.embed = toInteger(e[1]) and b.embed = toInteger(e[2])
-set r.weight = toFloat(e[3])
+// add additional attribute 1
+load csv from 'file:///a1.csv' as row
+match (n:V)
+where n.embed = toInteger(row[1])
+set n.totalView = toInteger(row[4])
+set n.artist = row[5]
+set n.duration = row[6]
+set n.songCanonicalName = row[7]
 
+// add additional attribute 2
 load csv from 'file:///a2.csv' as row
 match (n:V)
 where n.embed = toInteger(row[1])
@@ -29,19 +34,48 @@ set n.channelId = row[8]
 set n.description = row[9]
 set n.thumbnails = row[10]
 
-//averageWatch
-match (n:V)
-where exists(n.averageWatch)
-return n.averageWatch
-order by n.averageWatch DESC
-limit 25
+//create artist
+load csv from 'file:///artist_node.csv' as n
+create (a:A{artist:n[0]})
 
-//degree calculation
-match (n:V)
-return size((n)-->()) as out_degree, size((n)<--()) as in_degree
+CREATE INDEX ON :A(index)
 
-match (g:G)-[]-(a:A)
-with g.genre as p, max(size((a)-->(:V))) as k
-match (g:G)-[]-(a:A)
-where size((a)-->(:V)) = k and g.genre = p
-return p as Genre, a.artist as Artist, k as Video_Counts
+//create artist->video edge
+load csv from 'file:///artist_edge.csv' as e
+match (a:A)
+match (b:V)
+where a.artist = e[0] and b.embed = toInteger(e[1])
+create (a)-[r:W]->(b)
+return r
+
+//create genre
+load csv from 'file:///genre_node.csv' as g
+create (k:G{genre:g[1]})
+
+CREATE INDEX ON :G(genre)
+
+//create genre->video edge
+load csv from 'file:///genre_edge.csv' as e
+match (a:G)
+match (b:V)
+where a.genre = e[1] and b.embed = toInteger(e[2])
+create (a)-[r:B]->(b)
+
+
+//create artist->artist edge
+load csv from 'file:///out/artist_artist.csv' as e
+match (a:A)
+match (b:A)
+where a.artist = e[1] and b.artist = e[2]
+create (a)-[r:RA]->(b)
+set r.weight = toInteger(e[3])
+return r
+
+//create genre->genre edge
+load csv from 'file:///out/genre_genre.csv' as e
+match (a:G)
+match (b:G)
+where a.genre = e[1] and b.genre = e[2]
+create (a)-[r:RG]->(b)
+set r.weight = toInteger(e[3])
+return r
