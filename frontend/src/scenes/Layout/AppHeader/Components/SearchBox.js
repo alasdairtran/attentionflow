@@ -7,33 +7,6 @@ import Autosuggest from 'react-autosuggest';
 
 var titles = [];
 
-//input to suggestion
-const getSuggestions = value => {
-  const inputValue = value.trim().toLowerCase();
-  const inputLength = inputValue.length;
-  if (inputLength > 0) {
-    const options = {
-      params: {
-        title: inputValue,
-      },
-    };
-    axios
-      .get('/vevo/suggestions/', options)
-      .then(res => {
-        titles = [];
-        var result = res.data.title;
-        for (var i = 0; i < result.length; i++) {
-          titles.push({ name: result[i] });
-        }
-        console.log(result);
-      })
-      .catch(function(error) {
-        console.error(error);
-      });
-  }
-  return inputLength === 0 ? [] : titles;
-};
-
 //suggestion to output
 const getSuggestionValue = suggestion => suggestion.name;
 
@@ -53,13 +26,36 @@ class SearchBox extends React.Component {
   onChangeValue = (event, { newValue }) => {
     this.setState({
       value: newValue,
+    } , () => {
+      console.log("New state in ASYNC callback:", this.state.value);
     });
   };
 
   onSuggestionsFetchRequested = ({ value }) => {
-    this.setState({
-      suggestions: getSuggestions(value),
-    });
+    const inputValue = value.trim().toLowerCase();
+    const inputLength = inputValue.length;
+    const options = {
+      params: {
+        title: inputValue,
+      },
+    };
+    axios
+      .get('/vevo/suggestions/', options)
+      .then(res => {
+        titles = [];
+        var result = res.data.title;
+        for (var i = 0; i < result.length; i++) {
+          titles.push({ name: result[i] });
+        }
+        if(inputLength > 0){
+          this.setState({
+            suggestions: titles,
+          });
+        }
+      })
+      .catch(function(error) {
+        console.error(error);
+      });
   };
 
   onSuggestionsClearRequested = () => {
@@ -69,7 +65,7 @@ class SearchBox extends React.Component {
   };
 
   render() {
-    const { value = '', suggestions } = this.state;
+    const { value = '', suggestions = titles} = this.state;
 
     // default place holder
     const inputProps = {
@@ -90,6 +86,7 @@ class SearchBox extends React.Component {
               onSuggestionsClearRequested={this.onSuggestionsClearRequested}
               getSuggestionValue={getSuggestionValue}
               renderSuggestion={renderSuggestion}
+              alwaysRenderSuggestions={true}
               inputProps={inputProps}
             ></Autosuggest>
 
