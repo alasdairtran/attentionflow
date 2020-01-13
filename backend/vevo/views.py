@@ -19,9 +19,9 @@ def get_example(request):
                               "OPTIONAL MATCH (v)-[s]-(w:V) "
                               "OPTIONAL MATCH (w)-[r]-(x:V) "
                               "OPTIONAL MATCH (x)-[t]-(z:V) "
-                              "RETURN [v.title, v.totalView, size(()-->(v)), v.dailyView] as title,"
-                              "collect(distinct [w.title, w.totalView, size(()-->(w)), w.dailyView, s.weight]) as level1,"
-                              "collect(distinct [x.title, x.totalView, size(()-->(x)), x.dailyView]) as level2,"
+                              "RETURN [v.title, v.totalView, size(()-->(v))] as title,"
+                              "collect(distinct [w.title, w.totalView, size(()-->(w)), s.weight]) as level1,"
+                              "collect(distinct [x.title, x.totalView, size(()-->(x))]) as level2,"
                               "collect(distinct [w.title, x.title, r.weight]) as linksArr1,"
                               "collect(distinct [x.title, z.title, t.weight]) as linksArr2 ",
                               {"title": title})
@@ -50,9 +50,9 @@ def get_ego(request):
         results = session.run("MATCH (v:V {title:{title}}) "
                               "OPTIONAL MATCH (v)-[s]->(w:V) "
                               "OPTIONAL MATCH (x:V)-[r]->(v) "
-                              "RETURN [v.title, v.totalView, size(()-->(v)), v.dailyView] as title,"
-                              "collect(distinct [w.title, w.totalView, size(()-->(w)), s.weight, w.dailyView]) as outgoing,"
-                              "collect(distinct[x.title, x.totalView, size(()-->(x)), r.weight, x.dailyView]) as incoming ",
+                              "RETURN [v.title, v.totalView, size(()-->(v))] as title,"
+                              "collect(distinct [w.title, w.totalView, size(()-->(w)), s.weight]) as outgoing,"
+                              "collect(distinct[x.title, x.totalView, size(()-->(x)), r.weight]) as incoming ",
                               {"title": title})
         result = results.single()
 
@@ -83,4 +83,38 @@ def get_suggestions(request):
     output = {
         "title": result
     }
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_song_info(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    title = request.GET['title']
+    with driver.session() as session:
+        results = session.run("MATCH (v:V {title:{title}}) "
+                              "RETURN v.artist as artist,"
+                              "v.genre as genre,"
+                              "v.totalView as totalViews,"
+                              "v.publishDate as publishDate,"
+                              "v.averageWatch as averageWatch,"
+                              "v.channelID as channelID,"
+                              "v.duration as duration,"
+                              "v.dailyView as dailyViews",
+                              {"title": title})
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "artist": result['artist'],
+        "totalViews": result['totalViews'],
+        "genre": result['genre'],
+        "publishDate": result['publishDate'],
+        "averageWatch": result['averageWatch'],
+        "channelID": result['channelID'],
+        "duration": result['duration'],
+        "dailyViews": result['dailyViews'],
+    }
+
     return JsonResponse(output)
