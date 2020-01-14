@@ -34,6 +34,17 @@ class BarChart extends Component {
   }
 
   drawBarChart(oWidth) {
+    let title = this.props.title;
+    let level1 = this.props.level1 === undefined ? [] : this.props.level1;
+    let level2 = this.props.level2 === undefined ? [] : this.props.level2;
+    let level3 = this.props.level3 === undefined ? [] : this.props.level3;
+    let linksArr1 =
+      this.props.linksArr1 === undefined ? [] : this.props.linksArr1;
+    let linksArr2 =
+      this.props.linksArr2 === undefined ? [] : this.props.linksArr2;
+    let linksArr3 =
+      this.props.linksArr3 === undefined ? [] : this.props.linksArr3;
+
     const canvasHeight = oWidth / 2;
     const canvasWidth = oWidth;
     const horizontalMargin = canvasWidth / 2 - 100;
@@ -44,23 +55,31 @@ class BarChart extends Component {
       .attr('width', canvasWidth)
       .attr('height', canvasHeight);
 
-    let nodeSet = this.props.level1.concat(this.props.level2);
-    nodeSet.push(this.props.title);
+    let nodeSet = level1.concat(level2, level3);
+    nodeSet.push(title);
     nodeSet = nodeSet.map(video => [video[0], video[1], video[2], video[3]]);
     let nodeTitles = nodeSet.map(video => video[0]);
     nodeSet = nodeSet.filter(
       (node, index) => nodeTitles.indexOf(node[0]) === index
     );
 
-    let filteredLinksArr2 = this.props.linksArr2.filter(video =>
+    let filteredLinksArr1 = linksArr1.filter(video =>
       nodeTitles.includes(video[1])
     );
 
-    const strokeList = this.props.level1
+    let filteredLinksArr2 = linksArr2.filter(video =>
+      nodeTitles.includes(video[1])
+    );
+    let filteredLinksArr3 = linksArr3.filter(video =>
+      nodeTitles.includes(video[1])
+    );
+
+    const strokeList = level1
       .map(d => d[4])
       .concat(
-        this.props.linksArr1.map(d => d[2]),
-        filteredLinksArr2.map(d => d[2])
+        filteredLinksArr1.map(d => d[2]),
+        filteredLinksArr2.map(d => d[2]),
+        filteredLinksArr3.map(d => d[2])
       );
     const minStroke = 0.5;
     const maxStroke = 5;
@@ -97,22 +116,30 @@ class BarChart extends Component {
       colour: colourScale(video[2]),
     }));
 
-    const links = this.props.linksArr1.map(video => ({
+    const links = filteredLinksArr1.map(video => ({
       source: video[0],
       target: video[1],
       value: strokeScale(video[2]),
     }));
 
     links.push(
-      ...this.props.level1.map(video => ({
+      ...level1.map(video => ({
         source: video[0],
-        target: this.props.title[0],
+        target: title[0],
         value: strokeScale(video[3]),
       }))
     );
 
     links.push(
       ...filteredLinksArr2.map(video => ({
+        source: video[1],
+        target: video[0],
+        value: strokeScale(video[2]),
+      }))
+    );
+
+    links.push(
+      ...filteredLinksArr3.map(video => ({
         source: video[1],
         target: video[0],
         value: strokeScale(video[2]),
@@ -184,7 +211,7 @@ class BarChart extends Component {
       .style('background', '#F9F9F9')
       .style('border', '2px solid black')
       .style('color', 'black')
-      .style('top', '0px')
+      .style('top', '150px')
       .style('left', '0px')
       .style('width', '460px')
       .style('visibility', 'hidden');
@@ -313,52 +340,50 @@ class BarChart extends Component {
       let averageWatchWidth =
         ((averageWatch * 60) / timeInSeconds(duration)) * 430;
 
-      tooltip
-        .html(
-          '<div style="background-color:dimgrey;height:100px;width:200px;margin-right:10px;display:inline-block;float:left;position:relative;">' +
-            '<div style="background-color:black;position:absolute;bottom:5px;right:5px;height:15px;color:white;font-size:10px;padding-right:2px;padding-left:2px">' +
-            formatTime(duration) +
-            '</div>' +
-            '</div>' +
-            '<div id="songInfo"style="height:100px;width:220px;display:inline-block;">' +
-            '<h6>' +
-            title +
-            '</h6>' +
-            '<p style="color:#656565;">' +
-            artist +
-            '</br>' +
-            d3.format('.3s')(totalViews) +
-            ' views &#183 ' +
-            publishDate.toLocaleDateString(publishDate, {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            }) +
-            '</p>' +
-            '</div>' +
-            '<br/>' +
-            formatGenres(genre) +
-            '<br/>' +
-            '<div style="height:30px;width:430px;background-color:grey;position:relative;z-index:150;vertical-align:middle">' +
-            '<div style="background-color:limegreen;position:absolute;bottom:0px;left:0px;z-index:151;height:30px;width:' +
-            averageWatchWidth +
-            'px;">' +
-            '</div>' +
-            '<p style="z-index:152;position:absolute;margin-top:4px;margin-left:5px">Average Watch Time: ' +
-            Math.floor(averageWatch) +
-            ':' +
-            (Math.round((averageWatch % 1) * 60) < 10 ? '0' : '') +
-            Math.round((averageWatch % 1) * 60) +
-            '/' +
-            formatTime(duration) +
-            '</p>' +
-            '</div>' +
-            '<br/>' +
-            'Daily Views' +
-            '<br/>' +
-            "<div id='dailyViewsGraph'></div>"
-        )
-        .style('visibility', 'visible');
+      tooltip.html(
+        '<div style="background-color:dimgrey;height:100px;width:200px;margin-right:10px;display:inline-block;float:left;position:relative;">' +
+          '<div style="background-color:black;position:absolute;bottom:5px;right:5px;height:15px;color:white;font-size:10px;padding-right:2px;padding-left:2px">' +
+          formatTime(duration) +
+          '</div>' +
+          '</div>' +
+          '<div id="songInfo"style="height:100px;width:220px;display:inline-block;">' +
+          '<h6>' +
+          title +
+          '</h6>' +
+          '<p style="color:#656565;">' +
+          artist +
+          '</br>' +
+          d3.format('.3s')(totalViews) +
+          ' views &#183 ' +
+          publishDate.toLocaleDateString(publishDate, {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          }) +
+          '</p>' +
+          '</div>' +
+          '<br/>' +
+          formatGenres(genre) +
+          '<br/>' +
+          '<div style="height:30px;width:430px;background-color:grey;position:relative;z-index:150;vertical-align:middle">' +
+          '<div style="background-color:limegreen;position:absolute;bottom:0px;left:0px;z-index:151;height:30px;width:' +
+          averageWatchWidth +
+          'px;">' +
+          '</div>' +
+          '<p style="z-index:152;position:absolute;margin-top:4px;margin-left:5px">Average Watch Time: ' +
+          Math.floor(averageWatch) +
+          ':' +
+          (Math.round((averageWatch % 1) * 60) < 10 ? '0' : '') +
+          Math.round((averageWatch % 1) * 60) +
+          '/' +
+          formatTime(duration) +
+          '</p>' +
+          '</div>' +
+          '<br/>' +
+          'Daily Views' +
+          '<br/>' +
+          "<div id='dailyViewsGraph'></div>"
+      );
 
       let graphWidth = 430;
       let graphHeight = 100;
@@ -414,6 +439,8 @@ class BarChart extends Component {
 
     node.on('mouseover', function(d) {
       d3.select(this).style('stroke', 'black');
+      tooltip.html('');
+      tooltip.style('visibility', 'visible');
       getSongInfo(d);
     });
 
@@ -598,6 +625,8 @@ class BarChart extends Component {
 
       node.on('mouseover', function(d) {
         d3.select(this).style('stroke', 'black');
+        tooltip.html('');
+        tooltip.style('visibility', 'visible');
         getSongInfo(d);
       });
 

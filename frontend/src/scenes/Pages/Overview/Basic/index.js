@@ -83,8 +83,10 @@ export default class AnalyticsDashboard1 extends Component {
       title: [],
       level1: [],
       level2: [],
+      level3: [],
       linksArr1: [],
       linksArr2: [],
+      linksArr3: [],
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -117,7 +119,7 @@ export default class AnalyticsDashboard1 extends Component {
       },
     };
     axios
-      .get('/vevo/example/', options)
+      .get('/vevo/1hop/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -133,8 +135,10 @@ export default class AnalyticsDashboard1 extends Component {
             title: res.data.title,
             level1: res.data.level1,
             level2: res.data.level2,
+            level3: res.data.level3,
             linksArr1: res.data.linksArr1,
             linksArr2: res.data.linksArr2,
+            linksArr3: res.data.linksArr3,
           });
         }
       })
@@ -153,7 +157,7 @@ export default class AnalyticsDashboard1 extends Component {
       },
     };
     axios
-      .get('/vevo/example/', options)
+      .get('/vevo/1hop/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -167,8 +171,10 @@ export default class AnalyticsDashboard1 extends Component {
             title: res.data.title,
             level1: res.data.level1,
             level2: res.data.level2,
+            level3: res.data.level3,
             linksArr1: res.data.linksArr1,
             linksArr2: res.data.linksArr2,
+            linksArr3: res.data.linksArr3,
           });
         }
       })
@@ -263,8 +269,10 @@ export default class AnalyticsDashboard1 extends Component {
                             title={this.state.title}
                             level1={this.state.level1}
                             level2={this.state.level2}
+                            level3={this.state.level3}
                             linksArr1={this.state.linksArr1}
                             linksArr2={this.state.linksArr2}
+                            linksArr3={this.state.linksArr3}
                           />
                         </div>
                       </TabPane>

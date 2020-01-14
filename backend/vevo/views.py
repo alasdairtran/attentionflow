@@ -7,9 +7,35 @@ from neo4j import GraphDatabase
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
 
+@csrf_exempt
+def get_1hop(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    title = request.GET["title"]
+    with driver.session() as session:
+        results = session.run("MATCH (v:V {title:{title}}) "
+                              "OPTIONAL MATCH (v)-[s]-(w:V) "
+                              "OPTIONAL MATCH (w)-[r]-(x:V) "
+                              "RETURN [v.title, v.totalView, size(()-->(v))] as title,"
+                              "collect(distinct [w.title, w.totalView, size(()-->(w)), s.weight]) as level1,"
+                              "collect(distinct [w.title, x.title, r.weight]) as linksArr1 ",
+                              {"title": title})
+
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "title": result['title'],
+        "level1": result['level1'],
+        "linksArr1": result['linksArr1'],
+    }
+
+    return JsonResponse(output)
 
 @csrf_exempt
-def get_example(request):
+def get_2hop(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
@@ -36,6 +62,43 @@ def get_example(request):
         "level2": result['level2'],
         "linksArr1": result['linksArr1'],
         "linksArr2": result['linksArr2'],
+    }
+
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_3hop(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    title = request.GET["title"]
+    with driver.session() as session:
+        results = session.run("MATCH (v:V {title:{title}}) "
+                              "OPTIONAL MATCH (v)-[s]-(w:V) "
+                              "OPTIONAL MATCH (w)-[r]-(x:V) "
+                              "OPTIONAL MATCH (x)-[t]-(z:V) "
+                              "OPTIONAL MATCH (z)-[u]-(y:V) "
+                              "RETURN [v.title, v.totalView, size(()-->(v))] as title,"
+                              "collect(distinct [w.title, w.totalView, size(()-->(w)), s.weight]) as level1,"
+                              "collect(distinct [x.title, x.totalView, size(()-->(x))]) as level2,"
+                              "collect(distinct [z.title, z.totalView, size(()-->(z))]) as level3,"
+                              "collect(distinct [w.title, x.title, r.weight]) as linksArr1,"
+                              "collect(distinct [x.title, z.title, t.weight]) as linksArr2,"
+                              "collect(distinct [z.title, y.title, u.weight]) as linksArr3 ",
+                              {"title": title})
+
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "title": result['title'],
+        "level1": result['level1'],
+        "level2": result['level2'],
+        "level3": result['level3'],
+        "linksArr1": result['linksArr1'],
+        "linksArr2": result['linksArr2'],
+        "linksArr3": result['linksArr3'],
     }
 
     return JsonResponse(output)
