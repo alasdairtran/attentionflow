@@ -21,7 +21,6 @@ def get_1hop(request):
                               "collect(distinct [w.title, w.totalView, size(()-->(w)), s.weight]) as level1,"
                               "collect(distinct [w.title, x.title, r.weight]) as linksArr1 ",
                               {"title": title})
-
         result = results.single()
 
     driver.close()
@@ -178,6 +177,52 @@ def get_song_info(request):
         "channelID": result['channelID'],
         "duration": result['duration'],
         "dailyViews": result['dailyViews'],
+    }
+
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_genre(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    title = request.GET['title']
+    with driver.session() as session:
+        results = session.run("MATCH (g:G) "
+                              "OPTIONAL MATCH (g)-[r]-(h:G) "
+                              "RETURN [g.genre, h.genre, r.weight] as genres ")
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "genres": result['genres'],
+    }
+
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_genre_ego(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    genre = request.GET['genre']
+    with driver.session() as session:
+        results = session.run("MATCH (g:G {genre:{genre}}) "
+                              "OPTIONAL MATCH (g)-[r]->(h:G) "
+                              "OPTIONAL MATCH (i)<-[s]-(g) "
+                              "RETURN [g.genre] as centre,"
+                              "[i.genre, s.weight] as incoming,"
+                              "[h.genre, r.weight] as outgoing ",
+                              {"genre": genre})
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "centre": result['centre'],
+        "incoming": result['incoming'],
+        "outgoing": result['outgoing'],
     }
 
     return JsonResponse(output)

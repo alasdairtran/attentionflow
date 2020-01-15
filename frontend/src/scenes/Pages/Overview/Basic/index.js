@@ -87,6 +87,7 @@ export default class AnalyticsDashboard1 extends Component {
       linksArr1: [],
       linksArr2: [],
       linksArr3: [],
+      genres: [],
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);

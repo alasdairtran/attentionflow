@@ -116,7 +116,7 @@ class BarChart extends Component {
       colour: colourScale(video[2]),
     }));
 
-    const links = filteredLinksArr1.map(video => ({
+    let links = filteredLinksArr1.map(video => ({
       source: video[0],
       target: video[1],
       value: strokeScale(video[2]),
@@ -145,6 +145,45 @@ class BarChart extends Component {
         value: strokeScale(video[2]),
       }))
     );
+
+    let setLinks = [];
+    let loops = links.length;
+    for (let i = 0; i < loops; i++) {
+      let found = false;
+      let checking = links.shift();
+      for (let j = 0; j < links.length; j++) {
+        if (
+          ((links[j].source === checking.source &&
+            links[j].target === checking.target) ||
+            (links[j].source === checking.target &&
+              links[j].target === checking.source)) &&
+          links[j].value === checking.value
+        ) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        let found2 = false;
+        for (let j = 0; j < setLinks.length; j++) {
+          if (
+            (setLinks[j].source === checking.source &&
+              setLinks[j].target === checking.target) ||
+            (setLinks[j].source === checking.target &&
+              setLinks[j].target === checking.source)
+          ) {
+            found2 = true;
+            setLinks[j].value += checking.value;
+            break;
+          }
+        }
+        if (!found2) {
+          setLinks.push(checking);
+        }
+      }
+    }
+
+    links = setLinks;
 
     const simulation = d3
       .forceSimulation(nodes)
