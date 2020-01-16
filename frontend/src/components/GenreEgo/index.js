@@ -34,6 +34,29 @@ class BarChart extends Component {
   }
 
   drawBarChart(oWidth) {
+    let linksArr = this.props.genreLinks.filter(genre => genre[1] !== null);
+    let genres = this.props.genres.filter(genre => genre[0] !== 'genre');
+
+    let connectedLinks = [];
+    const loops = linksArr.length;
+    for (let i = 0; i < loops; i++) {
+      let found = false;
+      let checking = linksArr.shift();
+      for (let j = 0; j < connectedLinks.length; j++) {
+        if (
+          connectedLinks[j][1] === checking[0] &&
+          connectedLinks[j][0] === checking[1]
+        ) {
+          found = true;
+          connectedLinks[j][2] += checking[2];
+          break;
+        }
+      }
+      if (!found) {
+        connectedLinks.push(checking);
+      }
+    }
+
     const canvasHeight = oWidth / 2;
     const canvasWidth = oWidth;
     const horizontalMargin = canvasWidth / 2 - 100;
@@ -44,7 +67,8 @@ class BarChart extends Component {
       .attr('width', canvasWidth)
       .attr('height', canvasHeight);
 
-    const strokeList = this.props.genres.map(genre => genre[2]);
+    //Connection weight
+    const strokeList = connectedLinks.map(genre => genre[2]);
     const minStroke = 0.5;
     const maxStroke = 5;
     const minWeight = d3.min(strokeList);
@@ -54,16 +78,38 @@ class BarChart extends Component {
       .domain([minWeight, maxWeight])
       .range([minStroke, maxStroke]);
 
-    const nodes = this.props.genres.map(genre => ({
+    //In-degree (other genres)
+    const radiusList = genres.map(d => d[2]);
+    const maxRadius = 10;
+    const minRadius = 3;
+    const minViews = d3.min(radiusList);
+    const maxViews = d3.max(radiusList);
+    const radiusScale = d3
+      .scaleLinear()
+      .domain([minViews, maxViews])
+      .range([minRadius, maxRadius]);
+
+    //No. of songs in genre
+    const colourList = genres.map(d => d[1]);
+    const minColour = '#c38aff';
+    const maxColour = '#5600b0';
+    const minInDegree = d3.min(colourList);
+    const maxInDegree = d3.max(colourList);
+    const colourScale = d3
+      .scaleLinear()
+      .domain([minInDegree, maxInDegree])
+      .range([minColour, maxColour]);
+
+    const nodes = genres.map(genre => ({
       id: genre[0],
-      radius: 15,
-      colour: 'purple',
+      radius: radiusScale(genre[2]),
+      colour: colourScale(genre[1]),
     }));
 
-    const links = this.props.genres.map(genre => ({
-      source: genre[0],
-      target: genre[1],
-      value: strokeScale(genre[2]),
+    let links = connectedLinks.map(video => ({
+      source: video[0],
+      target: video[1],
+      value: strokeScale(video[2]),
     }));
 
     const simulation = d3
@@ -73,7 +119,7 @@ class BarChart extends Component {
         d3
           .forceLink(links)
           .id(d => d.id)
-          .strength(0.1)
+          .strength(0)
       )
       .force(
         'collide',
@@ -116,31 +162,28 @@ class BarChart extends Component {
     node
       .append('text')
       .text(function(d) {
-        return d.id;
+        return d.id.split('_').join(' ');
       })
       .attr('x', 6)
       .attr('y', 3)
       .style('font-size', '10px');
 
-    let tooltip = d3
-      .select(this.refs.canvas)
-      .append('div')
-      .style('position', 'absolute')
-      .style('z-index', '100')
-      .style('padding', '10px')
-      .style('background', '#F9F9F9')
-      .style('border', '2px solid black')
-      .style('color', 'black')
-      .style('top', '150px')
-      .style('left', '0px')
-      .style('width', '460px')
-      .style('visibility', 'hidden');
-
     node.on('click', d => {
-      tooltip.style('visibility', 'hidden');
       node.remove();
       link.remove();
       getEgo(d.id);
+    });
+
+    simulation.on('tick', () => {
+      link
+        .attr('x1', d => d.source.x)
+        .attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x)
+        .attr('y2', d => d.target.y);
+
+      node.attr('transform', function(d) {
+        return 'translate(' + d.x + ',' + d.y + ')';
+      });
     });
 
     function getEgo(genre) {
@@ -157,7 +200,7 @@ class BarChart extends Component {
           } else {
             let incoming = res.data.incoming;
             let outgoing = res.data.outgoing;
-            let central = res.data.centre;
+            let central = res.data.central;
             drawEgoGraph(incoming, outgoing, central);
           }
         })
@@ -167,16 +210,18 @@ class BarChart extends Component {
     }
 
     function drawEgoGraph(incomingUnchecked, outgoingUnchecked, title) {
-      const incoming =
-        incomingUnchecked[0][0] === null ? [] : incomingUnchecked;
-      const outgoing =
-        outgoingUnchecked[0][0] === null ? [] : outgoingUnchecked;
+      let incoming = incomingUnchecked[0][0] === null ? [] : incomingUnchecked;
+      let outgoing = outgoingUnchecked[0][0] === null ? [] : outgoingUnchecked;
+
+      incoming.sort();
+      outgoing.sort();
+
       const vidList = incoming.concat(outgoing);
       const inLength = incoming.length;
       const outLength = outgoing.length;
 
-      const minWeight = d3.min(vidList.map(videoData => videoData[1]));
-      const maxWeight = d3.max(vidList.map(videoData => videoData[1]));
+      const minWeight = d3.min(vidList.map(videoData => videoData[2]));
+      const maxWeight = d3.max(vidList.map(videoData => videoData[2]));
       const maxRadius = Math.min(
         (canvasHeight - verticalMargin * 2) /
           Math.max(incoming.length, outgoing.length) /
@@ -189,21 +234,49 @@ class BarChart extends Component {
         .domain([minWeight, maxWeight])
         .range([minRadius, maxRadius]);
 
+      vidList.push(title);
+
+      const minViews = d3.min(vidList.map(videoData => videoData[1]));
+      const maxViews = d3.max(vidList.map(videoData => videoData[1]));
+      const minColour = '#0054FF';
+      const maxColour = '#FFAB00';
+      const neutralColour = '#808080';
+      const maxDifference = Math.max(title[1] - minViews, maxViews - title[1]);
+      const colourScale = d3
+        .scaleLinear()
+        .domain([title[1] - maxDifference, title[1] + maxDifference])
+        .range([minColour, maxColour]);
+      const colourScaleLessViews = d3
+        .scaleLinear()
+        .domain([minViews, title[1]])
+        .range([minColour, neutralColour]);
+      const colourScaleMoreViews = d3
+        .scaleLinear()
+        .domain([title[1], maxViews])
+        .range([neutralColour, maxColour]);
+
       const nodes = incoming.map(video => ({
         id: video[0],
-        radius: radiusScale(video[1]),
-        colour: 'rgb(128,128,128)',
+        radius: radiusScale(video[2]),
+        colour:
+          video[1] < title[1]
+            ? colourScaleLessViews(video[1])
+            : colourScaleMoreViews(video[1]),
         type: 'I',
       }));
 
       nodes.push(
         ...outgoing.map(video => ({
           id: video[0],
-          radius: radiusScale(video[1]),
-          colour: 'rgb(128,128,128)',
+          radius: radiusScale(video[2]),
+          colour:
+            video[1] < title[1]
+              ? colourScaleLessViews(video[1])
+              : colourScaleMoreViews(video[1]),
           type: 'O',
         }))
       );
+
       nodes.push({
         id: title[0],
         radius: (maxRadius + minRadius) / 2,
@@ -262,7 +335,7 @@ class BarChart extends Component {
       node
         .append('text')
         .text(function(d) {
-          return d.id;
+          return d.id.split('_').join(' ');
         })
         .attr('text-anchor', d =>
           d.type === 'I' ? 'end' : d.type === 'O' ? 'start' : 'middle'
@@ -275,14 +348,6 @@ class BarChart extends Component {
         node.remove();
         link.remove();
         getEgo(d.id);
-      });
-
-      node.on('mouseover', function(d) {
-        d3.select(this).style('stroke', 'black');
-      });
-
-      node.on('mouseleave', function() {
-        d3.select(this).style('stroke', 'none');
       });
 
       simulation.on('tick', () => {

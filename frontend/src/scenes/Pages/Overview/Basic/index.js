@@ -4,6 +4,8 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
 import ExampleChart from '../../../../components/ExampleChart';
+import GenreEgo from '../../../../components/GenreEgo';
+import ArtistEgo from '../../../../components/ArtistEgo';
 
 import {
   Row,
@@ -88,6 +90,9 @@ export default class AnalyticsDashboard1 extends Component {
       linksArr2: [],
       linksArr3: [],
       genres: [],
+      genreLinks: [],
+      artists: [],
+      artistLinks: [],
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -140,6 +145,10 @@ export default class AnalyticsDashboard1 extends Component {
             linksArr1: res.data.linksArr1,
             linksArr2: res.data.linksArr2,
             linksArr3: res.data.linksArr3,
+            genres: res.data.genres,
+            genreLinks: res.data.genreLinks,
+            artists: res.data.artists,
+            artistLinks: res.data.artistLinks,
           });
         }
       })
@@ -228,7 +237,7 @@ export default class AnalyticsDashboard1 extends Component {
                         <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
                           {' '}
                         </i>
-                        {this.state.title[0]}
+                        {/*{this.state.title[0]}*/}
                       </div>
                       <div className="btn-actions-pane-right">
                         <Button
@@ -274,6 +283,10 @@ export default class AnalyticsDashboard1 extends Component {
                             linksArr1={this.state.linksArr1}
                             linksArr2={this.state.linksArr2}
                             linksArr3={this.state.linksArr3}
+                            genres={this.state.genres}
+                            genreLinks={this.state.genreLinks}
+                            artists={this.state.artists}
+                            artistLinks={this.state.artistLinks}
                           />
                         </div>
                       </TabPane>
