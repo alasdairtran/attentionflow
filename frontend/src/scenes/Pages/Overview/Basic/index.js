@@ -123,11 +123,11 @@ export default class AnalyticsDashboard1 extends Component {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = {
       params: {
-        title: 'adele',
+        title: 'Adele - Hello',
       },
     };
     axios
-      .get('/vevo/1hop_artist/', options)
+      .get('/vevo/1hop/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -279,7 +279,7 @@ export default class AnalyticsDashboard1 extends Component {
                     <TabContent activeTab={this.state.activeTab1}>
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
-                          <ArtistEgo
+                          <ExampleChart
                             title={this.state.title}
                             level1={this.state.level1}
                             level2={this.state.level2}

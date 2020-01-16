@@ -250,8 +250,8 @@ class BarChart extends Component {
       .style('background', '#F9F9F9')
       .style('border', '2px solid black')
       .style('color', 'black')
-      .style('top', '150px')
-      .style('left', '0px')
+      .style('top', '0px')
+      .style('right', '0px')
       .style('width', '460px')
       .style('visibility', 'hidden');
 
