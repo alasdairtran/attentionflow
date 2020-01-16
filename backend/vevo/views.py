@@ -354,9 +354,13 @@ def get_artist_ego(request):
         results = session.run("MATCH (v:A {artist:{title}}) "
                               "OPTIONAL MATCH (v)-[s]->(w:A) "
                               "OPTIONAL MATCH (x:A)-[r]->(v) "
+                              "OPTIONAL MATCH (a:V)--(v) "
+                              "OPTIONAL MATCH (a)-[c]->(b:V) where b.artist = {title} "
                               "RETURN [v.artist, size((v)-->(:V)), size((v)<--(:A))] as central,"
                               "collect(distinct [w.artist, size((w)-->(:V)), s.weight]) as outgoing,"
-                              "collect(distinct [x.artist, size((x)-->(:V)), r.weight]) as incoming ",
+                              "collect(distinct [x.artist, size((x)-->(:V)), r.weight]) as incoming,"
+                              "collect(distinct [a.title, a.totalView, size((:V)-->(a))]) as songs,"
+                              "collect(distinct [a.title, b.title, c.weight]) as songLinks ",
                               {"title": title})
         result = results.single()
 
@@ -366,6 +370,8 @@ def get_artist_ego(request):
             "title": result['central'],
             "incoming": result['incoming'],
             "outgoing": result['outgoing'],
+            "songs": result['songs'],
+            "songLinks": result['songLinks'],
         }
 
     return JsonResponse(output)

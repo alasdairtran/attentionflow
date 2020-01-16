@@ -93,6 +93,8 @@ export default class AnalyticsDashboard1 extends Component {
       genreLinks: [],
       artists: [],
       artistLinks: [],
+      songs: [],
+      songLinks: [],
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -121,11 +123,11 @@ export default class AnalyticsDashboard1 extends Component {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = {
       params: {
-        title: 'Adele - Hello',
+        title: 'adele',
       },
     };
     axios
-      .get('/vevo/1hop/', options)
+      .get('/vevo/1hop_artist/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -149,6 +151,8 @@ export default class AnalyticsDashboard1 extends Component {
             genreLinks: res.data.genreLinks,
             artists: res.data.artists,
             artistLinks: res.data.artistLinks,
+            songs: res.data.songs,
+            songLinks: res.data.songLinks,
           });
         }
       })
@@ -275,7 +279,7 @@ export default class AnalyticsDashboard1 extends Component {
                     <TabContent activeTab={this.state.activeTab1}>
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
-                          <ExampleChart
+                          <ArtistEgo
                             title={this.state.title}
                             level1={this.state.level1}
                             level2={this.state.level2}
@@ -287,6 +291,8 @@ export default class AnalyticsDashboard1 extends Component {
                             genreLinks={this.state.genreLinks}
                             artists={this.state.artists}
                             artistLinks={this.state.artistLinks}
+                            songs={this.state.songs}
+                            songLinks={this.state.songLinks}
                           />
                         </div>
                       </TabPane>

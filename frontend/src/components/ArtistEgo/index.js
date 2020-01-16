@@ -45,10 +45,24 @@ class BarChart extends Component {
     let linksArr3 =
       this.props.linksArr3 === undefined ? [] : this.props.linksArr3;
 
+    let tooltip = d3
+      .select(this.refs.canvas)
+      .append('div')
+      .style('position', 'absolute')
+      .style('z-index', '100')
+      .style('padding', '10px')
+      .style('background', '#F9F9F9')
+      .style('border', '2px solid black')
+      .style('color', 'black')
+      .style('right', '0px')
+      .style('top', '0px')
+      .style('width', '460px')
+      .style('visibility', 'hidden')
+      .on('click', () => tooltip.style('visibility', 'hidden').html(''));
+
     const canvasHeight = oWidth / 2;
     const canvasWidth = oWidth;
-    const horizontalMargin = canvasWidth / 2 - 100;
-    const verticalMargin = 130;
+    const verticalMargin = 30;
     const svg = d3
       .select(this.refs.canvas)
       .append('svg')
@@ -132,14 +146,6 @@ class BarChart extends Component {
 
     links.push(
       ...filteredLinksArr2.map(video => ({
-        source: video[1],
-        target: video[0],
-        value: strokeScale(video[2]),
-      }))
-    );
-
-    links.push(
-      ...filteredLinksArr3.map(video => ({
         source: video[1],
         target: video[0],
         value: strokeScale(video[2]),
@@ -244,7 +250,7 @@ class BarChart extends Component {
     node.on('click', d => {
       node.remove();
       link.remove();
-      getEgo(d.id);
+      getArtistInfo(d.id);
     });
 
     simulation.on('tick', () => {
@@ -259,7 +265,7 @@ class BarChart extends Component {
       });
     });
 
-    function getEgo(title) {
+    function getArtistInfo(title) {
       const options = {
         params: {
           title: title,
@@ -274,7 +280,10 @@ class BarChart extends Component {
             let incoming = res.data.incoming;
             let outgoing = res.data.outgoing;
             let central = res.data.title;
+            let songs = res.data.songs;
+            let songLinks = res.data.songLinks;
             drawEgoGraph(incoming, outgoing, central);
+            drawSongGraph(songs, songLinks);
           }
         })
         .catch(function(error) {
@@ -365,11 +374,11 @@ class BarChart extends Component {
           'x',
           d3.forceX().x(function(d) {
             if (d.type === 'I') {
-              return horizontalMargin;
+              return (canvasWidth / 5) * 3 + 100;
             } else if (d.type === 'O') {
-              return canvasWidth - horizontalMargin;
+              return canvasWidth - 100;
             } else {
-              return canvasWidth / 2;
+              return (canvasWidth / 5) * 4;
             }
           })
         )
@@ -419,15 +428,381 @@ class BarChart extends Component {
         .style('font-size', '10px');
 
       node.on('click', d => {
-        node.remove();
-        link.remove();
-        getEgo(d.id);
+        svg.selectAll('*').remove();
+        getArtistInfo(d.id);
       });
 
       simulation.on('tick', () => {
         node.attr('transform', function(d) {
           return 'translate(' + d.x + ',' + d.y + ')';
         });
+      });
+    }
+
+    function drawSongGraph(songs, songLinks) {
+      let linksArr = songLinks.filter(song => song[1] !== null);
+
+      let connectedLinks = [];
+      const loops = linksArr.length;
+      for (let i = 0; i < loops; i++) {
+        let found = false;
+        let checking = linksArr.shift();
+        for (let j = 0; j < connectedLinks.length; j++) {
+          if (
+            connectedLinks[j][1] === checking[0] &&
+            connectedLinks[j][0] === checking[1]
+          ) {
+            found = true;
+            connectedLinks[j][2] += checking[2];
+            break;
+          }
+        }
+        if (!found) {
+          connectedLinks.push(checking);
+        }
+      }
+
+      //Connection weight
+      const strokeList = connectedLinks.map(song => song[2]);
+      const minStroke = 0.5;
+      const maxStroke = 5;
+      const minWeight = d3.min(strokeList);
+      const maxWeight = d3.max(strokeList);
+      const strokeScale = d3
+        .scaleLinear()
+        .domain([minWeight, maxWeight])
+        .range([minStroke, maxStroke]);
+
+      //In-Degree
+      const radiusList = songs.map(d => d[2]);
+      const maxRadius = 10;
+      const minRadius = 3;
+      const minViews = d3.min(radiusList);
+      const maxViews = d3.max(radiusList);
+      const radiusScale = d3
+        .scaleLinear()
+        .domain([minViews, maxViews])
+        .range([minRadius, maxRadius]);
+
+      //Views
+      const colourList = songs.map(d => d[1]);
+      const minColour = '#c38aff';
+      const maxColour = '#5600b0';
+      const minInDegree = d3.min(colourList);
+      const maxInDegree = d3.max(colourList);
+      const colourScale = d3
+        .scaleLinear()
+        .domain([minInDegree, maxInDegree])
+        .range([minColour, maxColour]);
+
+      const nodes = songs.map(genre => ({
+        id: genre[0],
+        radius: radiusScale(genre[2]),
+        colour: colourScale(genre[1]),
+      }));
+
+      let links = connectedLinks.map(video => ({
+        source: video[0],
+        target: video[1],
+        value: strokeScale(video[2]),
+      }));
+
+      const simulation = d3
+        .forceSimulation(nodes)
+        .force(
+          'link',
+          d3
+            .forceLink(links)
+            .id(d => d.id)
+            .strength(0.1)
+        )
+        .force(
+          'collide',
+          d3
+            .forceCollide()
+            .radius(function(d) {
+              return d.radius + 1.5;
+            })
+            .iterations(2)
+        )
+        .force('charge', d3.forceManyBody().strength(-50))
+        .force(
+          'center',
+          d3.forceCenter((canvasWidth / 5) * 1, canvasHeight / 2)
+        )
+        .force('x', d3.forceX(0.0002))
+        .force('y', d3.forceY(0.0001));
+
+      const link = svg
+        .append('g')
+        .attr('stroke', '#999')
+        .attr('stroke-opacity', 0.6)
+        .selectAll('line')
+        .data(links)
+        .join('line')
+        .attr('stroke-width', d => d.value);
+
+      const node = svg
+        .append('g')
+        .selectAll('g')
+        .data(nodes)
+        .enter()
+        .append('g');
+
+      node
+        .append('circle')
+        .call(drag(simulation))
+        .attr('r', d => 2 * d.radius)
+        .attr('fill', d => d.colour);
+
+      node.append('title').text(d => d.id);
+
+      node
+        .append('text')
+        .text(function(d) {
+          return d.id.split('_').join(' ');
+        })
+        .attr('x', 6)
+        .attr('y', 3)
+        .style('font-size', '10px');
+
+      simulation.on('tick', () => {
+        link
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
+
+        node.attr('transform', function(d) {
+          return 'translate(' + d.x + ',' + d.y + ')';
+        });
+      });
+
+      node.on('click', d => {
+        tooltip.style('visibility', 'visible');
+        getSongInfo(d);
+      });
+
+      function getSongInfo(d) {
+        const options = {
+          params: {
+            title: d.id,
+          },
+        };
+        axios
+          .get('/vevo/song_info/', options)
+          .then(res => {
+            if (res.data.error) {
+              console.log('error');
+            } else {
+              let artist = res.data.artist;
+              let totalViews = res.data.totalViews;
+              let genre = res.data.genre;
+              let publishDate = new Date(res.data.publishDate);
+              let averageWatch = res.data.averageWatch;
+              let channelID = res.data.channelID;
+              let duration = res.data.duration;
+              let dailyViews = res.data.dailyViews;
+              drawPopout(
+                d.id,
+                artist,
+                totalViews,
+                genre,
+                publishDate,
+                averageWatch,
+                channelID,
+                duration,
+                dailyViews
+              );
+            }
+          })
+          .catch(function(error) {
+            console.error(error);
+          });
+      }
+
+      function formatTime(timeString) {
+        if (timeString === null) {
+          return null;
+        }
+        let finalArr = [];
+        let len = timeString.length;
+        for (let i = 1; i <= len; i++) {
+          if (timeString.charAt(len - i) === 'M') {
+            if (finalArr.length === 0) {
+              finalArr = [':', '0', '0'];
+            } else if (finalArr.length === 1) {
+              finalArr.unshift(':', '0');
+            } else {
+              finalArr.unshift(':');
+            }
+          } else if (timeString.charAt(len - i) === 'H') {
+            if (finalArr.length === 3) {
+              finalArr.unshift(':', '0', '0');
+            } else if (finalArr.length === 4) {
+              finalArr.unshift(':', '0');
+            } else {
+              finalArr.unshift(':');
+            }
+          } else if (timeString.charAt(len - i) === 'T') {
+            return finalArr.join('');
+          } else if (timeString.charAt(len - i) !== 'S') {
+            finalArr.unshift(timeString.charAt(len - i));
+          }
+        }
+      }
+
+      function formatGenres(genreString) {
+        if (genreString === null) {
+          return null;
+        }
+        let arr = genreString.slice(2, -2).split("', '");
+        let output = arr.length > 1 ? 'Genres: ' : 'Genre: ';
+        arr.forEach(genre => (output += genre.split('_').join(' ') + ', '));
+        return output.slice(0, -2);
+      }
+
+      function timeInSeconds(time) {
+        if (time === null) {
+          return null;
+        }
+        let total = 0;
+        let multiplier = 1;
+        let len = time.length;
+        for (let i = 1; i <= len; i++) {
+          if (time.charAt(len - i) === 'M') {
+            multiplier = 60;
+          } else if (time.charAt(len - i) === 'H') {
+            multiplier = 3600;
+          } else if (time.charAt(len - i) === 'T') {
+            return total;
+          } else if (
+            time.charAt(len - i) !== 'S' &&
+            time.charAt(len - i) !== ' '
+          ) {
+            total += parseInt(time.charAt(len - i)) * multiplier;
+            multiplier *= 10;
+          }
+        }
+      }
+
+      function drawPopout(
+        title,
+        artist,
+        totalViews,
+        genre,
+        publishDate,
+        averageWatch,
+        channelID,
+        duration,
+        dailyViews
+      ) {
+        let averageWatchWidth =
+          ((averageWatch * 60) / timeInSeconds(duration)) * 430;
+
+        tooltip.html(
+          '<div style="background-color:dimgrey;height:100px;width:200px;margin-right:10px;display:inline-block;float:left;position:relative;">' +
+            '<div style="background-color:black;position:absolute;bottom:5px;right:5px;height:15px;color:white;font-size:10px;padding-right:2px;padding-left:2px">' +
+            formatTime(duration) +
+            '</div>' +
+            '</div>' +
+            '<div id="songInfo"style="height:100px;width:220px;display:inline-block;">' +
+            '<h6>' +
+            title +
+            '</h6>' +
+            '<p style="color:#656565;">' +
+            artist +
+            '</br>' +
+            d3.format('.3s')(totalViews) +
+            ' views &#183 ' +
+            publishDate.toLocaleDateString(publishDate, {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            }) +
+            '</p>' +
+            '</div>' +
+            '<br/>' +
+            formatGenres(genre) +
+            '<br/>' +
+            '<div style="height:30px;width:430px;background-color:grey;position:relative;z-index:150;vertical-align:middle">' +
+            '<div style="background-color:limegreen;position:absolute;bottom:0px;left:0px;z-index:151;height:30px;width:' +
+            averageWatchWidth +
+            'px;">' +
+            '</div>' +
+            '<p style="z-index:152;position:absolute;margin-top:4px;margin-left:5px">Average Watch Time: ' +
+            Math.floor(averageWatch) +
+            ':' +
+            (Math.round((averageWatch % 1) * 60) < 10 ? '0' : '') +
+            Math.round((averageWatch % 1) * 60) +
+            '/' +
+            formatTime(duration) +
+            '</p>' +
+            '</div>' +
+            '<br/>' +
+            'Daily Views' +
+            '<br/>' +
+            "<div id='dailyViewsGraph'></div>"
+        );
+
+        let graphWidth = 430;
+        let graphHeight = 100;
+        let viewsArray = JSON.parse(dailyViews);
+
+        let dailyViewsGraph = d3
+          .select('#dailyViewsGraph')
+          .append('svg')
+          .attr('width', graphWidth)
+          .attr('height', graphHeight);
+
+        let x = d3
+          .scaleLinear()
+          .domain([0, viewsArray.length])
+          .range([40, graphWidth - 1]);
+        let y = d3
+          .scaleLinear()
+          .domain([0, d3.max(viewsArray)])
+          .range([graphHeight - 10, 10]);
+
+        let xAxis = d3
+          .axisBottom()
+          .scale(x)
+          .tickValues([]);
+        let yAxis = d3
+          .axisLeft()
+          .scale(y)
+          .ticks(7)
+          .tickFormat(d3.format('.3s'));
+        dailyViewsGraph
+          .append('g')
+          .attr('transform', 'translate(0,90)')
+          .call(xAxis);
+        dailyViewsGraph
+          .append('g')
+          .attr('transform', 'translate(40,0)')
+          .call(yAxis);
+
+        dailyViewsGraph
+          .append('path')
+          .datum(viewsArray)
+          .attr('fill', 'none')
+          .attr('stroke', 'steelblue')
+          .attr('stroke-width', 1.5)
+          .attr(
+            'd',
+            d3
+              .line()
+              .x((d, i) => x(i))
+              .y(d => y(d))
+          );
+      }
+
+      node.on('mouseover', function(d) {
+        d3.select(this).style('stroke', 'black');
+      });
+
+      node.on('mouseleave', function() {
+        d3.select(this).style('stroke', 'none');
       });
     }
   }
