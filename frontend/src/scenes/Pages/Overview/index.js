@@ -4,6 +4,9 @@ import { Route } from 'react-router-dom';
 // DASHBOARDS
 
 import BasicOverview from './Basic/';
+import GenreOverview from './Genre';
+import ArtistOverview from './Artist';
+import SongOverview from './Song';
 
 // Layout
 
@@ -19,6 +22,9 @@ const Overview = ({ match }) => (
       <div className="app-main__outer">
         <div className="app-main__inner">
           <Route path={`${match.url}/basic`} component={BasicOverview} />
+          <Route path={`${match.url}/genre`} component={GenreOverview} />
+          <Route path={`${match.url}/artist`} component={ArtistOverview} />
+          <Route path={`${match.url}/song`} component={SongOverview} />
         </div>
         <AppFooter />
       </div>

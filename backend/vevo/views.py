@@ -187,8 +187,8 @@ def get_genre(request):
                                   auth=("neo4j", NEO4J_PASS))
 
     with driver.session() as session:
-        results = session.run("MATCH (g:G) "
-                              "OPTIONAL MATCH (g)-[r]->(h:G) "
+        results = session.run("MATCH (g:G) where g.genre <> 'genre' and g.genre <> 'Music' "
+                              "OPTIONAL MATCH (g)-[r]->(h:G) where h.genre <> 'Music' "
                               "RETURN collect(distinct [g.genre, size((g)-->(:V)), size((g)<--(:G))]) as genres,"
                               "collect(distinct [g.genre, h.genre, r.weight]) as genreLinks ")
         result = results.single()
@@ -210,8 +210,8 @@ def get_genre_ego(request):
     genre = request.GET['genre']
     with driver.session() as session:
         results = session.run("MATCH (v:G {genre:{genre}}) "
-                              "OPTIONAL MATCH (v)-[s]->(w:G) "
-                              "OPTIONAL MATCH (x:G)-[r]->(v) "
+                              "OPTIONAL MATCH (v)-[s]->(w:G) where w.genre <> 'Music' "
+                              "OPTIONAL MATCH (x:G)-[r]->(v) where x.genre <> 'Music' "
                               "RETURN [v.genre, size((v)-[:B]->()), size((v)<-[:RG]-())] as central,"
                               "collect(distinct [w.genre, size((w)-->(:V)), s.weight]) as outgoing,"
                               "collect(distinct[x.genre, size((x)-->(:V)), r.weight]) as incoming ",
@@ -355,7 +355,7 @@ def get_artist_ego(request):
                               "OPTIONAL MATCH (v)-[s]->(w:A) "
                               "OPTIONAL MATCH (x:A)-[r]->(v) "
                               "OPTIONAL MATCH (a:V)--(v) "
-                              "OPTIONAL MATCH (a)-[c]->(b:V) where b.artist = {title} "
+                              "OPTIONAL MATCH (a)-[c]->(b:V) where (b)<--(v) "
                               "RETURN [v.artist, size((v)-->(:V)), size((v)<--(:A))] as central,"
                               "collect(distinct [w.artist, size((w)-->(:V)), s.weight]) as outgoing,"
                               "collect(distinct [x.artist, size((x)-->(:V)), r.weight]) as incoming,"
@@ -370,6 +370,58 @@ def get_artist_ego(request):
             "title": result['central'],
             "incoming": result['incoming'],
             "outgoing": result['outgoing'],
+            "songs": result['songs'],
+            "songLinks": result['songLinks'],
+        }
+
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_artist_incoming_outgoing(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    artist = request.GET['artist']
+    with driver.session() as session:
+        results = session.run("MATCH (v:A {artist:{artist}}) "
+                              "OPTIONAL MATCH (v)-[s]->(w:A) "
+                              "OPTIONAL MATCH (x:A)-[r]->(v) "
+                              "RETURN [v.artist, size((v)-->(:V)), size((v)<--(:A))] as central,"
+                              "collect(distinct [w.artist, size((w)-->(:V)), s.weight]) as outgoing,"
+                              "collect(distinct [x.artist, size((x)-->(:V)), r.weight]) as incoming ",
+                              {"artist": artist})
+        result = results.single()
+
+        driver.close()
+
+        output = {
+            "central": result['central'],
+            "incoming": result['incoming'],
+            "outgoing": result['outgoing'],
+        }
+
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_songs_by_artist(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    artist = request.GET['artist']
+    with driver.session() as session:
+        results = session.run("MATCH (v:A {artist:{artist}}) "
+                              "OPTIONAL MATCH (v)-[s]->(w:A) "
+                              "OPTIONAL MATCH (x:A)-[r]->(v) "
+                              "OPTIONAL MATCH (a:V)--(v) "
+                              "OPTIONAL MATCH (a)-[c]->(b:V) where (b)<--(v) "
+                              "RETURN collect(distinct [a.title, a.totalView, size((:V)-->(a))]) as songs,"
+                              "collect(distinct [a.title, b.title, c.weight]) as songLinks ",
+                              {"artist": artist})
+        result = results.single()
+
+        driver.close()
+
+        output = {
             "songs": result['songs'],
             "songLinks": result['songLinks'],
         }

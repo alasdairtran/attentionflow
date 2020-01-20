@@ -3,7 +3,7 @@ import axios from 'axios';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
-import ExampleChart from '../../../../components/SongExample';
+import ArtistExample from '../../../../components/ArtistExample';
 
 import {
   Row,
@@ -71,6 +71,7 @@ const data2 = [
 
 export default class AnalyticsDashboard1 extends Component {
   constructor(props) {
+    console.log('here');
     super(props);
 
     this.state = {
@@ -115,11 +116,11 @@ export default class AnalyticsDashboard1 extends Component {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = {
       params: {
-        title: 'Adele - Hello',
+        title: 'adele',
       },
     };
     axios
-      .get('/vevo/1hop/', options)
+      .get('/vevo/1hop_artist/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -265,7 +266,7 @@ export default class AnalyticsDashboard1 extends Component {
                     <TabContent activeTab={this.state.activeTab1}>
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
-                          <ExampleChart
+                          <ArtistExample
                             title={this.state.title}
                             level1={this.state.level1}
                             level2={this.state.level2}

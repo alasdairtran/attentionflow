@@ -16,4 +16,6 @@ urlpatterns = [
     path('1hop_artist/', views.get_1hop_artist),
     path('2hop_artist/', views.get_2hop_artist),
     path('3hop_artist/', views.get_3hop_artist),
+    path('artist_incoming_outgoing/', views.get_artist_incoming_outgoing),
+    path('songs_by_artist/', views.get_songs_by_artist),
 ]

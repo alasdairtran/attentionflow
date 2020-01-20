@@ -3,7 +3,8 @@ import axios from 'axios';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
-import ExampleChart from '../../../../components/SongExample';
+import GenreExample from '../../../../components/GenreExample';
+import SongExample from '../../../../components/SongExample';
 
 import {
   Row,
@@ -41,6 +42,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import ArtistExample from '../../../../components/ArtistExample';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -80,6 +82,7 @@ export default class AnalyticsDashboard1 extends Component {
       isLoading: false,
       hasError: false,
       errorMessage: '',
+      search: false,
       title: [],
       level1: [],
       level2: [],
@@ -87,6 +90,8 @@ export default class AnalyticsDashboard1 extends Component {
       linksArr1: [],
       linksArr2: [],
       linksArr3: [],
+      genres: [],
+      genreLinks: [],
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -113,13 +118,9 @@ export default class AnalyticsDashboard1 extends Component {
   fetchExample = e => {
     e.preventDefault();
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
-    const options = {
-      params: {
-        title: 'Adele - Hello',
-      },
-    };
+    const options = {};
     axios
-      .get('/vevo/1hop/', options)
+      .get('/vevo/genre/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -132,13 +133,9 @@ export default class AnalyticsDashboard1 extends Component {
           this.setState({
             isLoaded: true,
             isLoading: false,
-            title: res.data.title,
-            level1: res.data.level1,
-            level2: res.data.level2,
-            level3: res.data.level3,
-            linksArr1: res.data.linksArr1,
-            linksArr2: res.data.linksArr2,
-            linksArr3: res.data.linksArr3,
+            genres: res.data.genres,
+            genreLinks: res.data.genreLinks,
+            search: false,
           });
         }
       })
@@ -175,6 +172,7 @@ export default class AnalyticsDashboard1 extends Component {
             linksArr1: res.data.linksArr1,
             linksArr2: res.data.linksArr2,
             linksArr3: res.data.linksArr3,
+            search: true,
           });
         }
       })
@@ -265,7 +263,13 @@ export default class AnalyticsDashboard1 extends Component {
                     <TabContent activeTab={this.state.activeTab1}>
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
-                          <ExampleChart
+                          <GenreExample
+                            search={this.state.search}
+                            genres={this.state.genres}
+                            genreLinks={this.state.genreLinks}
+                          />
+                          <SongExample
+                            search={this.state.search}
                             title={this.state.title}
                             level1={this.state.level1}
                             level2={this.state.level2}
