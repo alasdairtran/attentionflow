@@ -19,7 +19,7 @@ export function getIncomingOutgoing(
     },
   };
   axios
-    .get('/vevo/ego/', options)
+    .get('/vevo/song_incoming_outgoing/', options)
     .then(res => {
       if (res.data.error) {
         console.log('error');

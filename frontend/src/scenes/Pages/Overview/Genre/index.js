@@ -154,7 +154,7 @@ export default class AnalyticsDashboard1 extends Component {
       },
     };
     axios
-      .get('/vevo/1hop/', options)
+      .get('/vevo/1hop_song/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({

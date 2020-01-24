@@ -187,6 +187,10 @@ function formatGenres(genreString) {
     return null;
   }
   let arr = genreString.slice(2, -2).split("', '");
+  arr = arr.filter(genre => genre !== 'Music');
+  if (arr.length === 0) {
+    return 'Genre: Other';
+  }
   let output = arr.length > 1 ? 'Genres: ' : 'Genre: ';
   arr.forEach(genre => (output += genre.split('_').join(' ') + ', '));
   return output.slice(0, -2);

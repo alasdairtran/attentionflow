@@ -16,7 +16,7 @@ export function getIncomingOutgoing(
     },
   };
   axios
-    .get('/vevo/genre_ego/', options)
+    .get('/vevo/genre_incoming_outgoing/', options)
     .then(res => {
       if (res.data.error) {
         console.log('error');

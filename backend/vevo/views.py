@@ -8,7 +8,7 @@ from neo4j import GraphDatabase
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
 
 @csrf_exempt
-def get_1hop(request):
+def get_1hop_song(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
@@ -34,7 +34,7 @@ def get_1hop(request):
     return JsonResponse(output)
 
 @csrf_exempt
-def get_2hop(request):
+def get_2hop_song(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
@@ -66,7 +66,7 @@ def get_2hop(request):
     return JsonResponse(output)
 
 @csrf_exempt
-def get_3hop(request):
+def get_3hop_song(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
@@ -103,7 +103,7 @@ def get_3hop(request):
     return JsonResponse(output)
 
 @csrf_exempt
-def get_ego(request):
+def get_song_incoming_outgoing(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
@@ -203,7 +203,7 @@ def get_genre(request):
     return JsonResponse(output)
 
 @csrf_exempt
-def get_genre_ego(request):
+def get_genre_incoming_outgoing(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
@@ -225,27 +225,6 @@ def get_genre_ego(request):
             "incoming": result['incoming'],
             "outgoing": result['outgoing'],
         }
-
-    return JsonResponse(output)
-
-@csrf_exempt
-def get_artist(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-
-    with driver.session() as session:
-        results = session.run("MATCH (g:A) "
-                              "OPTIONAL MATCH (g)-[r]->(h:A) "
-                              "RETURN collect(distinct [g.artist, size((g)-->(:V)), size((g)<--(:A))]) as artists,"
-                              "collect(distinct [g.artist, h.artist, r.weight]) as artistLinks ")
-        result = results.single()
-
-    driver.close()
-
-    output = {
-        "artistLinks": result['artistLinks'],
-        "artists": result['artists'],
-    }
 
     return JsonResponse(output)
 
@@ -345,38 +324,6 @@ def get_3hop_artist(request):
     return JsonResponse(output)
 
 @csrf_exempt
-def get_artist_ego(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-
-    title = request.GET['title']
-    with driver.session() as session:
-        results = session.run("MATCH (v:A {artist:{title}}) "
-                              "OPTIONAL MATCH (v)-[s]->(w:A) "
-                              "OPTIONAL MATCH (x:A)-[r]->(v) "
-                              "OPTIONAL MATCH (a:V)--(v) "
-                              "OPTIONAL MATCH (a)-[c]->(b:V) where (b)<--(v) "
-                              "RETURN [v.artist, size((v)-->(:V)), size((v)<--(:A))] as central,"
-                              "collect(distinct [w.artist, size((w)-->(:V)), s.weight]) as outgoing,"
-                              "collect(distinct [x.artist, size((x)-->(:V)), r.weight]) as incoming,"
-                              "collect(distinct [a.title, a.totalView, size((:V)-->(a))]) as songs,"
-                              "collect(distinct [a.title, b.title, c.weight]) as songLinks ",
-                              {"title": title})
-        result = results.single()
-
-        driver.close()
-
-        output = {
-            "title": result['central'],
-            "incoming": result['incoming'],
-            "outgoing": result['outgoing'],
-            "songs": result['songs'],
-            "songLinks": result['songLinks'],
-        }
-
-    return JsonResponse(output)
-
-@csrf_exempt
 def get_artist_incoming_outgoing(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
@@ -421,9 +368,71 @@ def get_songs_by_artist(request):
 
         driver.close()
 
-        output = {
+        output= {
             "songs": result['songs'],
             "songLinks": result['songLinks'],
         }
+
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_genre_bubbles(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    with driver.session() as session:
+        results = session.run("MATCH (g:G) where g.genre <> 'Music' and g.genre <> 'genre' "
+                              "RETURN collect(g.genre) as genres ")
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "genres": result['genres'],
+    }
+
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_genre_top_artists(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    genre = request.GET['genre']
+    with driver.session() as session:
+        results = session.run("MATCH (g:G {genre:{genre}}) "
+                              "OPTIONAL MATCH (a:A)--()--(g) "
+                              "WITH distinct g, a ORDER BY size((g)--()--(a)) desc "
+                              "RETURN collect([a.artist, size((g)--()--(a))])[..case when count(a)/40 > 5 then count(a)/40 else 5 end] as artists ",
+                              {"genre": genre})
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "artists": result['artists'],
+    }
+
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_genre_artist_top_songs(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    genre = request.GET['genre']
+    artist = request.GET['artist']
+    with driver.session() as session:
+        results = session.run("MATCH (g:G {genre:{genre}})--(v:V)--(a:A {artist: {artist}}) "
+                              "WITH v ORDER BY v.totalView desc "
+                              "RETURN collect([v.title, v.totalView])[..3] as songs ",
+                              {"genre": genre, 'artist': artist})
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "songs": result['songs'],
+    }
 
     return JsonResponse(output)

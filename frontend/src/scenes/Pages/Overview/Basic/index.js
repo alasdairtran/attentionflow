@@ -3,7 +3,7 @@ import axios from 'axios';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
-import ExampleChart from '../../../../components/SongExample';
+import GenreBubbles from '../../../../components/GenreBubbles';
 
 import {
   Row,
@@ -80,13 +80,7 @@ export default class AnalyticsDashboard1 extends Component {
       isLoading: false,
       hasError: false,
       errorMessage: '',
-      title: [],
-      level1: [],
-      level2: [],
-      level3: [],
-      linksArr1: [],
-      linksArr2: [],
-      linksArr3: [],
+      root: {},
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -112,39 +106,7 @@ export default class AnalyticsDashboard1 extends Component {
 
   fetchExample = e => {
     e.preventDefault();
-    this.setState({ isLoaded: false, isLoading: true, hasError: false });
-    const options = {
-      params: {
-        title: 'Adele - Hello',
-      },
-    };
-    axios
-      .get('/vevo/1hop/', options)
-      .then(res => {
-        if (res.data.error) {
-          this.setState({
-            isLoading: false,
-            hasError: true,
-            isLoaded: false,
-            errorMessage: res.data.error,
-          });
-        } else {
-          this.setState({
-            isLoaded: true,
-            isLoading: false,
-            title: res.data.title,
-            level1: res.data.level1,
-            level2: res.data.level2,
-            level3: res.data.level3,
-            linksArr1: res.data.linksArr1,
-            linksArr2: res.data.linksArr2,
-            linksArr3: res.data.linksArr3,
-          });
-        }
-      })
-      .catch(function(error) {
-        console.error(error);
-      });
+    this.setState({ isLoaded: true, isLoading: false, hasError: false });
   };
 
   // For search box
@@ -157,7 +119,7 @@ export default class AnalyticsDashboard1 extends Component {
       },
     };
     axios
-      .get('/vevo/1hop/', options)
+      .get('/vevo/1hop_song/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -265,15 +227,7 @@ export default class AnalyticsDashboard1 extends Component {
                     <TabContent activeTab={this.state.activeTab1}>
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
-                          <ExampleChart
-                            title={this.state.title}
-                            level1={this.state.level1}
-                            level2={this.state.level2}
-                            level3={this.state.level3}
-                            linksArr1={this.state.linksArr1}
-                            linksArr2={this.state.linksArr2}
-                            linksArr3={this.state.linksArr3}
-                          />
+                          <GenreBubbles root={this.state.root} />
                         </div>
                       </TabPane>
                       <TabPane tabId="22">

@@ -71,7 +71,6 @@ const data2 = [
 
 export default class AnalyticsDashboard1 extends Component {
   constructor(props) {
-    console.log('here');
     super(props);
 
     this.state = {
@@ -158,7 +157,7 @@ export default class AnalyticsDashboard1 extends Component {
       },
     };
     axios
-      .get('/vevo/1hop/', options)
+      .get('/vevo/1hop_song/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({

@@ -4,8 +4,6 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
 import ExampleChart from '../../../../components/SongExample';
-import GenreEgo from '../../../../components/GenreExample';
-import ArtistEgo from '../../../../components/ArtistExample';
 
 import {
   Row,
@@ -73,7 +71,6 @@ const data2 = [
 
 export default class AnalyticsDashboard1 extends Component {
   constructor(props) {
-    console.log('here');
     super(props);
 
     this.state = {
@@ -128,7 +125,7 @@ export default class AnalyticsDashboard1 extends Component {
       },
     };
     axios
-      .get('/vevo/1hop/', options)
+      .get('/vevo/1hop_song/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -172,7 +169,7 @@ export default class AnalyticsDashboard1 extends Component {
       },
     };
     axios
-      .get('/vevo/1hop/', options)
+      .get('/vevo/1hop_song/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
