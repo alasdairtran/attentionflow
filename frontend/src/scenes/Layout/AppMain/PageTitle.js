@@ -37,9 +37,6 @@ class PageTitle extends Component {
               </div>
             </div>
           </div>
-          <div className="page-title-actions">
-            <TitleComponent2 />
-          </div>
         </div>
       </div>
     );

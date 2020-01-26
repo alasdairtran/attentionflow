@@ -10599,7 +10599,14 @@ button,
 .app-header__logo .logo-src {
   height: 23px;
   width: 97px;
-  background: url('./utils/images/logo-inverse.png');
+  background: url('./utils/images/logo.png');
+}
+.app-header__logo .logo-name {
+  height: 23px;
+  width: 97px;
+  font-weight: bold;
+  font-family: Menlo;
+  color: #ffffff;
 }
 
 .app-header__menu,

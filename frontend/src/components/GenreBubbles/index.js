@@ -55,7 +55,7 @@ class GenreBubbles extends Component {
             },
           ],
         },
-        { name: 'Performing_arts', children: [] },
+        // { name: 'Performing_arts', children: [] },
         {
           name: 'Jazz',
           children: [
@@ -396,7 +396,7 @@ class GenreBubbles extends Component {
             },
           ],
         },
-        { name: 'Entertainment', children: [] },
+        // { name: 'Entertainment', children: [] },
         {
           name: 'Christian_music',
           children: [
@@ -469,7 +469,7 @@ class GenreBubbles extends Component {
             },
           ],
         },
-        { name: 'Film', children: [] },
+        // { name: 'Film', children: [] },
         {
           name: 'Country_music',
           children: [
@@ -2171,13 +2171,13 @@ class GenreBubbles extends Component {
       .range(['hsl(152,80%,80%)', 'hsl(228,30%,40%)'])
       .interpolate(d3.interpolateHcl);
 
-    let diameter = oWidth / 2;
+    let diameter = oWidth;
 
     let svg = d3
       .select(this.refs.canvas)
       .append('svg')
       .attr('width', oWidth)
-      .attr('height', diameter + 20)
+      .attr('height', diameter + 50)
       .attr('class', 'bubble');
 
     let g = svg
@@ -2190,7 +2190,7 @@ class GenreBubbles extends Component {
     let pack = d3
       .pack()
       .size([diameter, diameter])
-      .padding(2);
+      .padding(3);
 
     root = d3
       .hierarchy(root)
@@ -2218,6 +2218,7 @@ class GenreBubbles extends Component {
           : 'node node--root';
       })
       .style('fill', function(d) {
+        if (d == root) return 'transparent';
         return d.children ? color(d.depth) : null;
       })
       .on('click', function(d) {
@@ -2234,8 +2235,8 @@ class GenreBubbles extends Component {
       .style('cursor', 'pointer')
       .style('stroke', 'black')
       .style('stroke-width', '0px')
-      .on('mouseover', function() {
-        d3.select(this).style('stroke-width', '1.5px');
+      .on('mouseover', function(d) {
+        if (d !== root) d3.select(this).style('stroke-width', '1.5px');
       })
       .on('mouseleave', function() {
         d3.select(this).style('stroke-width', '0px');
@@ -2259,7 +2260,7 @@ class GenreBubbles extends Component {
 
     let node = g.selectAll('circle,text');
 
-    svg.style('background', color(-1)).on('click', function() {
+    svg.style('background', 'transparent').on('click', function() {
       zoom(root);
     });
 
