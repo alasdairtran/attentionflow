@@ -63,7 +63,7 @@ class BarChart extends Component {
       .style('visibility', 'hidden')
       .on('click', () => tooltip.style('visibility', 'hidden').html(''));
 
-    const canvasHeight = oWidth / 2;
+    const canvasHeight = oWidth * 0.6;
     const canvasWidth = oWidth;
     const verticalMargin = 30;
     const svg = d3
@@ -117,15 +117,19 @@ class BarChart extends Component {
       .domain([minViews, maxViews])
       .range([minRadius, maxRadius]);
 
+    const nodeScale = 4;
     const colourList = nodeSet.map(d => d[2]);
-    const minColour = '#c38aff';
-    const maxColour = '#5600b0';
+    // const minColour = '#c38aff';
+    // const maxColour = '#5600b0';
     const minInDegree = d3.min(colourList);
     const maxInDegree = d3.max(colourList);
     const colourScale = d3
-      .scaleLinear()
-      .domain([minInDegree, maxInDegree])
-      .range([minColour, maxColour]);
+      .scaleSequential(d3.interpolateYlGnBu)
+      .domain([minInDegree, maxInDegree + 5]);
+    // const colourScale = d3
+    //   .scaleLinear()
+    //   .domain([minInDegree, maxInDegree])
+    //   .range([minColour, maxColour]);
 
     const nodes = nodeSet.map(video => ({
       id: video[0],
@@ -201,21 +205,22 @@ class BarChart extends Component {
         d3
           .forceLink(links)
           .id(d => d.id)
-          .strength(0.1)
+          .strength(0.3)
       )
       .force(
         'collide',
         d3
           .forceCollide()
           .radius(function(d) {
-            return d.radius + 1.5;
+            return nodeScale * d.radius + 10;
           })
           .iterations(2)
       )
-      .force('charge', d3.forceManyBody().strength(-200))
-      .force('center', d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
-      .force('x', d3.forceX(0.0002))
-      .force('y', d3.forceY(0.0001));
+      .force('charge', d3.forceManyBody().strength(-1000))
+      .force(
+        'center',
+        d3.forceCenter((canvasWidth - 100) / 2, canvasHeight / 2)
+      );
 
     const link = svg
       .append('g')
@@ -224,7 +229,7 @@ class BarChart extends Component {
       .selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke-width', d => d.value);
+      .attr('stroke-width', d => 3 * d.value);
 
     const node = svg
       .append('g')
@@ -236,19 +241,24 @@ class BarChart extends Component {
     node
       .append('circle')
       .call(drag(simulation))
-      .attr('r', d => 2 * d.radius)
-      .attr('fill', d => d.colour);
+      .attr('r', d => nodeScale * d.radius)
+      .attr('fill', d => d.colour)
+      .attr('stroke', '#ccc')
+      .attr('stroke-width', 3);
 
     node.append('title').text(d => d.id);
 
     node
       .append('text')
+      .call(drag(simulation))
       .text(function(d) {
         return d.id;
       })
-      .attr('x', 6)
+      .attr('x', function(d) {
+        return -2.5 * (1 + d.id.length);
+      })
       .attr('y', 3)
-      .style('font-size', '10px');
+      .style('font-size', '12px');
 
     node.on('click', d => {
       node.remove();
@@ -267,15 +277,27 @@ class BarChart extends Component {
     });
 
     simulation.on('tick', () => {
+      node
+        .attr('cx', function(d) {
+          return (d.x = Math.max(
+            nodeScale * d.radius + 20,
+            Math.min(canvasWidth - 20 - nodeScale * d.radius, d.x)
+          ));
+        })
+        .attr('cy', function(d) {
+          return (d.y = Math.max(
+            nodeScale * d.radius + 20,
+            Math.min(canvasHeight - 20 - nodeScale * d.radius, d.y)
+          ));
+        })
+        .attr('transform', function(d) {
+          return 'translate(' + d.x + ',' + d.y + ')';
+        });
       link
         .attr('x1', d => d.source.x)
         .attr('y1', d => d.source.y)
         .attr('x2', d => d.target.x)
         .attr('y2', d => d.target.y);
-
-      node.attr('transform', function(d) {
-        return 'translate(' + d.x + ',' + d.y + ')';
-      });
     });
 
     node.on('mouseover', function(d) {

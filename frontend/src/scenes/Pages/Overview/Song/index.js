@@ -207,11 +207,6 @@ export default class AnalyticsDashboard1 extends Component {
           transitionLeave={false}
         >
           <div>
-            <PageTitle
-              heading="vevoviz"
-              subheading="An interactive visualisation exploring how YouTube music videos drive attention to each other."
-              icon="pe-7s-car icon-gradient bg-mean-fruit"
-            />
             <button
               type="submit"
               className="btn btn-sm btn-primary"

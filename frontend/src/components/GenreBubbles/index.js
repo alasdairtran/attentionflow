@@ -2165,11 +2165,12 @@ class GenreBubbles extends Component {
       ],
     };
 
-    let color = d3
-      .scaleLinear()
-      .domain([-1, 5])
-      .range(['hsl(152,80%,80%)', 'hsl(228,30%,40%)'])
-      .interpolate(d3.interpolateHcl);
+    let color = d3.scaleSequential(d3.interpolateGnBu).domain([-1, 5]);
+    // let color = d3
+    //   .scaleLinear()
+    //   .domain([-1, 5])
+    //   .range(['hsl(152,80%,80%)', 'hsl(228,30%,40%)'])
+    //   .interpolate(d3.interpolateHcl);
 
     let diameter = oWidth;
 
