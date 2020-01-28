@@ -32,9 +32,7 @@ const drag = simulation => {
 class BarChart extends Component {
   componentDidMount() {
     let oWidth = document.getElementById('graphContainer').offsetWidth;
-    if (this.props.search !== true) {
-      this.drawBarChart(oWidth);
-    }
+    this.drawBarChart(oWidth);
   }
 
   drawBarChart(oWidth) {

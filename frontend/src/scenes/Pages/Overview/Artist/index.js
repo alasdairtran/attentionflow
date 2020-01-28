@@ -4,6 +4,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
 import ArtistExample from '../../../../components/ArtistExample';
+import SongExample from '../../../../components/SongExample';
 
 import {
   Row,
@@ -87,6 +88,7 @@ export default class AnalyticsDashboard1 extends Component {
       linksArr1: [],
       linksArr2: [],
       linksArr3: [],
+      search: false,
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -94,6 +96,7 @@ export default class AnalyticsDashboard1 extends Component {
 
   componentDidMount() {
     document.body.classList.add('bg-light');
+    this.fetchExample();
   }
 
   toggle() {
@@ -111,7 +114,6 @@ export default class AnalyticsDashboard1 extends Component {
   }
 
   fetchExample = e => {
-    e.preventDefault();
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = {
       params: {
@@ -139,6 +141,7 @@ export default class AnalyticsDashboard1 extends Component {
             linksArr1: res.data.linksArr1,
             linksArr2: res.data.linksArr2,
             linksArr3: res.data.linksArr3,
+            search: false,
           });
         }
       })
@@ -175,6 +178,7 @@ export default class AnalyticsDashboard1 extends Component {
             linksArr1: res.data.linksArr1,
             linksArr2: res.data.linksArr2,
             linksArr3: res.data.linksArr3,
+            search: true,
           });
         }
       })
@@ -195,14 +199,6 @@ export default class AnalyticsDashboard1 extends Component {
           transitionLeave={false}
         >
           <div>
-            <button
-              type="submit"
-              className="btn btn-sm btn-primary"
-              onClick={this.fetchExample}
-              disabled={this.state.isLoading}
-            >
-              {this.state.isLoading ? 'Fetching data...' : 'Get an example'}
-            </button>
             <button
               id="display"
               hidden="hidden"
@@ -260,15 +256,27 @@ export default class AnalyticsDashboard1 extends Component {
                     <TabContent activeTab={this.state.activeTab1}>
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
-                          <ArtistExample
-                            title={this.state.title}
-                            level1={this.state.level1}
-                            level2={this.state.level2}
-                            level3={this.state.level3}
-                            linksArr1={this.state.linksArr1}
-                            linksArr2={this.state.linksArr2}
-                            linksArr3={this.state.linksArr3}
-                          />
+                          {!this.state.search ? (
+                            <ArtistExample
+                              title={this.state.title}
+                              level1={this.state.level1}
+                              level2={this.state.level2}
+                              level3={this.state.level3}
+                              linksArr1={this.state.linksArr1}
+                              linksArr2={this.state.linksArr2}
+                              linksArr3={this.state.linksArr3}
+                            />
+                          ) : (
+                            <SongExample
+                              title={this.state.title}
+                              level1={this.state.level1}
+                              level2={this.state.level2}
+                              level3={this.state.level3}
+                              linksArr1={this.state.linksArr1}
+                              linksArr2={this.state.linksArr2}
+                              linksArr3={this.state.linksArr3}
+                            />
+                          )}
                         </div>
                       </TabPane>
                       <TabPane tabId="22">

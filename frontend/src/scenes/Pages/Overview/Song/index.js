@@ -3,7 +3,7 @@ import axios from 'axios';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
-import ExampleChart from '../../../../components/SongExample';
+import SongExample from '../../../../components/SongExample';
 
 import {
   Row,
@@ -87,12 +87,7 @@ export default class AnalyticsDashboard1 extends Component {
       linksArr1: [],
       linksArr2: [],
       linksArr3: [],
-      genres: [],
-      genreLinks: [],
-      artists: [],
-      artistLinks: [],
-      songs: [],
-      songLinks: [],
+      search: false,
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -100,6 +95,7 @@ export default class AnalyticsDashboard1 extends Component {
 
   componentDidMount() {
     document.body.classList.add('bg-light');
+    this.fetchExample();
   }
 
   toggle() {
@@ -117,8 +113,12 @@ export default class AnalyticsDashboard1 extends Component {
   }
 
   fetchExample = e => {
-    e.preventDefault();
-    this.setState({ isLoaded: false, isLoading: true, hasError: false });
+    this.setState({
+      isLoaded: false,
+      isLoading: true,
+      hasError: false,
+      search: false,
+    });
     const options = {
       params: {
         title: 'Adele - Hello',
@@ -145,12 +145,6 @@ export default class AnalyticsDashboard1 extends Component {
             linksArr1: res.data.linksArr1,
             linksArr2: res.data.linksArr2,
             linksArr3: res.data.linksArr3,
-            genres: res.data.genres,
-            genreLinks: res.data.genreLinks,
-            artists: res.data.artists,
-            artistLinks: res.data.artistLinks,
-            songs: res.data.songs,
-            songLinks: res.data.songLinks,
           });
         }
       })
@@ -178,6 +172,7 @@ export default class AnalyticsDashboard1 extends Component {
           });
         } else {
           this.setState({
+            search: true,
             isLoaded: true,
             isLoading: false,
             title: res.data.title,
@@ -207,14 +202,6 @@ export default class AnalyticsDashboard1 extends Component {
           transitionLeave={false}
         >
           <div>
-            <button
-              type="submit"
-              className="btn btn-sm btn-primary"
-              onClick={this.fetchExample}
-              disabled={this.state.isLoading}
-            >
-              {this.state.isLoading ? 'Fetching data...' : 'Get an example'}
-            </button>
             <button
               id="display"
               hidden="hidden"
@@ -272,21 +259,27 @@ export default class AnalyticsDashboard1 extends Component {
                     <TabContent activeTab={this.state.activeTab1}>
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
-                          <ExampleChart
-                            title={this.state.title}
-                            level1={this.state.level1}
-                            level2={this.state.level2}
-                            level3={this.state.level3}
-                            linksArr1={this.state.linksArr1}
-                            linksArr2={this.state.linksArr2}
-                            linksArr3={this.state.linksArr3}
-                            genres={this.state.genres}
-                            genreLinks={this.state.genreLinks}
-                            artists={this.state.artists}
-                            artistLinks={this.state.artistLinks}
-                            songs={this.state.songs}
-                            songLinks={this.state.songLinks}
-                          />
+                          {!this.state.search ? (
+                            <SongExample
+                              title={this.state.title}
+                              level1={this.state.level1}
+                              level2={this.state.level2}
+                              level3={this.state.level3}
+                              linksArr1={this.state.linksArr1}
+                              linksArr2={this.state.linksArr2}
+                              linksArr3={this.state.linksArr3}
+                            />
+                          ) : (
+                            <SongExample
+                              title={this.state.title}
+                              level1={this.state.level1}
+                              level2={this.state.level2}
+                              level3={this.state.level3}
+                              linksArr1={this.state.linksArr1}
+                              linksArr2={this.state.linksArr2}
+                              linksArr3={this.state.linksArr3}
+                            />
+                          )}
                         </div>
                       </TabPane>
                       <TabPane tabId="22">

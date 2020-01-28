@@ -99,6 +99,7 @@ export default class AnalyticsDashboard1 extends Component {
 
   componentDidMount() {
     document.body.classList.add('bg-light');
+    this.fetchExample();
   }
 
   toggle() {
@@ -116,7 +117,6 @@ export default class AnalyticsDashboard1 extends Component {
   }
 
   fetchExample = e => {
-    e.preventDefault();
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = {};
     axios
@@ -194,14 +194,6 @@ export default class AnalyticsDashboard1 extends Component {
         >
           <div>
             <button
-              type="submit"
-              className="btn btn-sm btn-primary"
-              onClick={this.fetchExample}
-              disabled={this.state.isLoading}
-            >
-              {this.state.isLoading ? 'Fetching data...' : 'Get an example'}
-            </button>
-            <button
               id="display"
               hidden="hidden"
               onClick={this.display}
@@ -258,21 +250,22 @@ export default class AnalyticsDashboard1 extends Component {
                     <TabContent activeTab={this.state.activeTab1}>
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
-                          <GenreExample
-                            search={this.state.search}
-                            genres={this.state.genres}
-                            genreLinks={this.state.genreLinks}
-                          />
-                          <SongExample
-                            search={this.state.search}
-                            title={this.state.title}
-                            level1={this.state.level1}
-                            level2={this.state.level2}
-                            level3={this.state.level3}
-                            linksArr1={this.state.linksArr1}
-                            linksArr2={this.state.linksArr2}
-                            linksArr3={this.state.linksArr3}
-                          />
+                          {!this.state.search ? (
+                            <GenreExample
+                              genres={this.state.genres}
+                              genreLinks={this.state.genreLinks}
+                            />
+                          ) : (
+                            <SongExample
+                              title={this.state.title}
+                              level1={this.state.level1}
+                              level2={this.state.level2}
+                              level3={this.state.level3}
+                              linksArr1={this.state.linksArr1}
+                              linksArr2={this.state.linksArr2}
+                              linksArr3={this.state.linksArr3}
+                            />
+                          )}
                         </div>
                       </TabPane>
                       <TabPane tabId="22">

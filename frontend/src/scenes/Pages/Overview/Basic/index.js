@@ -41,6 +41,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import SongExample from '../../../../components/SongExample';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -81,6 +82,14 @@ export default class AnalyticsDashboard1 extends Component {
       hasError: false,
       errorMessage: '',
       root: {},
+      search: false,
+      title: [],
+      level1: [],
+      level2: [],
+      level3: [],
+      linksArr1: [],
+      linksArr2: [],
+      linksArr3: [],
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -88,6 +97,7 @@ export default class AnalyticsDashboard1 extends Component {
 
   componentDidMount() {
     document.body.classList.add('bg-light');
+    this.fetchExample();
   }
 
   toggle() {
@@ -105,8 +115,12 @@ export default class AnalyticsDashboard1 extends Component {
   }
 
   fetchExample = e => {
-    e.preventDefault();
-    this.setState({ isLoaded: true, isLoading: false, hasError: false });
+    this.setState({
+      isLoaded: true,
+      isLoading: false,
+      hasError: false,
+      search: false,
+    });
   };
 
   // For search box
@@ -137,6 +151,7 @@ export default class AnalyticsDashboard1 extends Component {
             linksArr1: res.data.linksArr1,
             linksArr2: res.data.linksArr2,
             linksArr3: res.data.linksArr3,
+            search: true,
           });
         }
       })
@@ -157,6 +172,11 @@ export default class AnalyticsDashboard1 extends Component {
           transitionLeave={false}
         >
           <div>
+            <button
+              id="display"
+              hidden="hidden"
+              onClick={this.display}
+            ></button>
             <PageTitle
               heading="vevoviz"
               subheading="An interactive visualisation exploring how YouTube music videos drive attention to each other."
@@ -165,7 +185,19 @@ export default class AnalyticsDashboard1 extends Component {
             <Row>
               <Col md="9" lg="9">
                 <div id="graphContainer">
-                  <GenreBubbles root={this.state.root} />
+                  {!this.state.search ? (
+                    <GenreBubbles root={this.state.root} />
+                  ) : (
+                    <SongExample
+                      title={this.state.title}
+                      level1={this.state.level1}
+                      level2={this.state.level2}
+                      level3={this.state.level3}
+                      linksArr1={this.state.linksArr1}
+                      linksArr2={this.state.linksArr2}
+                      linksArr3={this.state.linksArr3}
+                    />
+                  )}
                 </div>
               </Col>
               <Col md="3" lg="3">
