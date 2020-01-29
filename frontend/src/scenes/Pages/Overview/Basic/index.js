@@ -78,7 +78,7 @@ export default class AnalyticsDashboard1 extends Component {
       dropdownOpen: false,
       activeTab1: '11',
       isLoaded: false,
-      isLoading: false,
+      isLoading: true,
       hasError: false,
       errorMessage: '',
       root: {},
@@ -185,7 +185,19 @@ export default class AnalyticsDashboard1 extends Component {
             <Row>
               <Col md="9" lg="9">
                 <div id="graphContainer">
-                  {!this.state.search ? (
+                  {this.state.isLoading ? (
+                    <div
+                      style={{
+                        width: '50px',
+                        height: '50px',
+                        border: '10px solid #f3f3f3',
+                        borderRadius: '50%',
+                        borderTop: '10px solid #3498db',
+                        animation: 'spin 2s linear infinite',
+                        margin: '100px auto',
+                      }}
+                    />
+                  ) : !this.state.search ? (
                     <GenreBubbles root={this.state.root} />
                   ) : (
                     <SongEgo
