@@ -4,6 +4,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
 import GenreBubbles from '../../../../components/GenreBubbles';
+import SongEgo from '../../../../components/SongEgo';
 
 import {
   Row,
@@ -41,7 +42,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import SongExample from '../../../../components/SongExample';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -188,7 +188,7 @@ export default class AnalyticsDashboard1 extends Component {
                   {!this.state.search ? (
                     <GenreBubbles root={this.state.root} />
                   ) : (
-                    <SongExample
+                    <SongEgo
                       title={this.state.title}
                       level1={this.state.level1}
                       level2={this.state.level2}

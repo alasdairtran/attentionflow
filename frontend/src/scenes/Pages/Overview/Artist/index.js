@@ -3,8 +3,8 @@ import axios from 'axios';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
-import ArtistExample from '../../../../components/ArtistExample';
-import SongExample from '../../../../components/SongExample';
+import ArtistTop50 from '../../../../components/ArtistTop50';
+import SongEgo from '../../../../components/SongEgo';
 
 import {
   Row,
@@ -121,7 +121,7 @@ export default class AnalyticsDashboard1 extends Component {
       },
     };
     axios
-      .get('/vevo/1hop_artist/', options)
+      .get('/vevo/top_50_artists/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -134,13 +134,8 @@ export default class AnalyticsDashboard1 extends Component {
           this.setState({
             isLoaded: true,
             isLoading: false,
-            title: res.data.title,
-            level1: res.data.level1,
-            level2: res.data.level2,
-            level3: res.data.level3,
-            linksArr1: res.data.linksArr1,
-            linksArr2: res.data.linksArr2,
-            linksArr3: res.data.linksArr3,
+            artists: res.data.artists,
+            links: res.data.links,
             search: false,
           });
         }
@@ -257,17 +252,12 @@ export default class AnalyticsDashboard1 extends Component {
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
                           {!this.state.search ? (
-                            <ArtistExample
-                              title={this.state.title}
-                              level1={this.state.level1}
-                              level2={this.state.level2}
-                              level3={this.state.level3}
-                              linksArr1={this.state.linksArr1}
-                              linksArr2={this.state.linksArr2}
-                              linksArr3={this.state.linksArr3}
+                            <ArtistTop50
+                              artists={this.state.artists}
+                              links={this.state.links}
                             />
                           ) : (
-                            <SongExample
+                            <SongEgo
                               title={this.state.title}
                               level1={this.state.level1}
                               level2={this.state.level2}

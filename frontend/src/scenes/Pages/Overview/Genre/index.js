@@ -3,8 +3,8 @@ import axios from 'axios';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
-import GenreExample from '../../../../components/GenreExample';
-import SongExample from '../../../../components/SongExample';
+import GenreNetwork from '../../../../components/GenreNetwork';
+import SongEgo from '../../../../components/SongEgo';
 
 import {
   Row,
@@ -42,7 +42,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ArtistExample from '../../../../components/ArtistExample';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -251,12 +250,12 @@ export default class AnalyticsDashboard1 extends Component {
                       <TabPane tabId="11">
                         <div id="graphContainer" className="col-md-12">
                           {!this.state.search ? (
-                            <GenreExample
+                            <GenreNetwork
                               genres={this.state.genres}
                               genreLinks={this.state.genreLinks}
                             />
                           ) : (
-                            <SongExample
+                            <SongEgo
                               title={this.state.title}
                               level1={this.state.level1}
                               level2={this.state.level2}

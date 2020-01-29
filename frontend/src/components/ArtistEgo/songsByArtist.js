@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 
-import { getSongInfo } from '../SongExample/popout';
+import { getSongInfo } from '../SongEgo/popout';
 
 export function getSongsByArtist(
   artist,
