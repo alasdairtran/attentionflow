@@ -37,16 +37,36 @@ class BarChart extends Component {
   }
 
   drawSongExample(oWidth) {
-    let title = this.props.title;
-    let level1 = this.props.level1 === undefined ? [] : this.props.level1;
-    let level2 = this.props.level2 === undefined ? [] : this.props.level2;
-    let level3 = this.props.level3 === undefined ? [] : this.props.level3;
-    let linksArr1 =
-      this.props.linksArr1 === undefined ? [] : this.props.linksArr1;
-    let linksArr2 =
-      this.props.linksArr2 === undefined ? [] : this.props.linksArr2;
-    let linksArr3 =
-      this.props.linksArr3 === undefined ? [] : this.props.linksArr3;
+    let nodesArr = this.props.videos;
+    let linksArr = this.props.links.filter(link => link[2] !== null);
+    let len = linksArr.length;
+    let filteredLinksArr = [];
+    for (let i = 0; i < len; i++) {
+      let checking = linksArr.shift();
+      let duplicate = false;
+      for (let j = 0; j < linksArr.length; j++) {
+        if (checking[0] === linksArr[j][0] && checking[1] === linksArr[j][1]) {
+          duplicate = true;
+          break;
+        }
+      }
+      if (!duplicate) {
+        let found = false;
+        for (let j = 0; j < filteredLinksArr.length; j++) {
+          if (
+            checking[0] === filteredLinksArr[j][1] &&
+            checking[1] === filteredLinksArr[j][0]
+          ) {
+            filteredLinksArr[j][2] += checking[2];
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          filteredLinksArr.push(checking);
+        }
+      }
+    }
 
     const canvasHeight = oWidth / 2;
     const canvasWidth = oWidth;
@@ -58,32 +78,7 @@ class BarChart extends Component {
       .attr('width', canvasWidth)
       .attr('height', canvasHeight);
 
-    let nodeSet = level1.concat(level2, level3);
-    nodeSet.push(title);
-    nodeSet = nodeSet.map(video => [video[0], video[1], video[2], video[3]]);
-    let nodeTitles = nodeSet.map(video => video[0]);
-    nodeSet = nodeSet.filter(
-      (node, index) => nodeTitles.indexOf(node[0]) === index
-    );
-
-    let filteredLinksArr1 = linksArr1.filter(video =>
-      nodeTitles.includes(video[1])
-    );
-
-    let filteredLinksArr2 = linksArr2.filter(video =>
-      nodeTitles.includes(video[1])
-    );
-    let filteredLinksArr3 = linksArr3.filter(video =>
-      nodeTitles.includes(video[1])
-    );
-
-    const strokeList = level1
-      .map(d => d[4])
-      .concat(
-        filteredLinksArr1.map(d => d[2]),
-        filteredLinksArr2.map(d => d[2]),
-        filteredLinksArr3.map(d => d[2])
-      );
+    const strokeList = filteredLinksArr.map(link => link[2]);
     const minStroke = 0.5;
     const maxStroke = 5;
     const minWeight = d3.min(strokeList);
@@ -93,7 +88,7 @@ class BarChart extends Component {
       .domain([minWeight, maxWeight])
       .range([minStroke, maxStroke]);
 
-    const radiusList = nodeSet.map(d => d[1]);
+    const radiusList = nodesArr.map(node => node[1]);
     const maxRadius = 15;
     const minRadius = 3;
     const minViews = d3.min(radiusList);
@@ -104,93 +99,24 @@ class BarChart extends Component {
       .range([minRadius, maxRadius]);
 
     const nodeScale = 4;
-    const colourList = nodeSet.map(d => d[2]);
-    // const minColour = '#c38aff';
-    // const maxColour = '#5600b0';
+    const colourList = nodesArr.map(node => node[2]);
     const minInDegree = d3.min(colourList);
     const maxInDegree = d3.max(colourList);
     const colourScale = d3
       .scaleSequential(d3.interpolatePuBu)
       .domain([minInDegree, maxInDegree + 5]);
-    // const colourScale = d3
-    //   .scaleLinear()
-    //   .domain([minInDegree, maxInDegree])
-    //   .range([minColour, maxColour]);
 
-    const nodes = nodeSet.map(video => ({
-      id: video[0],
-      radius: radiusScale(video[1]),
-      colour: colourScale(video[2]),
+    const nodes = nodesArr.map(node => ({
+      id: node[0],
+      radius: radiusScale(node[1]),
+      colour: colourScale(node[2]),
     }));
 
-    let links = filteredLinksArr1.map(video => ({
-      source: video[0],
-      target: video[1],
-      value: strokeScale(video[2]),
+    let links = filteredLinksArr.map(link => ({
+      source: link[0],
+      target: link[1],
+      value: strokeScale(link[2]),
     }));
-
-    links.push(
-      ...level1.map(video => ({
-        source: video[0],
-        target: title[0],
-        value: strokeScale(video[3]),
-      }))
-    );
-
-    links.push(
-      ...filteredLinksArr2.map(video => ({
-        source: video[1],
-        target: video[0],
-        value: strokeScale(video[2]),
-      }))
-    );
-
-    links.push(
-      ...filteredLinksArr3.map(video => ({
-        source: video[1],
-        target: video[0],
-        value: strokeScale(video[2]),
-      }))
-    );
-
-    let setLinks = [];
-    let loops = links.length;
-    for (let i = 0; i < loops; i++) {
-      let found = false;
-      let checking = links.shift();
-      for (let j = 0; j < links.length; j++) {
-        if (
-          ((links[j].source === checking.source &&
-            links[j].target === checking.target) ||
-            (links[j].source === checking.target &&
-              links[j].target === checking.source)) &&
-          links[j].value === checking.value
-        ) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        let found2 = false;
-        for (let j = 0; j < setLinks.length; j++) {
-          if (
-            (setLinks[j].source === checking.source &&
-              setLinks[j].target === checking.target) ||
-            (setLinks[j].source === checking.target &&
-              setLinks[j].target === checking.source)
-          ) {
-            found2 = true;
-            setLinks[j].value += checking.value;
-            break;
-          }
-        }
-        if (!found2) {
-          setLinks.push(checking);
-        }
-      }
-    }
-
-    links = setLinks;
 
     const simulation = d3
       .forceSimulation(nodes)

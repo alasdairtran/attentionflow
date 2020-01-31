@@ -81,15 +81,9 @@ export default class AnalyticsDashboard1 extends Component {
       isLoading: true,
       hasError: false,
       errorMessage: '',
-      title: [],
-      level1: [],
-      level2: [],
-      level3: [],
-      linksArr1: [],
-      linksArr2: [],
-      linksArr3: [],
       songs: [],
       links: [],
+      videos: [],
       search: false,
     };
     this.toggle = this.toggle.bind(this);
@@ -146,7 +140,7 @@ export default class AnalyticsDashboard1 extends Component {
   // For search box
   display = d => {
     d.preventDefault();
-    this.setState({ isLoaded: false, hasError: false });
+    this.setState({ isLoaded: false, hasError: false, isLoading: true });
     const options = {
       params: {
         title: document.getElementById('search-text').value,
@@ -164,13 +158,8 @@ export default class AnalyticsDashboard1 extends Component {
           this.setState({
             isLoaded: true,
             isLoading: false,
-            title: res.data.title,
-            level1: res.data.level1,
-            level2: res.data.level2,
-            level3: res.data.level3,
-            linksArr1: res.data.linksArr1,
-            linksArr2: res.data.linksArr2,
-            linksArr3: res.data.linksArr3,
+            videos: res.data.videos,
+            links: res.data.links,
             search: true,
           });
         }
@@ -266,13 +255,8 @@ export default class AnalyticsDashboard1 extends Component {
                           />
                         ) : (
                           <SongEgo
-                            title={this.state.title}
-                            level1={this.state.level1}
-                            level2={this.state.level2}
-                            level3={this.state.level3}
-                            linksArr1={this.state.linksArr1}
-                            linksArr2={this.state.linksArr2}
-                            linksArr3={this.state.linksArr3}
+                            videos={this.state.videos}
+                            links={this.state.links}
                           />
                         )}
                       </div>

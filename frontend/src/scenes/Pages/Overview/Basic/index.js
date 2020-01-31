@@ -83,13 +83,8 @@ export default class AnalyticsDashboard1 extends Component {
       errorMessage: '',
       root: {},
       search: false,
-      title: [],
-      level1: [],
-      level2: [],
-      level3: [],
-      linksArr1: [],
-      linksArr2: [],
-      linksArr3: [],
+      links: [],
+      videos: [],
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -115,18 +110,132 @@ export default class AnalyticsDashboard1 extends Component {
   }
 
   fetchExample = e => {
-    this.setState({
-      isLoaded: true,
-      isLoading: false,
-      hasError: false,
-      search: false,
-    });
+    this.setState({ isLoaded: false, isLoading: true, hasError: false });
+    let options = {};
+    let genreObjects = [];
+    let root;
+    let finished = false;
+    let finishedGenres = false;
+    let finishedArtists = false;
+    let finishedSongs = false;
+    let totalSongs = 0;
+    axios
+      .get('/vevo/genre_bubbles/', options)
+      .then(res => {
+        if (res.data.error) {
+          console.log('error');
+        } else {
+          let genres = res.data.genres;
+          genres.forEach(function(genre, index) {
+            finishedArtists = false;
+            let artistObjects = [];
+            options = {
+              params: {
+                genre: genre,
+              },
+            };
+            axios
+              .get('vevo/genre_top_artists/', options)
+              .then(res => {
+                if (res.data.error) {
+                  console.log('error');
+                } else {
+                  let artists = res.data.artists;
+                  let artistPromises = [];
+                  artists.forEach(function(artistList, index) {
+                    finishedSongs = false;
+                    if (artistList != null) {
+                      let artist = artistList[0];
+                      if (artist != null) {
+                        let songObjects = [];
+                        options = {
+                          params: {
+                            genre: genre,
+                            artist: artist,
+                            limit: Math.min(
+                              Math.floor(artistList[1] / 1000000000) + 1,
+                              5
+                            ),
+                          },
+                        };
+                        artistPromises.push(
+                          axios
+                            .get('vevo/genre_artist_top_songs/', options)
+                            .then(res => {
+                              if (res.data.error) {
+                                console.log('error');
+                              } else {
+                                let songs = res.data.songs;
+                                songs.forEach(function(song, index) {
+                                  songObjects.push({
+                                    name: song[0],
+                                    size: song[1],
+                                  });
+
+                                  if (index === songs.length - 1) {
+                                    finishedSongs = true;
+                                  }
+                                });
+
+                                artistObjects.push({
+                                  name: artist,
+                                  children: songObjects,
+                                });
+                              }
+                            })
+                            .catch(function(error) {
+                              console.log(error);
+                            })
+                        );
+                      }
+                    }
+                  });
+                  Promise.all(artistPromises).then(() => {
+                    genreObjects.push({
+                      name: genre,
+                      children: artistObjects,
+                    });
+                  });
+                }
+              })
+              .catch(function(error) {
+                console.log(error);
+              });
+          });
+        }
+        root = {
+          name: 'genres',
+          children: genreObjects,
+        };
+
+        let promise = new Promise((resolve, reject) => {
+          function checkFlag() {
+            if (root.children.length !== 19) {
+              window.setTimeout(checkFlag, 100);
+            } else {
+              resolve();
+            }
+          }
+          checkFlag();
+        });
+        promise.then(() =>
+          this.setState({
+            isLoaded: true,
+            isLoading: false,
+            search: false,
+            root: root,
+          })
+        );
+      })
+      .catch(function(error) {
+        console.error(error);
+      });
   };
 
   // For search box
   display = d => {
     d.preventDefault();
-    this.setState({ isLoaded: false, hasError: false });
+    this.setState({ isLoaded: false, hasError: false, isLoading: true });
     const options = {
       params: {
         title: document.getElementById('search-text').value,
@@ -144,13 +253,8 @@ export default class AnalyticsDashboard1 extends Component {
           this.setState({
             isLoaded: true,
             isLoading: false,
-            title: res.data.title,
-            level1: res.data.level1,
-            level2: res.data.level2,
-            level3: res.data.level3,
-            linksArr1: res.data.linksArr1,
-            linksArr2: res.data.linksArr2,
-            linksArr3: res.data.linksArr3,
+            videos: res.data.videos,
+            links: res.data.links,
             search: true,
           });
         }
@@ -201,13 +305,8 @@ export default class AnalyticsDashboard1 extends Component {
                     <GenreBubbles root={this.state.root} />
                   ) : (
                     <SongEgo
-                      title={this.state.title}
-                      level1={this.state.level1}
-                      level2={this.state.level2}
-                      level3={this.state.level3}
-                      linksArr1={this.state.linksArr1}
-                      linksArr2={this.state.linksArr2}
-                      linksArr3={this.state.linksArr3}
+                      videos={this.state.videos}
+                      links={this.state.links}
                     />
                   )}
                 </div>
