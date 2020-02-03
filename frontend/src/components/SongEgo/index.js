@@ -32,6 +32,7 @@ const drag = simulation => {
 
 class BarChart extends Component {
   componentDidMount() {
+    console.log('mounted');
     let oWidth = document.getElementById('graphContainer').offsetWidth;
     this.drawSongExample(oWidth);
   }

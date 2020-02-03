@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
+import SongEgo from '../SongEgo';
+import { getSongEgo } from '../SongEgo/songEgo';
 
 class GenreBubbles extends Component {
   componentDidMount() {
     let oWidth = document.getElementById('graphContainer').offsetWidth;
-    if (this.props.search !== false) {
-      this.drawGenreBubbles(oWidth);
-    }
+    this.drawGenreBubbles(oWidth);
   }
 
   drawGenreBubbles(oWidth) {
@@ -21,7 +21,7 @@ class GenreBubbles extends Component {
       .select(this.refs.canvas)
       .append('svg')
       .attr('width', oWidth)
-      .attr('height', diameter + 50)
+      .attr('height', oWidth)
       .attr('class', 'bubble');
 
     let g = svg
@@ -110,7 +110,29 @@ class GenreBubbles extends Component {
 
     zoomTo([root.x, root.y, root.r * 2]);
 
-    d3.selectAll('.node--leaf').style('fill', 'white');
+    let tooltip = d3
+      .select(this.refs.canvas)
+      .append('div')
+      .style('position', 'absolute')
+      .style('z-index', '100')
+      .style('padding', '10px')
+      .style('background', '#F9F9F9')
+      .style('border', '2px solid black')
+      .style('color', 'black')
+      .style('bottom', '0px')
+      .style('right', '0px')
+      .style('width', '460px')
+      .style('visibility', 'hidden');
+
+    d3.selectAll('.node--leaf')
+      .style('fill', 'white')
+      .on('click', function(d) {
+        console.log(d.data.name);
+        //d3.select('#graphContainer').html('<div style="width:50px;height:50px;border:10px solid #f3f3f3;borderRadius:50%;borderTop:10px solid #3498db;animation:spin 2s linear infinite;margin:100px auto"/>');
+        svg.selectAll('*').remove();
+        getSongEgo(d.data.name, svg, tooltip);
+      });
+
     d3.selectAll('.label')
       .style('pointer-events', 'none')
       .style('text-anchor', 'middle');
