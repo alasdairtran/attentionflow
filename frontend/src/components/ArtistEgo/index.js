@@ -192,7 +192,8 @@ class BarChart extends Component {
         return -2.5 * (1 + d.id.length);
       })
       .attr('y', 3)
-      .style('font-size', '12px');
+      .style('font-size', '12px')
+      .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
     node.on('click', d => {
       node.remove();
@@ -234,12 +235,19 @@ class BarChart extends Component {
         .attr('y2', d => d.target.y);
     });
 
-    node.on('mouseover', function(d) {
-      d3.select(this).style('stroke', 'black');
+    node.on('mouseover', function() {
+      d3.select(this)
+        .style('stroke', 'black')
+        .raise()
+        .select('text')
+        .style('visibility', 'visible');
     });
 
     node.on('mouseleave', function() {
-      d3.select(this).style('stroke', 'none');
+      d3.select(this)
+        .style('stroke', 'none')
+        .select('text')
+        .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
     });
   }
 

@@ -170,7 +170,8 @@ function drawSongsByArtist(
     })
     .attr('x', 6)
     .attr('y', 3)
-    .style('font-size', '10px');
+    .style('font-size', '10px')
+    .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
   simulation.on('tick', () => {
     link
@@ -184,8 +185,18 @@ function drawSongsByArtist(
     });
   });
 
-  node.on('click', d => {
-    tooltip.style('visibility', 'visible');
-    getSongInfo(d, tooltip);
+  node.on('mouseover', function() {
+    d3.select(this)
+      .style('stroke', 'black')
+      .raise()
+      .select('text')
+      .style('visibility', 'visible');
+  });
+
+  node.on('mouseleave', function() {
+    d3.select(this)
+      .style('stroke', 'none')
+      .select('text')
+      .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
   });
 }

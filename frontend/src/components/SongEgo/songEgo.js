@@ -44,7 +44,14 @@ export function getSongEgo(title, svg, tooltip) {
         console.log(res.data.videos);
         console.log(res.data.links);
         let oWidth = document.getElementById('graphContainer').offsetWidth;
-        drawSongEgo(oWidth, res.data.videos, res.data.links, svg, tooltip);
+        drawSongEgo(
+          oWidth,
+          oWidth,
+          res.data.videos,
+          res.data.links,
+          svg,
+          tooltip
+        );
       }
     })
     .catch(function(error) {
@@ -53,7 +60,8 @@ export function getSongEgo(title, svg, tooltip) {
 }
 
 export function drawSongEgo(
-  oWidth,
+  width,
+  height,
   nodesArr,
   linksArrUnfiltered,
   svg,
@@ -89,8 +97,8 @@ export function drawSongEgo(
     }
   }
 
-  const canvasHeight = oWidth;
-  const canvasWidth = oWidth;
+  const canvasHeight = height;
+  const canvasWidth = width;
   const horizontalMargin = canvasWidth / 2 - 100;
   const verticalMargin = 130;
 
@@ -191,7 +199,8 @@ export function drawSongEgo(
       return -2.5 * (1 + d.id.length);
     })
     .attr('y', 3)
-    .style('font-size', '12px');
+    .style('font-size', '12px')
+    .style('visibility', d => (d.radius > 8 ? 'visible' : 'hidden'));
 
   node.on('click', d => {
     tooltip.style('visibility', 'hidden');
@@ -210,7 +219,11 @@ export function drawSongEgo(
   });
 
   node.on('mouseover', function(d) {
-    d3.select(this).style('stroke', 'black');
+    d3.select(this)
+      .style('stroke', 'black')
+      .raise()
+      .select('text')
+      .style('visibility', 'visible');
     tooltip.html('');
     tooltip.style('visibility', 'visible');
     getSongInfo(d, tooltip);
@@ -218,7 +231,10 @@ export function drawSongEgo(
 
   node.on('mouseleave', function() {
     tooltip.style('visibility', 'hidden');
-    d3.select(this).style('stroke', 'none');
+    d3.select(this)
+      .style('stroke', 'none')
+      .select('text')
+      .style('visibility', d => (d.radius > 8 ? 'visible' : 'hidden'));
   });
 
   simulation.on('tick', () => {

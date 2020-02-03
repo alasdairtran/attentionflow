@@ -94,17 +94,11 @@ class BarChart extends Component {
     //No. of songs in genre
     const nodeScale = 5;
     const colourList = genres.map(d => d[1]);
-    // const minColour = '#e4c9ff';
-    // const maxColour = '#5600b0';
     const minInDegree = d3.min(colourList);
     const maxInDegree = d3.max(colourList);
     const colourScale = d3
       .scaleSequential(d3.interpolateRdPu)
       .domain([minInDegree, maxInDegree]);
-    // const colourScale = d3
-    //   .scaleLinear()
-    //   .domain([minInDegree, maxInDegree])
-    //   .range([minColour, maxColour]);
 
     const nodes = genres.map(genre => ({
       id: genre[0],
@@ -179,7 +173,8 @@ class BarChart extends Component {
       })
       .attr('y', 5)
       .style('fill', '#000')
-      .style('font-size', '14px');
+      .style('font-size', '14px')
+      .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
     node.on('click', d => {
       node.remove();
@@ -218,17 +213,22 @@ class BarChart extends Component {
         .attr('x2', d => d.target.x)
         .attr('y2', d => d.target.y);
     });
-  }
 
-  // tick() {
-  //   node.attr("cx", function(d) { return d.x = Math.max(radius, Math.min(width - radius, d.x)); })
-  //       .attr("cy", function(d) { return d.y = Math.max(radius, Math.min(height - radius, d.y)); });
-  //
-  //   link.attr("x1", function(d) { return d.source.x; })
-  //       .attr("y1", function(d) { return d.source.y; })
-  //       .attr("x2", function(d) { return d.target.x; })
-  //       .attr("y2", function(d) { return d.target.y; });
-  // }
+    node.on('mouseover', function() {
+      d3.select(this)
+        .style('stroke', 'black')
+        .raise()
+        .select('text')
+        .style('visibility', 'visible');
+    });
+
+    node.on('mouseleave', function() {
+      d3.select(this)
+        .style('stroke', 'none')
+        .select('text')
+        .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
+    });
+  }
 
   render() {
     return <div ref="canvas"></div>;

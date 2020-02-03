@@ -172,7 +172,8 @@ class BarChart extends Component {
         return -2.5 * (1 + d.id.length);
       })
       .attr('y', 3)
-      .style('font-size', '12px');
+      .style('font-size', '12px')
+      .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
     let tooltip = d3
       .select(this.refs.canvas)
@@ -227,6 +228,21 @@ class BarChart extends Component {
         .attr('y1', d => d.source.y)
         .attr('x2', d => d.target.x)
         .attr('y2', d => d.target.y);
+    });
+
+    node.on('mouseover', function() {
+      d3.select(this)
+        .style('stroke', 'black')
+        .raise()
+        .select('text')
+        .style('visibility', 'visible');
+    });
+
+    node.on('mouseleave', function() {
+      d3.select(this)
+        .style('stroke', 'none')
+        .select('text')
+        .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
     });
   }
 

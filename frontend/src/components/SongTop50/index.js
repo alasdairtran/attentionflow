@@ -172,18 +172,18 @@ class BarChart extends Component {
         return -2.5 * (1 + d.id.length);
       })
       .attr('y', 3)
-      .style('font-size', '12px');
+      .style('font-size', '12px')
+      .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
     let tooltip = d3
       .select(this.refs.canvas)
       .append('div')
       .style('position', 'absolute')
-      .style('z-index', '100')
       .style('padding', '10px')
       .style('background', '#F9F9F9')
       .style('border', '2px solid black')
       .style('color', 'black')
-      .style('top', '0px')
+      .style('top', canvasHeight + 'px')
       .style('right', '0px')
       .style('width', '460px')
       .style('visibility', 'hidden');
@@ -205,7 +205,11 @@ class BarChart extends Component {
     });
 
     node.on('mouseover', function(d) {
-      d3.select(this).style('stroke', 'black');
+      d3.select(this)
+        .style('stroke', 'black')
+        .raise()
+        .select('text')
+        .style('visibility', 'visible');
       tooltip.html('');
       tooltip.style('visibility', 'visible');
       getSongInfo(d, tooltip);
@@ -213,7 +217,10 @@ class BarChart extends Component {
 
     node.on('mouseleave', function() {
       tooltip.style('visibility', 'hidden');
-      d3.select(this).style('stroke', 'none');
+      d3.select(this)
+        .style('stroke', 'none')
+        .select('text')
+        .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
     });
 
     simulation.on('tick', () => {
