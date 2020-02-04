@@ -2,17 +2,45 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 import { getSongInfo } from './popout';
+import { getSongEgo } from './songEgo';
 
-export function getIncomingOutgoing(
-  title,
-  canvasHeight,
-  canvasWidth,
-  verticalMargin,
-  horizontalMargin,
-  drag,
-  tooltip,
-  svg
-) {
+const drag = simulation => {
+  function dragstarted(d) {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+
+  function dragended(d) {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+
+  return d3
+    .drag()
+    .on('start', dragstarted)
+    .on('drag', dragged)
+    .on('end', dragended);
+};
+
+export function getIncomingOutgoing(title, oWidth) {
+  console.log(title);
+  d3.select('#graphContainer2').html('');
+  d3.select('#graphContainer2')
+    .append('div')
+    .style('width', '50px')
+    .style('height', '50px')
+    .style('border', '10px solid #f3f3f3')
+    .style('border-radius', '50%')
+    .style('border-top', '10px solid #3498db')
+    .style('animation', 'spin 2s linear infinite')
+    .style('margin', '100px auto');
   const options = {
     params: {
       title: title,
@@ -27,18 +55,8 @@ export function getIncomingOutgoing(
         let incoming = res.data.incoming;
         let outgoing = res.data.outgoing;
         let central = res.data.title;
-        drawIncomingOutgoing(
-          incoming,
-          outgoing,
-          central,
-          canvasHeight,
-          canvasWidth,
-          verticalMargin,
-          horizontalMargin,
-          drag,
-          tooltip,
-          svg
-        );
+        d3.select('#graphContainer2').html('');
+        drawIncomingOutgoing(incoming, outgoing, central, oWidth);
       }
     })
     .catch(function(error) {
@@ -50,16 +68,34 @@ function drawIncomingOutgoing(
   incomingUnchecked,
   outgoingUnchecked,
   title,
-  canvasHeight,
-  canvasWidth,
-  verticalMargin,
-  horizontalMargin,
-  drag,
-  tooltip,
-  svg
+  oWidth
 ) {
   const incoming = incomingUnchecked[0][0] === null ? [] : incomingUnchecked;
   const outgoing = outgoingUnchecked[0][0] === null ? [] : outgoingUnchecked;
+  const horizontalMargin = 300;
+  const canvasHeight = oWidth / 2;
+  const canvasWidth = oWidth;
+  const verticalMargin = 130;
+  console.log(canvasHeight);
+  const svg = d3
+    .select('#graphContainer2')
+    .append('svg')
+    .attr('width', canvasWidth)
+    .attr('height', canvasHeight);
+
+  let tooltip = d3
+    .select('#graphContainer2')
+    .append('div')
+    .style('position', 'absolute')
+    .style('z-index', '100')
+    .style('padding', '10px')
+    .style('background', '#F9F9F9')
+    .style('border', '2px solid black')
+    .style('color', 'black')
+    .style('left', '0px')
+    .style('bottom', '-350px')
+    .style('width', '460px')
+    .style('visibility', 'hidden');
 
   incoming.sort();
   outgoing.sort();
@@ -166,6 +202,8 @@ function drawIncomingOutgoing(
       })
     );
 
+  console.log(nodes);
+
   const node = svg
     .append('g')
     .selectAll('g')
@@ -193,17 +231,9 @@ function drawIncomingOutgoing(
 
   node.on('click', d => {
     tooltip.style('visibility', 'hidden');
-    node.remove();
-    getIncomingOutgoing(
-      d.id,
-      canvasHeight,
-      canvasWidth,
-      verticalMargin,
-      horizontalMargin,
-      drag,
-      tooltip,
-      svg
-    );
+    svg.remove();
+    getSongEgo(d.id, oWidth);
+    getIncomingOutgoing(d.id, oWidth);
   });
 
   node.on('mouseover', function(d) {
@@ -217,6 +247,58 @@ function drawIncomingOutgoing(
     tooltip.style('visibility', 'hidden');
     d3.select(this).style('stroke', 'none');
   });
+
+  svg
+    .append('text')
+    .text('Incoming')
+    .attr('x', 300)
+    .attr('y', verticalMargin / 2)
+    .attr('text-anchor', 'end');
+
+  svg
+    .append('text')
+    .text('Outgoing')
+    .attr('x', canvasWidth - 300)
+    .attr('y', verticalMargin / 2)
+    .attr('text-anchor', 'start');
+
+  svg
+    .append('polygon')
+    .style('fill', 'grey')
+    .attr(
+      'points',
+      '300,' +
+        verticalMargin +
+        ' 300,' +
+        (canvasHeight - verticalMargin) +
+        ' ' +
+        canvasWidth / 2 +
+        ',' +
+        canvasHeight / 2
+    )
+    .lower()
+    .style('opacity', '20%');
+
+  svg
+    .append('polygon')
+    .style('fill', 'grey')
+    .attr(
+      'points',
+      canvasWidth -
+        300 +
+        ',' +
+        verticalMargin +
+        ' ' +
+        (canvasWidth - 300) +
+        ',' +
+        (canvasHeight - verticalMargin) +
+        ' ' +
+        canvasWidth / 2 +
+        ',' +
+        canvasHeight / 2
+    )
+    .lower()
+    .style('opacity', '20%');
 
   simulation.on('tick', () => {
     node.attr('transform', function(d) {

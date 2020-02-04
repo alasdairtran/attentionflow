@@ -30,28 +30,35 @@ const drag = simulation => {
     .on('end', dragended);
 };
 
-export function getSongEgo(title, svg, tooltip) {
+export function getSongEgo(title, oWidth) {
+  console.log(title);
+  d3.select('#graphContainer').html('');
+  d3.select('#graphContainer')
+    .append('div')
+    .style('width', '50px')
+    .style('height', '50px')
+    .style('border', '10px solid #f3f3f3')
+    .style('border-radius', '50%')
+    .style('border-top', '10px solid #3498db')
+    .style('animation', 'spin 2s linear infinite')
+    .style('margin', '100px auto');
+
+  console.log(d3.select('#graphContainer').html());
   const options = {
     params: {
       title: title,
     },
   };
+  console.log('a');
   axios
     .get('/vevo/1hop_song/', options)
     .then(res => {
+      d3.select('#graphContainer').html('');
       if (res.data.error) {
+        console.log('error');
       } else {
-        console.log(res.data.videos);
-        console.log(res.data.links);
-        let oWidth = document.getElementById('graphContainer').offsetWidth;
-        drawSongEgo(
-          oWidth,
-          oWidth,
-          res.data.videos,
-          res.data.links,
-          svg,
-          tooltip
-        );
+        console.log('b');
+        drawSongEgo(res.data.videos, res.data.links, oWidth);
       }
     })
     .catch(function(error) {
@@ -59,14 +66,7 @@ export function getSongEgo(title, svg, tooltip) {
     });
 }
 
-export function drawSongEgo(
-  width,
-  height,
-  nodesArr,
-  linksArrUnfiltered,
-  svg,
-  tooltip
-) {
+export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
   let linksArr = linksArrUnfiltered.filter(link => link[2] !== null);
   let len = linksArr.length;
   let filteredLinksArr = [];
@@ -97,10 +97,13 @@ export function drawSongEgo(
     }
   }
 
-  const canvasHeight = height;
-  const canvasWidth = width;
-  const horizontalMargin = canvasWidth / 2 - 100;
-  const verticalMargin = 130;
+  const canvasHeight = oWidth / 2;
+  const canvasWidth = oWidth;
+  const svg = d3
+    .select('#graphContainer')
+    .append('svg')
+    .attr('width', canvasWidth)
+    .attr('height', canvasHeight);
 
   const strokeList = filteredLinksArr.map(link => link[2]);
   const minStroke = 0.5;
@@ -136,11 +139,15 @@ export function drawSongEgo(
     colour: colourScale(node[2]),
   }));
 
+  console.log(nodes);
+
   let links = filteredLinksArr.map(link => ({
     source: link[0],
     target: link[1],
     value: strokeScale(link[2]),
   }));
+
+  console.log(links);
 
   const simulation = d3
     .forceSimulation(nodes)
@@ -202,20 +209,25 @@ export function drawSongEgo(
     .style('font-size', '12px')
     .style('visibility', d => (d.radius > 8 ? 'visible' : 'hidden'));
 
+  let tooltip = d3
+    .select('#graphContainer')
+    .append('div')
+    .style('position', 'absolute')
+    .style('z-index', '100')
+    .style('padding', '10px')
+    .style('background', '#F9F9F9')
+    .style('border', '2px solid black')
+    .style('color', 'black')
+    .style('left', '0px')
+    .style('bottom', '-350px')
+    .style('width', '460px')
+    .style('visibility', 'hidden');
+
   node.on('click', d => {
     tooltip.style('visibility', 'hidden');
-    node.remove();
-    link.remove();
-    getIncomingOutgoing(
-      d.id,
-      canvasHeight,
-      canvasWidth,
-      verticalMargin,
-      horizontalMargin,
-      drag,
-      tooltip,
-      svg
-    );
+    svg.remove();
+    getSongEgo(d.id, oWidth);
+    getIncomingOutgoing(d.id, oWidth);
   });
 
   node.on('mouseover', function(d) {

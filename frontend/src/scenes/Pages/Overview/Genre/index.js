@@ -42,6 +42,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import * as d3 from 'd3';
+import { getSongEgo } from '../../../../components/SongEgo/songEgo';
+import { getIncomingOutgoing } from '../../../../components/SongEgo/incomingOutgoing';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -86,6 +89,7 @@ export default class AnalyticsDashboard1 extends Component {
       genres: [],
       genreLinks: [],
       search: false,
+      oWidth: 0,
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -93,6 +97,9 @@ export default class AnalyticsDashboard1 extends Component {
 
   componentDidMount() {
     document.body.classList.add('bg-light');
+    this.setState({
+      oWidth: document.getElementById('graphContainer').clientWidth,
+    });
     this.fetchExample();
   }
 
@@ -141,33 +148,19 @@ export default class AnalyticsDashboard1 extends Component {
   // For search box
   display = d => {
     d.preventDefault();
-    this.setState({ isLoaded: false, hasError: false, isLoading: true });
-    const options = {
-      params: {
-        title: document.getElementById('search-text').value,
-      },
-    };
-    axios
-      .get('/vevo/1hop_song/', options)
-      .then(res => {
-        if (res.data.error) {
-          this.setState({
-            hasError: true,
-            errorMessage: res.data.error,
-          });
-        } else {
-          this.setState({
-            isLoaded: true,
-            isLoading: false,
-            links: res.data.links,
-            videos: res.data.videos,
-            search: true,
-          });
-        }
-      })
-      .catch(function(error) {
-        console.error(error);
-      });
+    this.setState({
+      isLoaded: true,
+      hasError: false,
+      isLoading: false,
+      title: document.getElementById('search-text').value,
+      search: true,
+    });
+    d3.select('#tab1Button').style('visibility', 'visible');
+    d3.select('#tab2Button').style('visibility', 'visible');
+    d3.select('#tab3Button').style('visibility', 'hidden');
+    let oWidth = this.state.oWidth;
+    getSongEgo(document.getElementById('search-text').value, oWidth);
+    getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
   };
 
   render() {
@@ -204,6 +197,7 @@ export default class AnalyticsDashboard1 extends Component {
                     <div className="btn-actions-pane-right">
                       <Button
                         outline
+                        id={'tab1Button'}
                         className={
                           'border-0 btn-pill btn-wide btn-transition ' +
                           classnames({
@@ -214,11 +208,13 @@ export default class AnalyticsDashboard1 extends Component {
                         onClick={() => {
                           this.toggle1('11');
                         }}
+                        style={{ visibility: 'hidden' }}
                       >
                         Tab 1
                       </Button>
                       <Button
                         outline
+                        id={'tab2Button'}
                         className={
                           'ml-1 btn-pill btn-wide border-0 btn-transition ' +
                           classnames({
@@ -229,8 +225,26 @@ export default class AnalyticsDashboard1 extends Component {
                         onClick={() => {
                           this.toggle1('22');
                         }}
+                        style={{ visibility: 'hidden' }}
                       >
                         Tab 2
+                      </Button>
+                      <Button
+                        outline
+                        id={'tab3Button'}
+                        className={
+                          'ml-1 btn-pill btn-wide border-0 btn-transition ' +
+                          classnames({
+                            active: this.state.activeTab1 === '33',
+                          })
+                        }
+                        color="primary"
+                        onClick={() => {
+                          this.toggle1('33');
+                        }}
+                        style={{ visibility: 'hidden' }}
+                      >
+                        Tab 3
                       </Button>
                     </div>
                   </CardHeader>
@@ -249,160 +263,19 @@ export default class AnalyticsDashboard1 extends Component {
                               margin: '100px auto',
                             }}
                           />
-                        ) : !this.state.search ? (
+                        ) : (
                           <GenreNetwork
                             genres={this.state.genres}
                             genreLinks={this.state.genreLinks}
-                          />
-                        ) : (
-                          <SongEgo
-                            videos={this.state.videos}
-                            links={this.state.links}
                           />
                         )}
                       </div>
                     </TabPane>
                     <TabPane tabId="22">
-                      <div className="widget-chart p-0">
-                        <ResponsiveContainer height={179}>
-                          <ComposedChart data={data2}>
-                            <CartesianGrid stroke="#ffffff" />
-                            <Area
-                              type="monotone"
-                              dataKey="amt"
-                              fill="#f7ffd0"
-                              stroke="#85a200"
-                            />
-                            <Bar
-                              dataKey="pv"
-                              barSize={16}
-                              fill="var(--primary)"
-                            />
-                            <Line
-                              type="monotone"
-                              dataKey="uv"
-                              strokeWidth="3"
-                              stroke="var(--danger)"
-                            />
-                          </ComposedChart>
-                        </ResponsiveContainer>
-                        <div className="widget-chart-content mt-3 mb-2">
-                          <div className="widget-description mt-0 text-success">
-                            <FontAwesomeIcon icon={faArrowUp} />
-                            <span className="pl-2 pr-2">37.2%</span>
-                            <span className="text-muted opacity-8">
-                              performance increase
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <CardBody className="pt-2">
-                        <Row>
-                          <Col md="6">
-                            <div className="widget-content">
-                              <div className="widget-content-outer">
-                                <div className="widget-content-wrapper">
-                                  <div className="widget-content-left mr-3">
-                                    <div className="widget-numbers fsize-3 text-muted">
-                                      23%
-                                    </div>
-                                  </div>
-                                  <div className="widget-content-right">
-                                    <div className="text-muted opacity-6">
-                                      Deploys
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="widget-progress-wrapper mt-1">
-                                  <Progress
-                                    className="progress-bar-sm progress-bar-animated-alt"
-                                    color="warning"
-                                    value="23"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </Col>
-                          <Col md="6">
-                            <div className="widget-content">
-                              <div className="widget-content-outer">
-                                <div className="widget-content-wrapper">
-                                  <div className="widget-content-left mr-3">
-                                    <div className="widget-numbers fsize-3 text-muted">
-                                      76%
-                                    </div>
-                                  </div>
-                                  <div className="widget-content-right">
-                                    <div className="text-muted opacity-6">
-                                      Traffic
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="widget-progress-wrapper mt-1">
-                                  <Progress
-                                    className="progress-bar-sm progress-bar-animated-alt"
-                                    color="info"
-                                    value="76"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </Col>
-                        </Row>
-                        <div className="divider mt-4" />
-                        <Row>
-                          <Col md="6">
-                            <div className="widget-content">
-                              <div className="widget-content-outer">
-                                <div className="widget-content-wrapper">
-                                  <div className="widget-content-left mr-3">
-                                    <div className="widget-numbers fsize-3 text-muted">
-                                      83%
-                                    </div>
-                                  </div>
-                                  <div className="widget-content-right">
-                                    <div className="text-muted opacity-6">
-                                      Servers Load
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="widget-progress-wrapper mt-1">
-                                  <Progress
-                                    className="progress-bar-sm progress-bar-animated-alt"
-                                    color="danger"
-                                    value="83"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </Col>
-                          <Col md="6">
-                            <div className="widget-content">
-                              <div className="widget-content-outer">
-                                <div className="widget-content-wrapper">
-                                  <div className="widget-content-left mr-3">
-                                    <div className="widget-numbers fsize-3 text-muted">
-                                      48%
-                                    </div>
-                                  </div>
-                                  <div className="widget-content-right">
-                                    <div className="text-muted opacity-6">
-                                      Reported Bugs
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="widget-progress-wrapper mt-1">
-                                  <Progress
-                                    className="progress-bar-sm progress-bar-animated-alt"
-                                    color="alternate"
-                                    value="48"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </Col>
-                        </Row>
-                      </CardBody>
+                      <div id="graphContainer2" />
+                    </TabPane>
+                    <TabPane tabId="33">
+                      <div id="graphContainer3" />
                     </TabPane>
                   </TabContent>
                 </Card>

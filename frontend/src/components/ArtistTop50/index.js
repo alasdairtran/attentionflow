@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import { getIncomingOutgoing } from '../ArtistEgo/incomingOutgoing';
 import { getSongsByArtist } from '../ArtistEgo/songsByArtist';
+import { getArtistEgo } from '../ArtistEgo/artistEgo';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -43,7 +44,7 @@ class BarChart extends Component {
     const canvasHeight = oWidth / 2;
     const canvasWidth = oWidth;
     const horizontalMargin = canvasWidth / 2 - 100;
-    const verticalMargin = 130;
+    const verticalMargin = 80;
     const svg = d3
       .select(this.refs.canvas)
       .append('svg')
@@ -191,19 +192,14 @@ class BarChart extends Component {
       .on('click', () => tooltip.style('visibility', 'hidden').html(''));
 
     node.on('click', d => {
-      node.remove();
-      link.remove();
+      d3.select('#tab1Button').style('visibility', 'visible');
+      d3.select('#tab2Button').style('visibility', 'visible');
+      d3.select('#tab3Button').style('visibility', 'visible');
+      svg.remove();
       tooltip.style('visibility', 'hidden');
-      getIncomingOutgoing(
-        d.id,
-        canvasWidth,
-        canvasHeight,
-        verticalMargin,
-        svg,
-        drag,
-        tooltip
-      );
-      getSongsByArtist(d.id, canvasWidth, canvasHeight, svg, drag, tooltip);
+      getArtistEgo(d.id, oWidth);
+      getSongsByArtist(d.id, oWidth);
+      getIncomingOutgoing(d.id, oWidth);
     });
 
     simulation.on('tick', () => {

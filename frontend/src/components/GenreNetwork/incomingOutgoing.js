@@ -188,7 +188,7 @@ function drawIncomingOutgoing(
     .style('font-size', '10px');
 
   node.on('click', d => {
-    node.remove();
+    svg.remove();
     getIncomingOutgoing(
       d.id,
       canvasHeight,

@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
 
-import { getSongInfo } from './popout';
-import { getIncomingOutgoing } from './incomingOutgoing';
+import { getSongInfo } from '../SongEgo/popout';
+import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
+import { getSongEgo } from '../SongEgo/songEgo';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -176,32 +177,26 @@ class BarChart extends Component {
       .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
     let tooltip = d3
-      .select(this.refs.canvas)
+      .select('#graphContainer')
       .append('div')
       .style('position', 'absolute')
+      .style('z-index', '100')
       .style('padding', '10px')
       .style('background', '#F9F9F9')
       .style('border', '2px solid black')
       .style('color', 'black')
-      .style('top', canvasHeight + 'px')
-      .style('right', '0px')
+      .style('left', '0px')
+      .style('bottom', '-350px')
       .style('width', '460px')
       .style('visibility', 'hidden');
 
     node.on('click', d => {
       tooltip.style('visibility', 'hidden');
-      node.remove();
-      link.remove();
-      getIncomingOutgoing(
-        d.id,
-        canvasHeight,
-        canvasWidth,
-        verticalMargin,
-        horizontalMargin,
-        drag,
-        tooltip,
-        svg
-      );
+      svg.remove();
+      d3.select('#tab1Button').style('visibility', 'visible');
+      d3.select('#tab2Button').style('visibility', 'visible');
+      getSongEgo(d.id, oWidth);
+      getIncomingOutgoing(d.id, oWidth);
     });
 
     node.on('mouseover', function(d) {

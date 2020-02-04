@@ -2,16 +2,44 @@ import * as d3 from 'd3';
 
 import axios from 'axios';
 import { getSongsByArtist } from './songsByArtist';
+import { getArtistEgo } from './artistEgo';
 
-export function getIncomingOutgoing(
-  artist,
-  canvasWidth,
-  canvasHeight,
-  verticalMargin,
-  svg,
-  drag,
-  tooltip
-) {
+const drag = simulation => {
+  function dragstarted(d) {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+
+  function dragended(d) {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+
+  return d3
+    .drag()
+    .on('start', dragstarted)
+    .on('drag', dragged)
+    .on('end', dragended);
+};
+
+export function getIncomingOutgoing(artist, oWidth) {
+  d3.select('#graphContainer3').html('');
+  d3.select('#graphContainer3')
+    .append('div')
+    .style('width', '50px')
+    .style('height', '50px')
+    .style('border', '10px solid #f3f3f3')
+    .style('border-radius', '50%')
+    .style('border-top', '10px solid #3498db')
+    .style('animation', 'spin 2s linear infinite')
+    .style('margin', '100px auto');
   const options = {
     params: {
       artist: artist,
@@ -26,17 +54,8 @@ export function getIncomingOutgoing(
         let central = res.data.central;
         let incoming = res.data.incoming;
         let outgoing = res.data.outgoing;
-        drawIncomingOutgoing(
-          incoming,
-          outgoing,
-          central,
-          canvasWidth,
-          canvasHeight,
-          verticalMargin,
-          svg,
-          drag,
-          tooltip
-        );
+        d3.select('#graphContainer3').html('');
+        drawIncomingOutgoing(incoming, outgoing, central, oWidth);
       }
     })
     .catch(function(error) {
@@ -48,13 +67,17 @@ function drawIncomingOutgoing(
   incomingUnchecked,
   outgoingUnchecked,
   title,
-  canvasWidth,
-  canvasHeight,
-  verticalMargin,
-  svg,
-  drag,
-  tooltip
+  oWidth
 ) {
+  const canvasWidth = oWidth;
+  const canvasHeight = oWidth / 2;
+  const verticalMargin = 100;
+  const svg = d3
+    .select('#graphContainer3')
+    .append('svg')
+    .attr('width', canvasWidth)
+    .attr('height', canvasHeight);
+
   const incoming = incomingUnchecked[0][0] === null ? [] : incomingUnchecked;
   const outgoing = outgoingUnchecked[0][0] === null ? [] : outgoingUnchecked;
 
@@ -135,11 +158,11 @@ function drawIncomingOutgoing(
       'x',
       d3.forceX().x(function(d) {
         if (d.type === 'I') {
-          return (canvasWidth / 5) * 3 + 100;
+          return 300;
         } else if (d.type === 'O') {
-          return canvasWidth - 100;
+          return canvasWidth - 300;
         } else {
-          return (canvasWidth / 5) * 4;
+          return canvasWidth / 2;
         }
       })
     )
@@ -188,19 +211,63 @@ function drawIncomingOutgoing(
     .attr('y', d => (d.type === 'C' ? -15 : 3))
     .style('font-size', '10px');
 
+  svg
+    .append('text')
+    .text('Incoming')
+    .attr('x', 300)
+    .attr('y', verticalMargin / 2)
+    .attr('text-anchor', 'end');
+
+  svg
+    .append('text')
+    .text('Outgoing')
+    .attr('x', canvasWidth - 300)
+    .attr('y', verticalMargin / 2)
+    .attr('text-anchor', 'start');
+
+  svg
+    .append('polygon')
+    .style('fill', 'grey')
+    .attr(
+      'points',
+      '300,' +
+        verticalMargin +
+        ' 300,' +
+        (canvasHeight - verticalMargin) +
+        ' ' +
+        canvasWidth / 2 +
+        ',' +
+        canvasHeight / 2
+    )
+    .lower()
+    .style('opacity', '20%');
+
+  svg
+    .append('polygon')
+    .style('fill', 'grey')
+    .attr(
+      'points',
+      canvasWidth -
+        300 +
+        ',' +
+        verticalMargin +
+        ' ' +
+        (canvasWidth - 300) +
+        ',' +
+        (canvasHeight - verticalMargin) +
+        ' ' +
+        canvasWidth / 2 +
+        ',' +
+        canvasHeight / 2
+    )
+    .lower()
+    .style('opacity', '20%');
+
   node.on('click', d => {
-    svg.selectAll('*').remove();
-    tooltip.style('visibility', 'hidden');
-    getIncomingOutgoing(
-      d.id,
-      canvasWidth,
-      canvasHeight,
-      verticalMargin,
-      svg,
-      drag,
-      tooltip
-    );
-    getSongsByArtist(d.id, canvasWidth, canvasHeight, svg, drag, tooltip);
+    svg.remove();
+    getArtistEgo(d.id, oWidth);
+    getSongsByArtist(d.id, oWidth);
+    getIncomingOutgoing(d.id, oWidth);
   });
 
   simulation.on('tick', () => {

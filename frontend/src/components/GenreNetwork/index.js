@@ -177,8 +177,7 @@ class BarChart extends Component {
       .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
     node.on('click', d => {
-      node.remove();
-      link.remove();
+      svg.remove();
       getIncomingOutgoing(
         d.id,
         canvasHeight,

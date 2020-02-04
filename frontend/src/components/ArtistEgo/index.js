@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import { getIncomingOutgoing } from './incomingOutgoing';
 import { getSongsByArtist } from './songsByArtist';
+import { getArtistEgo } from './artistEgo';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -196,9 +197,10 @@ class BarChart extends Component {
       .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
     node.on('click', d => {
-      node.remove();
-      link.remove();
+      svg.remove();
       tooltip.style('visibility', 'hidden');
+      getArtistEgo(d.id);
+      getSongsByArtist(d.id, canvasWidth, canvasHeight, svg, drag, tooltip);
       getIncomingOutgoing(
         d.id,
         canvasWidth,
@@ -208,7 +210,6 @@ class BarChart extends Component {
         drag,
         tooltip
       );
-      getSongsByArtist(d.id, canvasWidth, canvasHeight, svg, drag, tooltip);
     });
 
     simulation.on('tick', () => {

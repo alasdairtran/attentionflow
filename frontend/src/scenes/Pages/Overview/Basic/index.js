@@ -42,6 +42,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import * as d3 from 'd3';
+import { getSongEgo } from '../../../../components/SongEgo/songEgo';
+import { getIncomingOutgoing } from '../../../../components/SongEgo/incomingOutgoing';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -235,33 +238,19 @@ export default class AnalyticsDashboard1 extends Component {
   // For search box
   display = d => {
     d.preventDefault();
-    this.setState({ isLoaded: false, hasError: false, isLoading: true });
-    const options = {
-      params: {
-        title: document.getElementById('search-text').value,
-      },
-    };
-    axios
-      .get('/vevo/1hop_song/', options)
-      .then(res => {
-        if (res.data.error) {
-          this.setState({
-            hasError: true,
-            errorMessage: res.data.error,
-          });
-        } else {
-          this.setState({
-            isLoaded: true,
-            isLoading: false,
-            videos: res.data.videos,
-            links: res.data.links,
-            search: true,
-          });
-        }
-      })
-      .catch(function(error) {
-        console.error(error);
-      });
+    this.setState({
+      isLoaded: true,
+      hasError: false,
+      isLoading: false,
+      title: document.getElementById('search-text').value,
+      search: true,
+    });
+    let oWidth = document.getElementById('graphContainer').offsetWidth;
+    d3.select('#tab1Button').style('visibility', 'visible');
+    d3.select('#tab2Button').style('visibility', 'visible');
+    d3.select('#tab3Button').style('visibility', 'hidden');
+    getSongEgo(document.getElementById('search-text').value, oWidth);
+    getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
   };
 
   render() {

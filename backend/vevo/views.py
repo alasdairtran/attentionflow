@@ -262,7 +262,7 @@ def get_1hop_artist(request):
                               "OPTIONAL MATCH (videos)-[x]->(e:A) WHERE e IN videoList "
                               "WITH a + videoList as videoList, links + collect([videos.artist, e.artist, x.weight]) AS links "
                               "UNWIND videoList as videos "
-                              "WITH collect(DISTINCT [videos.artist, size((a)-->(:V)), size((:A)-->(videos))]) as videos, links "
+                              "WITH collect(DISTINCT [videos.artist, size((videos)-->(:V)), size((:A)-->(videos))]) as videos, links "
                               "RETURN videos as artists, "
                               "links as links ",
                               {"artist": artist})
@@ -272,7 +272,7 @@ def get_1hop_artist(request):
 
     output = {
         "artists": result['artists'],
-        "videos": result['videos'],
+        "links": result['links'],
     }
 
     return JsonResponse(output)
@@ -282,29 +282,35 @@ def get_2hop_artist(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
-    title = request.GET["title"]
+    artist = request.GET["artist"]
     with driver.session() as session:
-        results = session.run("MATCH (v:A {artist:{title}}) "
-                              "OPTIONAL MATCH (v)-[s]-(w:A) "
-                              "OPTIONAL MATCH (w)-[r]-(x:A) "
-                              "OPTIONAL MATCH (x)-[t]-(z:A) "
-                              "RETURN [v.artist, size((v)-->(:V)), size((:A)-->(v))] as title,"
-                              "collect(distinct [w.artist, size((w)-->(:V)), size((:A)-->(w)), s.weight]) as level1,"
-                              "collect(distinct [x.artist, size((x)-->(:V)), size((:A)-->(x))]) as level2,"
-                              "collect(distinct [w.artist, x.artist, r.weight]) as linksArr1,"
-                              "collect(distinct [x.artist, z.artist, t.weight]) as linksArr2 ",
-                              {"title": title})
+        results = session.run("MATCH (a:A {artist:{artist}}) "
+                              "OPTIONAL MATCH (b:A)-[z]->(a) "
+                              "OPTIONAL MATCH (c:A)<-[y]-(a) "
+                              "WITH a, collect(b) + collect(c) AS videoList, "
+                              "collect([b.artist, a.artist, z.weight]) + collect([a.artist, c.artist, y.weight]) AS links "
+                              "UNWIND videoList AS videos "
+                              "OPTIONAL MATCH (videos)-[x]->(e:A) "
+                              "OPTIONAL MATCH (videos)<-[w]-(f:A) "
+                              "WITH a + videoList + collect(e) + collect(f) as videoList, "
+                              "links + collect([videos.artist, e.artist, x.weight]) + collect([f.artist, videos.artist, w.weight]) AS links, "
+                              "collect(e) + collect(f) as checkingList "
+                              "UNWIND checkingList as checking "
+                              "OPTIONAL MATCH (checking)-[v]->(g:A) where g in videoList "
+                              "WITH videoList, links + collect([checking.artist, g.artist, v.weight]) as links "
+                              "UNWIND videoList as videos "
+                              "WITH collect(DISTINCT [videos.artist, size((videos)-->(:V)), size((:A)-->(videos))]) as videos, links "
+                              "RETURN videos as artists, "
+                              "links as links ",
+                              {"artist": artist})
 
         result = results.single()
 
     driver.close()
 
     output = {
-        "title": result['title'],
-        "level1": result['level1'],
-        "level2": result['level2'],
-        "linksArr1": result['linksArr1'],
-        "linksArr2": result['linksArr2'],
+        "artists": result['artists'],
+        "links": result['links'],
     }
 
     return JsonResponse(output)
