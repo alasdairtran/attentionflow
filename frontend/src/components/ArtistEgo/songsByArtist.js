@@ -2,6 +2,8 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 import { getSongInfo } from '../SongEgo/popout';
+import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
+import { getSongEgo } from '../SongEgo/songEgo';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -249,5 +251,12 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
       .style('stroke', 'none')
       .select('text')
       .style('visibility', d => (d.radius > 8 ? 'visible' : 'hidden'));
+  });
+
+  node.on('click', d => {
+    svg.remove();
+    d3.select('#tab3Button').style('visibility', 'hidden');
+    getSongEgo(d.id, oWidth);
+    getIncomingOutgoing(d.id, oWidth);
   });
 }

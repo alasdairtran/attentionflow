@@ -21,4 +21,5 @@ urlpatterns = [
     path('genre_artist_top_songs/', views.get_genre_artist_top_songs),
     path('top_50_songs/', views.get_top_50_songs),
     path('top_50_artists/', views.get_top_50_artists),
+    path('genre_top_50_artists/', views.get_genre_top_50_artists),
 ]

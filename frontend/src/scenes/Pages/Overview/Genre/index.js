@@ -88,7 +88,6 @@ export default class AnalyticsDashboard1 extends Component {
       links: [],
       genres: [],
       genreLinks: [],
-      search: false,
       oWidth: 0,
     };
     this.toggle = this.toggle.bind(this);
@@ -152,8 +151,6 @@ export default class AnalyticsDashboard1 extends Component {
       isLoaded: true,
       hasError: false,
       isLoading: false,
-      title: document.getElementById('search-text').value,
-      search: true,
     });
     d3.select('#tab1Button').style('visibility', 'visible');
     d3.select('#tab2Button').style('visibility', 'visible');

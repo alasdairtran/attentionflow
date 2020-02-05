@@ -1,15 +1,43 @@
 import axios from 'axios';
 import * as d3 from 'd3';
+import { getGenreTopArtists } from './genreTopArtists';
 
-export function getIncomingOutgoing(
-  genre,
-  canvasHeight,
-  canvasWidth,
-  verticalMargin,
-  horizontalMargin,
-  drag,
-  svg
-) {
+const drag = simulation => {
+  function dragstarted(d) {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+
+  function dragended(d) {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+
+  return d3
+    .drag()
+    .on('start', dragstarted)
+    .on('drag', dragged)
+    .on('end', dragended);
+};
+
+export function getIncomingOutgoing(genre, oWidth) {
+  d3.select('#graphContainer2').html('');
+  d3.select('#graphContainer2')
+    .append('div')
+    .style('width', '50px')
+    .style('height', '50px')
+    .style('border', '10px solid #f3f3f3')
+    .style('border-radius', '50%')
+    .style('border-top', '10px solid #3498db')
+    .style('animation', 'spin 2s linear infinite')
+    .style('margin', '100px auto');
   const options = {
     params: {
       genre: genre,
@@ -24,17 +52,8 @@ export function getIncomingOutgoing(
         let incoming = res.data.incoming;
         let outgoing = res.data.outgoing;
         let central = res.data.central;
-        drawIncomingOutgoing(
-          incoming,
-          outgoing,
-          central,
-          canvasHeight,
-          canvasWidth,
-          verticalMargin,
-          horizontalMargin,
-          drag,
-          svg
-        );
+        d3.select('#graphContainer2').html('');
+        drawIncomingOutgoing(incoming, outgoing, central, oWidth);
       }
     })
     .catch(function(error) {
@@ -46,15 +65,21 @@ function drawIncomingOutgoing(
   incomingUnchecked,
   outgoingUnchecked,
   title,
-  canvasHeight,
-  canvasWidth,
-  verticalMargin,
-  horizontalMargin,
-  drag,
-  svg
+  oWidth
 ) {
+  const horizontalMargin = 300;
+  const canvasHeight = oWidth / 2;
+  const canvasWidth = oWidth;
+  const verticalMargin = 130;
+
   let incoming = incomingUnchecked[0][0] === null ? [] : incomingUnchecked;
   let outgoing = outgoingUnchecked[0][0] === null ? [] : outgoingUnchecked;
+
+  const svg = d3
+    .select('#graphContainer2')
+    .append('svg')
+    .attr('width', canvasWidth)
+    .attr('height', canvasHeight);
 
   incoming.sort();
   outgoing.sort();
@@ -189,16 +214,61 @@ function drawIncomingOutgoing(
 
   node.on('click', d => {
     svg.remove();
-    getIncomingOutgoing(
-      d.id,
-      canvasHeight,
-      canvasWidth,
-      verticalMargin,
-      horizontalMargin,
-      drag,
-      svg
-    );
+    getGenreTopArtists(d.id, oWidth);
+    getIncomingOutgoing(d.id, oWidth);
   });
+
+  svg
+    .append('text')
+    .text('Incoming')
+    .attr('x', 300)
+    .attr('y', verticalMargin / 2)
+    .attr('text-anchor', 'end');
+
+  svg
+    .append('text')
+    .text('Outgoing')
+    .attr('x', canvasWidth - 300)
+    .attr('y', verticalMargin / 2)
+    .attr('text-anchor', 'start');
+
+  svg
+    .append('polygon')
+    .style('fill', 'grey')
+    .attr(
+      'points',
+      '300,' +
+        verticalMargin +
+        ' 300,' +
+        (canvasHeight - verticalMargin) +
+        ' ' +
+        canvasWidth / 2 +
+        ',' +
+        canvasHeight / 2
+    )
+    .lower()
+    .style('opacity', '20%');
+
+  svg
+    .append('polygon')
+    .style('fill', 'grey')
+    .attr(
+      'points',
+      canvasWidth -
+        300 +
+        ',' +
+        verticalMargin +
+        ' ' +
+        (canvasWidth - 300) +
+        ',' +
+        (canvasHeight - verticalMargin) +
+        ' ' +
+        canvasWidth / 2 +
+        ',' +
+        canvasHeight / 2
+    )
+    .lower()
+    .style('opacity', '20%');
 
   simulation.on('tick', () => {
     node.attr('transform', function(d) {

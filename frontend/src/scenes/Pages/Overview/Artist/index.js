@@ -87,7 +87,6 @@ export default class AnalyticsDashboard1 extends Component {
       videos: [],
       artists: [],
       links: [],
-      search: false,
       oWidth: 0,
     };
     this.toggle = this.toggle.bind(this);
@@ -135,7 +134,6 @@ export default class AnalyticsDashboard1 extends Component {
             isLoading: false,
             artists: res.data.artists,
             links: res.data.links,
-            search: false,
           });
         }
       })
@@ -152,10 +150,8 @@ export default class AnalyticsDashboard1 extends Component {
       hasError: false,
       isLoading: false,
       title: document.getElementById('search-text').value,
-      search: true,
     });
     let oWidth = this.state.oWidth;
-    console.log(oWidth);
     d3.select('#tab1Button').style('visibility', 'visible');
     d3.select('#tab2Button').style('visibility', 'visible');
     d3.select('#tab3Button').style('visibility', 'hidden');

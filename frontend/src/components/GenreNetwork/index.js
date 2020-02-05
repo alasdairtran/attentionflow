@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 import { getIncomingOutgoing } from './incomingOutgoing';
+import { getGenreTopArtists } from './genreTopArtists';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -178,14 +179,15 @@ class BarChart extends Component {
 
     node.on('click', d => {
       svg.remove();
+      d3.select('#tab1Button').style('visibility', 'visible');
+      d3.select('#tab2Button').style('visibility', 'visible');
+      getGenreTopArtists(
+        d.id,
+        document.getElementById('graphContainer').offsetWidth
+      );
       getIncomingOutgoing(
         d.id,
-        canvasHeight,
-        canvasWidth,
-        verticalMargin,
-        horizontalMargin,
-        drag,
-        svg
+        document.getElementById('graphContainer').offsetWidth
       );
     });
 

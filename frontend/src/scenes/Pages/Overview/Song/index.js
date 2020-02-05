@@ -86,7 +86,6 @@ export default class AnalyticsDashboard1 extends Component {
       songs: [],
       links: [],
       videos: [],
-      search: false,
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -130,7 +129,6 @@ export default class AnalyticsDashboard1 extends Component {
             isLoading: false,
             songs: res.data.songs,
             links: res.data.links,
-            search: false,
           });
         }
       })
@@ -146,7 +144,6 @@ export default class AnalyticsDashboard1 extends Component {
       isLoaded: true,
       hasError: false,
       isLoading: false,
-      search: true,
     });
     let oWidth = document.getElementById('graphContainer').offsetWidth;
     d3.select('#tab1Button').style('visibility', 'visible');

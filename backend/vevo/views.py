@@ -447,6 +447,33 @@ def get_genre_top_artists(request):
     return JsonResponse(output)
 
 @csrf_exempt
+def get_genre_top_50_artists(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    genre = request.GET['genre']
+    with driver.session() as session:
+        results = session.run("MATCH (g:G {genre:{genre}}) "
+                              "OPTIONAL MATCH (a:A)--()--(g) "
+                              "OPTIONAL MATCH (a)--(v:V)--(g) "
+                              "WITH a, sum(v.totalView) as views "
+                              "ORDER BY views desc limit 50 "
+                              "OPTIONAL MATCH (a)-[r]->(b:A) "
+                              "RETURN collect(distinct [a.artist, views, size((:A)-->(a))]) as artists, "
+                              "collect([a.artist, b.artist, r.weight]) as links ",
+                              {"genre": genre})
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "artists": result['artists'],
+        "links": result['links'],
+    }
+
+    return JsonResponse(output)
+
+@csrf_exempt
 def get_genre_artist_top_songs(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))

@@ -30,7 +30,6 @@ const drag = simulation => {
 };
 
 export function getIncomingOutgoing(title, oWidth) {
-  console.log(title);
   d3.select('#graphContainer2').html('');
   d3.select('#graphContainer2')
     .append('div')
@@ -76,7 +75,6 @@ function drawIncomingOutgoing(
   const canvasHeight = oWidth / 2;
   const canvasWidth = oWidth;
   const verticalMargin = 130;
-  console.log(canvasHeight);
   const svg = d3
     .select('#graphContainer2')
     .append('svg')
@@ -201,8 +199,6 @@ function drawIncomingOutgoing(
         }
       })
     );
-
-  console.log(nodes);
 
   const node = svg
     .append('g')

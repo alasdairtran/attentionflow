@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
 
-import { getSongInfo } from './popout';
-import { getIncomingOutgoing } from './incomingOutgoing';
+import { getIncomingOutgoing } from '../ArtistEgo/incomingOutgoing';
+import { getSongsByArtist } from '../ArtistEgo/songsByArtist';
+import { getArtistEgo } from '../ArtistEgo/artistEgo';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -30,7 +31,7 @@ const drag = simulation => {
     .on('end', dragended);
 };
 
-export function getSongEgo(title, oWidth) {
+export function getGenreTopArtists(genre, oWidth) {
   d3.select('#graphContainer').html('');
   d3.select('#graphContainer')
     .append('div')
@@ -43,17 +44,19 @@ export function getSongEgo(title, oWidth) {
     .style('margin', '100px auto');
   const options = {
     params: {
-      title: title,
+      genre: genre,
     },
   };
   axios
-    .get('/vevo/1hop_song/', options)
+    .get('/vevo/genre_top_50_artists/', options)
     .then(res => {
-      d3.select('#graphContainer').html('');
       if (res.data.error) {
         console.log('error');
       } else {
-        drawSongEgo(res.data.videos, res.data.links, oWidth);
+        let artists = res.data.artists;
+        let links = res.data.links;
+        d3.select('#graphContainer').html('');
+        drawGenreTopArtists(artists, links, oWidth);
       }
     })
     .catch(function(error) {
@@ -61,8 +64,11 @@ export function getSongEgo(title, oWidth) {
     });
 }
 
-export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
-  let linksArr = linksArrUnfiltered.filter(link => link[2] !== null);
+function drawGenreTopArtists(artistsArr, linksUnfiltered, oWidth) {
+  let artistNames = artistsArr.map(artist => artist[0]);
+  let linksArr = linksUnfiltered.filter(
+    link => link[1] !== null && artistNames.includes(link[1])
+  );
   let len = linksArr.length;
   let filteredLinksArr = [];
   for (let i = 0; i < len; i++) {
@@ -100,7 +106,7 @@ export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
     .attr('width', canvasWidth)
     .attr('height', canvasHeight);
 
-  const strokeList = filteredLinksArr.map(link => link[2]);
+  const strokeList = linksArr.map(link => link[2]);
   const minStroke = 0.5;
   const maxStroke = 5;
   const minWeight = d3.min(strokeList);
@@ -110,34 +116,34 @@ export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
     .domain([minWeight, maxWeight])
     .range([minStroke, maxStroke]);
 
-  const radiusList = nodesArr.map(node => node[1]);
+  const viewsList = artistsArr.map(d => d[1]);
   const maxRadius = 15;
   const minRadius = 3;
-  const minViews = d3.min(radiusList);
-  const maxViews = d3.max(radiusList);
+  const minViews = d3.min(viewsList);
+  const maxViews = d3.max(viewsList);
   const radiusScale = d3
     .scaleLinear()
     .domain([minViews, maxViews])
     .range([minRadius, maxRadius]);
 
   const nodeScale = 4;
-  const colourList = nodesArr.map(node => node[2]);
-  const minInDegree = d3.min(colourList);
-  const maxInDegree = d3.max(colourList);
+  const inDegreeList = artistsArr.map(d => d[2]);
+  const minInDegree = d3.min(inDegreeList);
+  const maxInDegree = d3.max(inDegreeList);
   const colourScale = d3
-    .scaleSequential(d3.interpolatePuBu)
+    .scaleSequential(d3.interpolateYlGnBu)
     .domain([minInDegree, maxInDegree + 5]);
 
-  const nodes = nodesArr.map(node => ({
-    id: node[0],
-    radius: radiusScale(node[1]),
-    colour: colourScale(node[2]),
+  const nodes = artistsArr.map(video => ({
+    id: video[0],
+    radius: radiusScale(video[1]),
+    colour: colourScale(video[2]),
   }));
 
-  let links = filteredLinksArr.map(link => ({
-    source: link[0],
-    target: link[1],
-    value: strokeScale(link[2]),
+  let links = filteredLinksArr.map(video => ({
+    source: video[0],
+    target: video[1],
+    value: strokeScale(video[2]),
   }));
 
   const simulation = d3
@@ -198,7 +204,7 @@ export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
     })
     .attr('y', 3)
     .style('font-size', '12px')
-    .style('visibility', d => (d.radius > 8 ? 'visible' : 'hidden'));
+    .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
   let tooltip = d3
     .select('#graphContainer')
@@ -209,35 +215,21 @@ export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
     .style('background', '#F9F9F9')
     .style('border', '2px solid black')
     .style('color', 'black')
-    .style('left', '0px')
-    .style('bottom', '-350px')
+    .style('right', '0px')
+    .style('top', '0px')
     .style('width', '460px')
-    .style('visibility', 'hidden');
+    .style('visibility', 'hidden')
+    .on('click', () => tooltip.style('visibility', 'hidden').html(''));
 
   node.on('click', d => {
-    tooltip.style('visibility', 'hidden');
+    d3.select('#tab1Button').style('visibility', 'visible');
+    d3.select('#tab2Button').style('visibility', 'visible');
+    d3.select('#tab3Button').style('visibility', 'visible');
     svg.remove();
-    getSongEgo(d.id, oWidth);
-    getIncomingOutgoing(d.id, oWidth);
-  });
-
-  node.on('mouseover', function(d) {
-    d3.select(this)
-      .style('stroke', 'black')
-      .raise()
-      .select('text')
-      .style('visibility', 'visible');
-    tooltip.html('');
-    tooltip.style('visibility', 'visible');
-    getSongInfo(d, tooltip);
-  });
-
-  node.on('mouseleave', function() {
     tooltip.style('visibility', 'hidden');
-    d3.select(this)
-      .style('stroke', 'none')
-      .select('text')
-      .style('visibility', d => (d.radius > 8 ? 'visible' : 'hidden'));
+    getArtistEgo(d.id, oWidth);
+    getSongsByArtist(d.id, oWidth);
+    getIncomingOutgoing(d.id, oWidth);
   });
 
   simulation.on('tick', () => {
@@ -262,5 +254,20 @@ export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
       .attr('y1', d => d.source.y)
       .attr('x2', d => d.target.x)
       .attr('y2', d => d.target.y);
+  });
+
+  node.on('mouseover', function() {
+    d3.select(this)
+      .style('stroke', 'black')
+      .raise()
+      .select('text')
+      .style('visibility', 'visible');
+  });
+
+  node.on('mouseleave', function() {
+    d3.select(this)
+      .style('stroke', 'none')
+      .select('text')
+      .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
   });
 }
