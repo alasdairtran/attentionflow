@@ -87,7 +87,6 @@ export default class AnalyticsDashboard1 extends Component {
       videos: [],
       artists: [],
       links: [],
-      oWidth: 0,
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
@@ -95,9 +94,6 @@ export default class AnalyticsDashboard1 extends Component {
 
   componentDidMount() {
     document.body.classList.add('bg-light');
-    this.setState({
-      oWidth: document.getElementById('graphContainer').clientWidth,
-    });
     this.fetchExample();
   }
 
@@ -151,7 +147,7 @@ export default class AnalyticsDashboard1 extends Component {
       isLoading: false,
       title: document.getElementById('search-text').value,
     });
-    let oWidth = this.state.oWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth;
     d3.select('#tab1Button').style('visibility', 'visible');
     d3.select('#tab2Button').style('visibility', 'visible');
     d3.select('#tab3Button').style('visibility', 'hidden');
@@ -185,7 +181,7 @@ export default class AnalyticsDashboard1 extends Component {
             <Row>
               <Col md="12" lg="12">
                 <Card className="mb-3">
-                  <CardHeader className="card-header-tab">
+                  <CardHeader id={'headerBar'} className="card-header-tab">
                     <div className="card-header-title">
                       <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
                         {' '}

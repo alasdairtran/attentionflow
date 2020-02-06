@@ -6,7 +6,7 @@ import { getIncomingOutgoing } from './incomingOutgoing';
 
 class BarChart extends Component {
   componentDidMount() {
-    let oWidth = document.getElementById('graphContainer').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth;
     d3.select('#tab1Button').style('visibility', 'visible');
     d3.select('#tab2Button').style('visibility', 'visible');
     d3.select('#titleBar').html(this.props.title);

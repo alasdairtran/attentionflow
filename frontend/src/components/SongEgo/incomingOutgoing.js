@@ -229,6 +229,7 @@ function drawIncomingOutgoing(
     tooltip.style('visibility', 'hidden');
     svg.remove();
     d3.select('#titleBar').html(d.id);
+    let oWidth = document.getElementById('headerBar').offsetWidth;
     getSongEgo(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
   });

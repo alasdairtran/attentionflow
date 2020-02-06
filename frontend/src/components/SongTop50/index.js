@@ -33,7 +33,7 @@ const drag = simulation => {
 
 class BarChart extends Component {
   componentDidMount() {
-    let oWidth = document.getElementById('graphContainer').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth;
     this.drawSongExample(oWidth);
   }
 
@@ -196,6 +196,7 @@ class BarChart extends Component {
       d3.select('#tab1Button').style('visibility', 'visible');
       d3.select('#tab2Button').style('visibility', 'visible');
       d3.select('#titleBar').html(d.id);
+      let oWidth = document.getElementById('headerBar').offsetWidth;
       getSongEgo(d.id, oWidth);
       getIncomingOutgoing(d.id, oWidth);
     });

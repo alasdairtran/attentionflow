@@ -266,6 +266,7 @@ function drawIncomingOutgoing(
   node.on('click', d => {
     svg.remove();
     d3.select('#titleBar').html(d.id);
+    let oWidth = document.getElementById('headerBar').offsetWidth;
     getArtistEgo(d.id, oWidth);
     getSongsByArtist(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);

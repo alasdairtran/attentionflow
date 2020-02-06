@@ -145,7 +145,7 @@ export default class AnalyticsDashboard1 extends Component {
       hasError: false,
       isLoading: false,
     });
-    let oWidth = document.getElementById('graphContainer').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth;
     d3.select('#tab1Button').style('visibility', 'visible');
     d3.select('#tab2Button').style('visibility', 'visible');
     d3.select('#tab3Button').style('visibility', 'hidden');
@@ -179,7 +179,7 @@ export default class AnalyticsDashboard1 extends Component {
             <Row>
               <Col md="12" lg="12">
                 <Card className="mb-3">
-                  <CardHeader className="card-header-tab">
+                  <CardHeader id={'titleBar'} className="card-header-tab">
                     <div className="card-header-title">
                       <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
                         {' '}

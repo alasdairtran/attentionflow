@@ -32,7 +32,7 @@ const drag = simulation => {
 
 class BarChart extends Component {
   componentDidMount() {
-    let oWidth = document.getElementById('graphContainer').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth;
     this.drawBarChart(oWidth);
   }
 
@@ -182,14 +182,9 @@ class BarChart extends Component {
       d3.select('#tab1Button').style('visibility', 'visible');
       d3.select('#tab2Button').style('visibility', 'visible');
       d3.select('#titleBar').html(d.id);
-      getGenreTopArtists(
-        d.id,
-        document.getElementById('graphContainer').offsetWidth
-      );
-      getIncomingOutgoing(
-        d.id,
-        document.getElementById('graphContainer').offsetWidth
-      );
+      let oWidth = document.getElementById('headerBar').offsetWidth;
+      getGenreTopArtists(d.id, oWidth);
+      getIncomingOutgoing(d.id, oWidth);
     });
 
     simulation.on('tick', () => {

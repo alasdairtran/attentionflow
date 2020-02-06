@@ -244,7 +244,7 @@ export default class AnalyticsDashboard1 extends Component {
     d3.select('#bubblesPage').style('display', 'none');
     d3.select('#nonBubblesPage').style('visibility', 'visible');
     d3.select('#titleBar').html(document.getElementById('search-text').value);
-    let oWidth = document.getElementById('graphContainer').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth;
     getSongEgo(document.getElementById('search-text').value, oWidth);
     getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
   };
@@ -315,7 +315,7 @@ export default class AnalyticsDashboard1 extends Component {
             <Row id={'nonBubblesPage'} style={{ visibility: 'hidden' }}>
               <Col md="12" lg="12">
                 <Card className="mb-3">
-                  <CardHeader className="card-header-tab">
+                  <CardHeader id={'headerBar'} className="card-header-tab">
                     <div className="card-header-title">
                       <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
                         {' '}

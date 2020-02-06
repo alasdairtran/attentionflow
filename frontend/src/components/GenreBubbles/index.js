@@ -305,7 +305,7 @@ class GenreBubbles extends Component {
         d3.select('#bubblesPage').style('display', 'none');
         d3.select('#nonBubblesPage').style('visibility', 'visible');
         d3.select('#titleBar').html(d.data.name);
-        let oWidth = document.getElementById('graphContainer').offsetWidth;
+        let oWidth = document.getElementById('headerBar').offsetWidth;
         getSongEgo(d.data.name, oWidth);
         getIncomingOutgoing(d.data.name, oWidth);
       });
