@@ -3,10 +3,11 @@ import * as d3 from 'd3';
 import axios from 'axios';
 import SongEgo from '../SongEgo';
 import { getSongEgo } from '../SongEgo/songEgo';
+import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
 
 class GenreBubbles extends Component {
   componentDidMount() {
-    let oWidth = document.getElementById('graphContainer').offsetWidth;
+    let oWidth = document.getElementById('graphContainerBubbles').offsetWidth;
     this.drawGenreBubbles(oWidth);
   }
 
@@ -194,7 +195,6 @@ class GenreBubbles extends Component {
 
               let graphWidth =
                 document.getElementById('bubblesInfo3').offsetWidth - 40;
-              console.log(graphWidth);
               let graphHeight = 120;
               let viewsArray = [];
               bubblesInfo.children.forEach(genreObject => {
@@ -301,7 +301,13 @@ class GenreBubbles extends Component {
 
     d3.selectAll('.node--leaf')
       .style('fill', 'white')
-      .on('click', function(d) {});
+      .on('click', function(d) {
+        d3.select('#bubblesPage').style('display', 'none');
+        d3.select('#nonBubblesPage').style('visibility', 'visible');
+        let oWidth = document.getElementById('graphContainer').offsetWidth;
+        getSongEgo(d.data.name, oWidth);
+        getIncomingOutgoing(d.data.name, oWidth);
+      });
 
     d3.selectAll('.label')
       .style('pointer-events', 'none')

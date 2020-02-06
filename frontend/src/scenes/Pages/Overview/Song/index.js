@@ -234,7 +234,7 @@ export default class AnalyticsDashboard1 extends Component {
                         }}
                         style={{ visibility: 'hidden' }}
                       >
-                        Tab 2
+                        Tab 3
                       </Button>
                     </div>
                   </CardHeader>

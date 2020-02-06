@@ -45,6 +45,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as d3 from 'd3';
 import { getSongEgo } from '../../../../components/SongEgo/songEgo';
 import { getIncomingOutgoing } from '../../../../components/SongEgo/incomingOutgoing';
+import SongTop50 from '../../../../components/SongTop50';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -241,10 +242,9 @@ export default class AnalyticsDashboard1 extends Component {
       title: document.getElementById('search-text').value,
       search: true,
     });
+    d3.select('#bubblesPage').style('display', 'none');
+    d3.select('#nonBubblesPage').style('visibility', 'visible');
     let oWidth = document.getElementById('graphContainer').offsetWidth;
-    d3.select('#tab1Button').style('visibility', 'visible');
-    d3.select('#tab2Button').style('visibility', 'visible');
-    d3.select('#tab3Button').style('visibility', 'hidden');
     getSongEgo(document.getElementById('search-text').value, oWidth);
     getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
   };
@@ -271,9 +271,9 @@ export default class AnalyticsDashboard1 extends Component {
               subheading="An interactive visualisation exploring how YouTube music videos drive attention to each other."
               icon="pe-7s-car icon-gradient bg-mean-fruit"
             />
-            <Row>
+            <Row id={'bubblesPage'}>
               <Col md="9" lg="9">
-                <div id="graphContainer">
+                <div id="graphContainerBubbles">
                   {this.state.isLoading ? (
                     <div
                       style={{
@@ -310,6 +310,203 @@ export default class AnalyticsDashboard1 extends Component {
                   className="card mb-3 bg-grow-early widget-chart text-white card-border"
                 />
                 {/*<div id={'bubblesInfo4'} style={{visibility: 'hidden'}} className="card mb-3 bg-love-kiss widget-chart card-border"/>*/}
+              </Col>
+            </Row>
+            <Row id={'nonBubblesPage'} style={{ visibility: 'hidden' }}>
+              <Col md="12" lg="12">
+                <Card className="mb-3">
+                  <CardHeader className="card-header-tab">
+                    <div className="card-header-title">
+                      <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
+                        {' '}
+                      </i>
+                    </div>
+                    <div className="btn-actions-pane-right">
+                      <Button
+                        outline
+                        className={
+                          'border-0 btn-pill btn-wide btn-transition ' +
+                          classnames({
+                            active: this.state.activeTab1 === '11',
+                          })
+                        }
+                        id={'tab1Button'}
+                        color="primary"
+                        onClick={() => {
+                          this.toggle1('11');
+                        }}
+                      >
+                        Tab 1
+                      </Button>
+                      <Button
+                        outline
+                        className={
+                          'ml-1 btn-pill btn-wide border-0 btn-transition ' +
+                          classnames({
+                            active: this.state.activeTab1 === '22',
+                          })
+                        }
+                        id={'tab2Button'}
+                        color="primary"
+                        onClick={() => {
+                          this.toggle1('22');
+                        }}
+                      >
+                        Tab 2
+                      </Button>
+                      <Button
+                        outline
+                        className={
+                          'ml-1 btn-pill btn-wide border-0 btn-transition ' +
+                          classnames({
+                            active: this.state.activeTab1 === '33',
+                          })
+                        }
+                        id={'tab3Button'}
+                        color="primary"
+                        onClick={() => {
+                          this.toggle1('33');
+                        }}
+                      >
+                        Tab 3
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <TabContent activeTab={this.state.activeTab1}>
+                    <TabPane tabId="11">
+                      <div id="graphContainer" className="col-md-12"></div>
+                    </TabPane>
+                    <TabPane tabId="22">
+                      <div id="graphContainer2" />
+                    </TabPane>
+                    <TabPane tabId="33">
+                      <div id="graphContainer3" />
+                    </TabPane>
+                  </TabContent>
+                </Card>
+              </Col>
+              <Col md="12" lg="12">
+                <Row>
+                  <Col md="3">
+                    <div className="card mb-3 bg-arielle-smile widget-chart text-white card-border">
+                      <div className="icon-wrapper rounded-circle">
+                        <div className="icon-wrapper-bg bg-white opacity-10" />
+                        <i className="lnr-cog icon-gradient bg-arielle-smile" />
+                      </div>
+                      <div className="widget-numbers">87,4</div>
+                      <div className="widget-subheading">Reports Generated</div>
+                      <div className="widget-description text-white">
+                        <FontAwesomeIcon icon={faAngleUp} />
+                        <span className="pl-1">54.9%</span>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md="3">
+                    <div className="card mb-3 bg-midnight-bloom widget-chart text-white card-border">
+                      <div className="icon-wrapper rounded">
+                        <div className="icon-wrapper-bg bg-white opacity-10" />
+                        <i className="lnr-screen icon-gradient bg-warm-flame" />
+                      </div>
+                      <div className="widget-numbers">17.2k</div>
+                      <div className="widget-subheading">Profiles</div>
+                      <div className="widget-description text-white">
+                        <span className="pr-1">62,7%</span>
+                        <FontAwesomeIcon icon={faArrowLeft} />
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md="3">
+                    <div className="card mb-3 bg-grow-early widget-chart text-white card-border">
+                      <div className="icon-wrapper rounded">
+                        <div className="icon-wrapper-bg bg-dark opacity-9" />
+                        <i className="lnr-graduation-hat text-white" />
+                      </div>
+                      <div className="widget-numbers">63.2k</div>
+                      <div className="widget-subheading">Bugs Fixed</div>
+                      <div className="widget-description text-white">
+                        <FontAwesomeIcon icon={faArrowRight} />
+                        <span className="pl-1">72.1%</span>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md="3">
+                    <div className="card mb-3 bg-love-kiss widget-chart card-border">
+                      <div className="widget-chart-content text-white">
+                        <div className="icon-wrapper rounded-circle">
+                          <div className="icon-wrapper-bg bg-white opacity-4" />
+                          <i className="lnr-cog" />
+                        </div>
+                        <div className="widget-numbers">45.8k</div>
+                        <div className="widget-subheading">Total Views</div>
+                        <div className="widget-description">
+                          <FontAwesomeIcon
+                            className="text-white opacity-5"
+                            icon={faAngleUp}
+                          />
+                          <span className="text-white">175.5%</span>
+                        </div>
+                      </div>
+                      <div className="widget-chart-wrapper">
+                        <ResponsiveContainer width="100%" aspect={3.0 / 1.0}>
+                          <LineChart
+                            data={data}
+                            margin={{ top: 0, right: 5, left: 5, bottom: 0 }}
+                          >
+                            <Line
+                              type="monotone"
+                              dataKey="pv"
+                              stroke="#ffffff"
+                              strokeWidth={3}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+                <div className="card mb-3 widget-chart">
+                  <div className="widget-chart-content">
+                    <div className="icon-wrapper rounded-circle">
+                      <div className="icon-wrapper-bg bg-warning" />
+                      <i className="lnr-heart icon-gradient bg-premium-dark">
+                        {' '}
+                      </i>
+                    </div>
+                    <div className="widget-numbers">4517.82</div>
+                    <div className="widget-subheading">
+                      Active Social Profiles
+                    </div>
+                    <div className="widget-description">
+                      Down by
+                      <span className="text-danger pl-1 pr-1">
+                        <FontAwesomeIcon icon={faAngleDown} />
+                        <span className="pl-1">54.1%</span>
+                      </span>
+                      from 30 days ago
+                    </div>
+                  </div>
+                  <div className="widget-chart-wrapper chart-wrapper-relative">
+                    <ResponsiveContainer height={100}>
+                      <LineChart
+                        data={data2}
+                        margin={{ top: 0, right: 5, left: 5, bottom: 0 }}
+                      >
+                        <Line
+                          type="monotone"
+                          dataKey="pv"
+                          stroke="#d6b5ff"
+                          strokeWidth={2}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="uv"
+                          stroke="#a75fff"
+                          strokeWidth={2}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </Col>
             </Row>
             <div className="row">
