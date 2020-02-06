@@ -11,7 +11,23 @@ class GenreBubbles extends Component {
   }
 
   drawGenreBubbles(oWidth) {
-    let root = this.props.root;
+    let bubblesInfo = this.props.bubblesInfo;
+    let root = JSON.parse(JSON.stringify(bubblesInfo));
+    root.children.forEach(genreObject => {
+      genreObject.children.forEach(artistObject => {
+        artistObject.children = artistObject.children
+          .slice(0, Math.floor(artistObject.name[1] / 2000000000) + 1)
+          .map(songObject => ({
+            name: songObject.name[0],
+            size: songObject.size,
+          }));
+      });
+    });
+    root.children.forEach(genreObject => {
+      genreObject.children.forEach(artistObject => {
+        artistObject.name = artistObject.name[0];
+      });
+    });
 
     let color = d3.scaleSequential(d3.interpolateGnBu).domain([-1, 5]);
 
@@ -80,10 +96,169 @@ class GenreBubbles extends Component {
       .style('stroke', 'black')
       .style('stroke-width', '0px')
       .on('mouseover', function(d) {
-        if (d !== root) d3.select(this).style('stroke-width', '1.5px');
-      })
-      .on('mouseleave', function() {
-        d3.select(this).style('stroke-width', '0px');
+        if (focus === d.parent || focus.parent === d || focus === d) {
+          d3.select('#bubblesInfo1').html('');
+          d3.select('#bubblesInfo2').html('');
+          d3.select('#bubblesInfo3').html('');
+          circle.style('stroke-width', '0px');
+
+          if (d !== root) {
+            d3.select(this).style('stroke-width', '1.5px');
+            d3.select('#bubblesInfo1')
+              .append('h5')
+              .text(d.data.name.split('_').join(' '));
+            //Genre Info
+            if (d.depth === 1) {
+              let topArtists = [];
+              bubblesInfo.children.forEach(genreObject => {
+                if (genreObject.name === d.data.name) {
+                  topArtists = genreObject.children
+                    .slice(0, 5)
+                    .map(artistObject => artistObject.name[0]);
+                }
+              });
+              d3.select('#bubblesInfo2')
+                .append('h6')
+                .html('Top Artists');
+              d3.select('#bubblesInfo2')
+                .append('ol')
+                .selectAll('li')
+                .data(topArtists)
+                .enter()
+                .append('li')
+                .html(d => d)
+                .style('text-align', 'left');
+              let topSongs = [];
+              bubblesInfo.children.forEach(genreObject => {
+                if (genreObject.name === d.data.name) {
+                  let songsList = [];
+                  genreObject.children.forEach(artistObject => {
+                    songsList.push(...artistObject.children);
+                  });
+
+                  songsList.sort(function(a, b) {
+                    return b.size - a.size;
+                  });
+                  topSongs = songsList.slice(0, 5);
+                }
+              });
+              d3.select('#bubblesInfo3')
+                .append('h6')
+                .html('Top Songs');
+              d3.select('#bubblesInfo3')
+                .append('ol')
+                .selectAll('li')
+                .data(topSongs)
+                .enter()
+                .append('li')
+                .html(d => d.name[0])
+                .style('text-align', 'left');
+            }
+            //Artist Info
+            else if (d.depth === 2) {
+              let topSongs = [];
+              bubblesInfo.children.forEach(genreObject => {
+                if (genreObject.name === d.parent.data.name) {
+                  genreObject.children.forEach(artistObject => {
+                    if (artistObject.name[0] === d.data.name) {
+                      topSongs = artistObject.children
+                        .slice(0, 5)
+                        .map(songObject => songObject.name[0]);
+                    }
+                  });
+                }
+              });
+              d3.select('#bubblesInfo2')
+                .append('h6')
+                .html('Top Songs');
+              d3.select('#bubblesInfo2')
+                .append('ol')
+                .selectAll('li')
+                .data(topSongs)
+                .enter()
+                .append('li')
+                .html(d => d)
+                .style('text-align', 'left');
+            }
+            //Song Info
+            else if (d.depth === 3) {
+              d3.select('#bubblesInfo2')
+                .append('h6')
+                .html('Total Views');
+              d3.select('#bubblesInfo2')
+                .append('p')
+                .html(d3.format(',')(d.data.size));
+              d3.select('#bubblesInfo3').html(
+                '<p>Daily Views</p>' + "<div id = 'dailyViewsGraph' />"
+              );
+
+              let graphWidth =
+                document.getElementById('bubblesInfo3').offsetWidth - 40;
+              console.log(graphWidth);
+              let graphHeight = 120;
+              let viewsArray = [];
+              bubblesInfo.children.forEach(genreObject => {
+                if (genreObject.name === d.parent.parent.data.name) {
+                  genreObject.children.forEach(artistObject => {
+                    if (artistObject.name[0] === d.parent.data.name) {
+                      artistObject.children.forEach(songObject => {
+                        if (songObject.name[0] === d.data.name)
+                          viewsArray = JSON.parse(songObject.name[1]);
+                      });
+                    }
+                  });
+                }
+              });
+
+              let dailyViewsGraph = d3
+                .select('#dailyViewsGraph')
+                .append('svg')
+                .attr('width', graphWidth)
+                .attr('height', graphHeight);
+
+              let x = d3
+                .scaleLinear()
+                .domain([0, viewsArray.length])
+                .range([40, graphWidth - 1]);
+              let y = d3
+                .scaleLinear()
+                .domain([0, d3.max(viewsArray)])
+                .range([graphHeight - 10, 10]);
+
+              let xAxis = d3
+                .axisBottom()
+                .scale(x)
+                .tickValues([]);
+              let yAxis = d3
+                .axisLeft()
+                .scale(y)
+                .ticks(7)
+                .tickFormat(d3.format('.3s'));
+              dailyViewsGraph
+                .append('g')
+                .attr('transform', 'translate(0,110)')
+                .call(xAxis);
+              dailyViewsGraph
+                .append('g')
+                .attr('transform', 'translate(40,0)')
+                .call(yAxis);
+
+              dailyViewsGraph
+                .append('path')
+                .datum(viewsArray)
+                .attr('fill', 'none')
+                .attr('stroke', 'white')
+                .attr('stroke-width', 1.5)
+                .attr(
+                  'd',
+                  d3
+                    .line()
+                    .x((d, i) => x(i))
+                    .y(d => y(d))
+                );
+            }
+          }
+        }
       });
 
     let text = g
@@ -126,12 +301,7 @@ class GenreBubbles extends Component {
 
     d3.selectAll('.node--leaf')
       .style('fill', 'white')
-      .on('click', function(d) {
-        console.log(d.data.name);
-        //d3.select('#graphContainer').html('<div style="width:50px;height:50px;border:10px solid #f3f3f3;borderRadius:50%;borderTop:10px solid #3498db;animation:spin 2s linear infinite;margin:100px auto"/>');
-        svg.selectAll('*').remove();
-        getSongEgo(d.data.name, svg, tooltip);
-      });
+      .on('click', function(d) {});
 
     d3.selectAll('.label')
       .style('pointer-events', 'none')

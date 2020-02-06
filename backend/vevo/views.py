@@ -484,7 +484,7 @@ def get_genre_artist_top_songs(request):
     with driver.session() as session:
         results = session.run("MATCH (g:G {genre:{genre}})--(v:V)--(a:A {artist: {artist}}) "
                               "WITH v ORDER BY v.totalView desc "
-                              "RETURN collect([v.title, v.totalView])[..{limit}] as songs ",
+                              "RETURN collect([v.title, v.totalView, v.dailyView])[..case when {limit} > 5 then {limit} else 5 end] as songs ",
                               {"genre": genre, 'artist': artist, 'limit': limit})
         result = results.single()
 

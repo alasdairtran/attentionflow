@@ -84,7 +84,7 @@ export default class AnalyticsDashboard1 extends Component {
       isLoading: true,
       hasError: false,
       errorMessage: '',
-      root: {},
+      bubblesInfo: {},
       search: false,
       links: [],
       videos: [],
@@ -116,7 +116,7 @@ export default class AnalyticsDashboard1 extends Component {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     let options = {};
     let genreObjects = [];
-    let root;
+    let bubblesInfo;
     let finished = false;
     let finishedGenres = false;
     let finishedArtists = false;
@@ -155,10 +155,7 @@ export default class AnalyticsDashboard1 extends Component {
                           params: {
                             genre: genre,
                             artist: artist,
-                            limit: Math.min(
-                              Math.floor(artistList[1] / 1000000000) + 1,
-                              5
-                            ),
+                            limit: Math.floor(artistList[1] / 1000000000) + 1,
                           },
                         };
                         artistPromises.push(
@@ -171,7 +168,7 @@ export default class AnalyticsDashboard1 extends Component {
                                 let songs = res.data.songs;
                                 songs.forEach(function(song, index) {
                                   songObjects.push({
-                                    name: song[0],
+                                    name: [song[0], song[2]],
                                     size: song[1],
                                   });
 
@@ -179,9 +176,8 @@ export default class AnalyticsDashboard1 extends Component {
                                     finishedSongs = true;
                                   }
                                 });
-
                                 artistObjects.push({
-                                  name: artist,
+                                  name: artistList,
                                   children: songObjects,
                                 });
                               }
@@ -206,14 +202,14 @@ export default class AnalyticsDashboard1 extends Component {
               });
           });
         }
-        root = {
+        bubblesInfo = {
           name: 'genres',
           children: genreObjects,
         };
 
         let promise = new Promise((resolve, reject) => {
           function checkFlag() {
-            if (root.children.length !== 19) {
+            if (bubblesInfo.children.length !== 19) {
               window.setTimeout(checkFlag, 100);
             } else {
               resolve();
@@ -226,7 +222,7 @@ export default class AnalyticsDashboard1 extends Component {
             isLoaded: true,
             isLoading: false,
             search: false,
-            root: root,
+            bubblesInfo: bubblesInfo,
           })
         );
       })
@@ -291,7 +287,7 @@ export default class AnalyticsDashboard1 extends Component {
                       }}
                     />
                   ) : !this.state.search ? (
-                    <GenreBubbles root={this.state.root} />
+                    <GenreBubbles bubblesInfo={this.state.bubblesInfo} />
                   ) : (
                     <SongEgo
                       videos={this.state.videos}
@@ -301,74 +297,19 @@ export default class AnalyticsDashboard1 extends Component {
                 </div>
               </Col>
               <Col md="3" lg="3">
-                <div className="card mb-3 bg-arielle-smile widget-chart text-white card-border">
-                  <div className="icon-wrapper rounded-circle">
-                    <div className="icon-wrapper-bg bg-white opacity-10" />
-                    <i className="lnr-cog icon-gradient bg-arielle-smile" />
-                  </div>
-                  <div className="widget-numbers">87,4</div>
-                  <div className="widget-subheading">Reports Generated</div>
-                  <div className="widget-description text-white">
-                    <FontAwesomeIcon icon={faAngleUp} />
-                    <span className="pl-1">54.9%</span>
-                  </div>
-                </div>
-                <div className="card mb-3 bg-midnight-bloom widget-chart text-white card-border">
-                  <div className="icon-wrapper rounded">
-                    <div className="icon-wrapper-bg bg-white opacity-10" />
-                    <i className="lnr-screen icon-gradient bg-warm-flame" />
-                  </div>
-                  <div className="widget-numbers">17.2k</div>
-                  <div className="widget-subheading">Profiles</div>
-                  <div className="widget-description text-white">
-                    <span className="pr-1">62,7%</span>
-                    <FontAwesomeIcon icon={faArrowLeft} />
-                  </div>
-                </div>
-                <div className="card mb-3 bg-grow-early widget-chart text-white card-border">
-                  <div className="icon-wrapper rounded">
-                    <div className="icon-wrapper-bg bg-dark opacity-9" />
-                    <i className="lnr-graduation-hat text-white" />
-                  </div>
-                  <div className="widget-numbers">63.2k</div>
-                  <div className="widget-subheading">Bugs Fixed</div>
-                  <div className="widget-description text-white">
-                    <FontAwesomeIcon icon={faArrowRight} />
-                    <span className="pl-1">72.1%</span>
-                  </div>
-                </div>
-                <div className="card mb-3 bg-love-kiss widget-chart card-border">
-                  <div className="widget-chart-content text-white">
-                    <div className="icon-wrapper rounded-circle">
-                      <div className="icon-wrapper-bg bg-white opacity-4" />
-                      <i className="lnr-cog" />
-                    </div>
-                    <div className="widget-numbers">45.8k</div>
-                    <div className="widget-subheading">Total Views</div>
-                    <div className="widget-description">
-                      <FontAwesomeIcon
-                        className="text-white opacity-5"
-                        icon={faAngleUp}
-                      />
-                      <span className="text-white">175.5%</span>
-                    </div>
-                  </div>
-                  <div className="widget-chart-wrapper">
-                    <ResponsiveContainer width="100%" aspect={3.0 / 1.0}>
-                      <LineChart
-                        data={data}
-                        margin={{ top: 0, right: 5, left: 5, bottom: 0 }}
-                      >
-                        <Line
-                          type="monotone"
-                          dataKey="pv"
-                          stroke="#ffffff"
-                          strokeWidth={3}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+                <div
+                  id={'bubblesInfo1'}
+                  className="card mb-3 bg-arielle-smile widget-chart text-white card-border"
+                />
+                <div
+                  id={'bubblesInfo2'}
+                  className="card mb-3 bg-midnight-bloom widget-chart text-white card-border"
+                />
+                <div
+                  id={'bubblesInfo3'}
+                  className="card mb-3 bg-grow-early widget-chart text-white card-border"
+                />
+                {/*<div id={'bubblesInfo4'} style={{visibility: 'hidden'}} className="card mb-3 bg-love-kiss widget-chart card-border"/>*/}
               </Col>
             </Row>
             <div className="row">
