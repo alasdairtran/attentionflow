@@ -197,6 +197,7 @@ class BarChart extends Component {
       d3.select('#tab3Button').style('visibility', 'visible');
       svg.remove();
       tooltip.style('visibility', 'hidden');
+      d3.select('#titleBar').html(d.id);
       getArtistEgo(d.id, oWidth);
       getSongsByArtist(d.id, oWidth);
       getIncomingOutgoing(d.id, oWidth);

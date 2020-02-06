@@ -217,6 +217,7 @@ export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
   node.on('click', d => {
     tooltip.style('visibility', 'hidden');
     svg.remove();
+    d3.select('#titleBar').html(d.id);
     getSongEgo(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
   });

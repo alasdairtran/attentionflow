@@ -45,7 +45,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as d3 from 'd3';
 import { getSongEgo } from '../../../../components/SongEgo/songEgo';
 import { getIncomingOutgoing } from '../../../../components/SongEgo/incomingOutgoing';
-import SongTop50 from '../../../../components/SongTop50';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -244,6 +243,7 @@ export default class AnalyticsDashboard1 extends Component {
     });
     d3.select('#bubblesPage').style('display', 'none');
     d3.select('#nonBubblesPage').style('visibility', 'visible');
+    d3.select('#titleBar').html(document.getElementById('search-text').value);
     let oWidth = document.getElementById('graphContainer').offsetWidth;
     getSongEgo(document.getElementById('search-text').value, oWidth);
     getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
@@ -320,6 +320,7 @@ export default class AnalyticsDashboard1 extends Component {
                       <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
                         {' '}
                       </i>
+                      <h6 id={'titleBar'} />
                     </div>
                     <div className="btn-actions-pane-right">
                       <Button

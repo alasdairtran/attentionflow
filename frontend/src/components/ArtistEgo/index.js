@@ -86,7 +86,6 @@ class BarChart extends Component {
 
     const canvasHeight = oWidth * 0.6;
     const canvasWidth = oWidth;
-    const verticalMargin = 30;
     const svg = d3
       .select(this.refs.canvas)
       .append('svg')
@@ -199,17 +198,10 @@ class BarChart extends Component {
     node.on('click', d => {
       svg.remove();
       tooltip.style('visibility', 'hidden');
-      getArtistEgo(d.id);
-      getSongsByArtist(d.id, canvasWidth, canvasHeight, svg, drag, tooltip);
-      getIncomingOutgoing(
-        d.id,
-        canvasWidth,
-        canvasHeight,
-        verticalMargin,
-        svg,
-        drag,
-        tooltip
-      );
+      d3.select('#titleBar').html(d.id);
+      getArtistEgo(d.id, oWidth);
+      getSongsByArtist(d.id, oWidth);
+      getIncomingOutgoing(d.id, oWidth);
     });
 
     simulation.on('tick', () => {

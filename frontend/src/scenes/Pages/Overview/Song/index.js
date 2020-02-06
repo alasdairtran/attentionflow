@@ -149,6 +149,7 @@ export default class AnalyticsDashboard1 extends Component {
     d3.select('#tab1Button').style('visibility', 'visible');
     d3.select('#tab2Button').style('visibility', 'visible');
     d3.select('#tab3Button').style('visibility', 'hidden');
+    d3.select('#titleBar').html(document.getElementById('search-text').value);
     getSongEgo(document.getElementById('search-text').value, oWidth);
     getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
   };
@@ -183,6 +184,7 @@ export default class AnalyticsDashboard1 extends Component {
                       <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
                         {' '}
                       </i>
+                      <h6 id={'titleBar'}>Top 50 Songs</h6>
                     </div>
                     <div className="btn-actions-pane-right">
                       <Button

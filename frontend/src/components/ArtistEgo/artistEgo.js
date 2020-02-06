@@ -217,6 +217,7 @@ function drawArtistEgo(nodesArr, linksArr, oWidth) {
 
   node.on('click', d => {
     svg.remove();
+    d3.select('#titleBar').html(d.id);
     getArtistEgo(d.id, oWidth);
     getSongsByArtist(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);

@@ -9,6 +9,7 @@ class BarChart extends Component {
     let oWidth = document.getElementById('graphContainer').offsetWidth;
     d3.select('#tab1Button').style('visibility', 'visible');
     d3.select('#tab2Button').style('visibility', 'visible');
+    d3.select('#titleBar').html(this.props.title);
     getSongEgo(this.props.title, oWidth);
     getIncomingOutgoing(this.props.title, oWidth);
   }

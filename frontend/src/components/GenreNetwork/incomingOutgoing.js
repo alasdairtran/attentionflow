@@ -214,6 +214,7 @@ function drawIncomingOutgoing(
 
   node.on('click', d => {
     svg.remove();
+    d3.select('#titleBar').html(d.id);
     getGenreTopArtists(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
   });

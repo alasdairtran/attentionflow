@@ -195,6 +195,7 @@ class BarChart extends Component {
       svg.remove();
       d3.select('#tab1Button').style('visibility', 'visible');
       d3.select('#tab2Button').style('visibility', 'visible');
+      d3.select('#titleBar').html(d.id);
       getSongEgo(d.id, oWidth);
       getIncomingOutgoing(d.id, oWidth);
     });
