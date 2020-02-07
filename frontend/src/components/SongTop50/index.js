@@ -33,7 +33,7 @@ const drag = simulation => {
 
 class BarChart extends Component {
   componentDidMount() {
-    let oWidth = document.getElementById('headerBar').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
     this.drawSongExample(oWidth);
   }
 
@@ -191,12 +191,11 @@ class BarChart extends Component {
       .style('visibility', 'hidden');
 
     node.on('click', d => {
-      tooltip.style('visibility', 'hidden');
       svg.remove();
-      d3.select('#tab1Button').style('visibility', 'visible');
-      d3.select('#tab2Button').style('visibility', 'visible');
+      d3.select('#tab1Button').style('display', 'inline');
+      d3.select('#tab2Button').style('display', 'inline');
       d3.select('#titleBar').html(d.id);
-      let oWidth = document.getElementById('headerBar').offsetWidth;
+      let oWidth = document.getElementById('headerBar').offsetWidth - 50;
       getSongEgo(d.id, oWidth);
       getIncomingOutgoing(d.id, oWidth);
     });

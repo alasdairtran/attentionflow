@@ -242,9 +242,9 @@ export default class AnalyticsDashboard1 extends Component {
       search: true,
     });
     d3.select('#bubblesPage').style('display', 'none');
-    d3.select('#nonBubblesPage').style('visibility', 'visible');
+    d3.select('#nonBubblesPage').style('display', 'inline');
     d3.select('#titleBar').html(document.getElementById('search-text').value);
-    let oWidth = document.getElementById('headerBar').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getSongEgo(document.getElementById('search-text').value, oWidth);
     getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
   };
@@ -312,7 +312,7 @@ export default class AnalyticsDashboard1 extends Component {
                 {/*<div id={'bubblesInfo4'} style={{visibility: 'hidden'}} className="card mb-3 bg-love-kiss widget-chart card-border"/>*/}
               </Col>
             </Row>
-            <Row id={'nonBubblesPage'} style={{ visibility: 'hidden' }}>
+            <Row id={'nonBubblesPage'} style={{ display: 'none' }}>
               <Col md="12" lg="12">
                 <Card className="mb-3">
                   <CardHeader id={'headerBar'} className="card-header-tab">

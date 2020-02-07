@@ -148,11 +148,11 @@ export default class AnalyticsDashboard1 extends Component {
       hasError: false,
       isLoading: false,
     });
-    d3.select('#tab1Button').style('visibility', 'visible');
-    d3.select('#tab2Button').style('visibility', 'visible');
-    d3.select('#tab3Button').style('visibility', 'hidden');
+    d3.select('#tab1Button').style('display', 'inline');
+    d3.select('#tab2Button').style('display', 'inline');
+    d3.select('#tab3Button').style('display', 'none');
     d3.select('#titleBar').html(document.getElementById('search-text').value);
-    let oWidth = document.getElementById('headerBar').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getSongEgo(document.getElementById('search-text').value, oWidth);
     getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
   };
@@ -182,7 +182,7 @@ export default class AnalyticsDashboard1 extends Component {
             <Row>
               <Col md="12" lg="12">
                 <Card className="mb-3">
-                  <CardHeader id={'titleBar'} className="card-header-tab">
+                  <CardHeader id={'headerBar'} className="card-header-tab">
                     <div className="card-header-title">
                       <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
                         {' '}
@@ -203,7 +203,7 @@ export default class AnalyticsDashboard1 extends Component {
                         onClick={() => {
                           this.toggle1('11');
                         }}
-                        style={{ visibility: 'hidden' }}
+                        style={{ display: 'none' }}
                       >
                         Tab 1
                       </Button>
@@ -220,7 +220,7 @@ export default class AnalyticsDashboard1 extends Component {
                         onClick={() => {
                           this.toggle1('22');
                         }}
-                        style={{ visibility: 'hidden' }}
+                        style={{ display: 'none' }}
                       >
                         Tab 2
                       </Button>
@@ -237,7 +237,7 @@ export default class AnalyticsDashboard1 extends Component {
                         onClick={() => {
                           this.toggle1('33');
                         }}
-                        style={{ visibility: 'hidden' }}
+                        style={{ display: 'none' }}
                       >
                         Tab 3
                       </Button>

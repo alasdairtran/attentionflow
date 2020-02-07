@@ -222,13 +222,13 @@ function drawGenreTopArtists(artistsArr, linksUnfiltered, oWidth) {
     .on('click', () => tooltip.style('visibility', 'hidden').html(''));
 
   node.on('click', d => {
-    d3.select('#tab1Button').style('visibility', 'visible');
-    d3.select('#tab2Button').style('visibility', 'visible');
-    d3.select('#tab3Button').style('visibility', 'visible');
+    d3.select('#tab1Button').style('display', 'inline');
+    d3.select('#tab2Button').style('display', 'inline');
+    d3.select('#tab3Button').style('display', 'inline');
     svg.remove();
     tooltip.style('visibility', 'hidden');
     d3.select('#titleBar').html(d.id);
-    let oWidth = document.getElementById('headerBar').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getArtistEgo(d.id, oWidth);
     getSongsByArtist(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);

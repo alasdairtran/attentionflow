@@ -218,7 +218,7 @@ export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
     tooltip.style('visibility', 'hidden');
     svg.remove();
     d3.select('#titleBar').html(d.id);
-    let oWidth = document.getElementById('headerBar').offsetWidth;
+    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getSongEgo(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
   });

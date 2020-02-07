@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
-import axios from 'axios';
-import SongEgo from '../SongEgo';
 import { getSongEgo } from '../SongEgo/songEgo';
 import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
 
@@ -84,8 +82,16 @@ class GenreBubbles extends Component {
       })
       .on('click', function(d) {
         if (focus !== d) {
-          focus = d;
-          zoom(d);
+          if (d === root) {
+            focus = d;
+            zoom(d);
+          } else if (d.parent.parent === focus) {
+            focus = d.parent;
+            zoom(d.parent);
+          } else {
+            focus = d;
+            zoom(d);
+          }
         } else {
           if (d !== root) {
             focus = d.parent;
@@ -279,35 +285,35 @@ class GenreBubbles extends Component {
 
     let node = g.selectAll('circle,text');
 
-    svg.style('background', 'transparent').on('click', function() {
-      zoom(root);
-    });
+    svg
+      .style('background', 'transparent')
+      .style('cursor', 'pointer')
+      .on('click', function() {
+        zoom(root);
+      });
 
     zoomTo([root.x, root.y, root.r * 2]);
-
-    let tooltip = d3
-      .select(this.refs.canvas)
-      .append('div')
-      .style('position', 'absolute')
-      .style('z-index', '100')
-      .style('padding', '10px')
-      .style('background', '#F9F9F9')
-      .style('border', '2px solid black')
-      .style('color', 'black')
-      .style('bottom', '0px')
-      .style('right', '0px')
-      .style('width', '460px')
-      .style('visibility', 'hidden');
 
     d3.selectAll('.node--leaf')
       .style('fill', 'white')
       .on('click', function(d) {
-        d3.select('#bubblesPage').style('display', 'none');
-        d3.select('#nonBubblesPage').style('visibility', 'visible');
-        d3.select('#titleBar').html(d.data.name);
-        let oWidth = document.getElementById('headerBar').offsetWidth;
-        getSongEgo(d.data.name, oWidth);
-        getIncomingOutgoing(d.data.name, oWidth);
+        if (focus === d.parent) {
+          d3.select('#bubblesPage').style('display', 'none');
+          d3.select('#nonBubblesPage').style('display', 'inline');
+          d3.select('#tab1Button').style('display', 'inline');
+          d3.select('#tab2Button').style('display', 'inline');
+          d3.select('#tab3Button').style('display', 'none');
+          d3.select('#titleBar').html(d.data.name);
+          let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+          getSongEgo(d.data.name, oWidth);
+          getIncomingOutgoing(d.data.name, oWidth);
+        } else if (focus === d.parent.parent) {
+          focus = d.parent;
+          zoom(d.parent);
+        } else if (focus === d.parent.parent.parent) {
+          focus = d.parent.parent;
+          zoom(d.parent.parent);
+        }
       });
 
     d3.selectAll('.label')
