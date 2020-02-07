@@ -65,7 +65,7 @@ export function getSongsByArtist(artist, oWidth) {
 
 function drawSongsByArtist(songs, songLinks, oWidth) {
   const canvasWidth = oWidth;
-  const canvasHeight = oWidth / 2;
+  const canvasHeight = oWidth * 0.6;
 
   const svg = d3
     .select('#graphContainer2')

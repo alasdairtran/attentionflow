@@ -42,7 +42,7 @@ class BarChart extends Component {
     let artistsArr = this.props.artists;
     let linksArr = this.props.links.filter(link => link[1] !== null);
 
-    const canvasHeight = oWidth / 2;
+    const canvasHeight = oWidth * 0.6;
     const canvasWidth = oWidth;
     const horizontalMargin = canvasWidth / 2 - 100;
     const verticalMargin = 80;

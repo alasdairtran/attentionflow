@@ -217,7 +217,7 @@ export default class AnalyticsDashboard1 extends Component {
                         }}
                         style={{ display: 'none' }}
                       >
-                        Tab 1
+                        Top Artists
                       </Button>
                       <Button
                         outline
@@ -234,7 +234,7 @@ export default class AnalyticsDashboard1 extends Component {
                         }}
                         style={{ display: 'none' }}
                       >
-                        Tab 2
+                        In/Out Flow
                       </Button>
                       <Button
                         outline

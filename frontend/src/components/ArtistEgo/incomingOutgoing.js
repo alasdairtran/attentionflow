@@ -70,7 +70,7 @@ function drawIncomingOutgoing(
   oWidth
 ) {
   const canvasWidth = oWidth;
-  const canvasHeight = oWidth / 2;
+  const canvasHeight = oWidth * 0.6;
   const verticalMargin = 100;
   const svg = d3
     .select('#graphContainer3')
