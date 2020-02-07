@@ -199,6 +199,7 @@ class BarChart extends Component {
     });
 
     simulation.on('tick', () => {
+      // ## this code makes nodes bounded in the panel
       node
         .attr('cx', function(d) {
           return (d.x = Math.max(
@@ -215,6 +216,15 @@ class BarChart extends Component {
         .attr('transform', function(d) {
           return 'translate(' + d.x + ',' + d.y + ')';
         });
+
+      // ## this code makes nodes NOT bounded in the panel
+      // node
+      //   .attr('cx', d => d.x)
+      //   .attr('cy', d => d.y)
+      //   .attr('transform', function(d) {
+      //     return 'translate(' + d.x + ',' + d.y + ')';
+      //   });
+
       link
         .attr('x1', d => d.source.x)
         .attr('y1', d => d.source.y)
