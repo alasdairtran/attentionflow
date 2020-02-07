@@ -140,20 +140,32 @@ export default class AnalyticsDashboard1 extends Component {
 
   // For search box
   display = d => {
-    d.preventDefault();
-    this.setState({
-      isLoaded: true,
-      hasError: false,
-      isLoading: false,
-      title: document.getElementById('search-text').value,
-    });
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
-    d3.select('#tab1Button').style('display', 'inline');
-    d3.select('#tab2Button').style('display', 'inline');
-    d3.select('#tab3Button').style('display', 'none');
-    d3.select('#titleBar').html(document.getElementById('search-text').value);
-    getSongEgo(document.getElementById('search-text').value, oWidth);
-    getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
+    if (!this.state.isLoading) {
+      d.preventDefault();
+      d3.select('#graphContainer').html('');
+      d3.select('#graphContainer')
+        .append('div')
+        .style('width', '50px')
+        .style('height', '50px')
+        .style('border', '10px solid #f3f3f3')
+        .style('border-radius', '50%')
+        .style('border-top', '10px solid #3498db')
+        .style('animation', 'spin 2s linear infinite')
+        .style('margin', '100px auto');
+      this.setState({
+        isLoaded: true,
+        hasError: false,
+        isLoading: false,
+        title: document.getElementById('search-text').value,
+      });
+      let oWidth = document.getElementById('headerBar').clientWidth;
+      d3.select('#tab1Button').style('display', 'inline');
+      d3.select('#tab2Button').style('display', 'inline');
+      d3.select('#tab3Button').style('display', 'none');
+      d3.select('#titleBar').html(document.getElementById('search-text').value);
+      getSongEgo(document.getElementById('search-text').value, oWidth);
+      getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
+    }
   };
 
   render() {
