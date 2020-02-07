@@ -30,6 +30,7 @@ const drag = simulation => {
     .on('end', dragended);
 };
 
+var vis;
 class BarChart extends Component {
   componentDidMount() {
     let oWidth = document.getElementById('headerBar').offsetWidth - 50;
@@ -64,11 +65,21 @@ class BarChart extends Component {
     const canvasWidth = oWidth;
     const horizontalMargin = canvasWidth / 2 - 100;
     const verticalMargin = 130;
-    const svg = d3
+
+    const outer = d3
       .select(this.refs.canvas)
       .append('svg')
       .attr('width', canvasWidth)
-      .attr('height', canvasHeight);
+      .attr('height', canvasHeight)
+      .attr('pointer-events', 'all');
+    outer
+      .append('rect')
+      .attr('class', 'background')
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .style('fill', '#FFF')
+      .call(d3.zoom().on('zoom', this.redraw));
+    vis = outer.append('g');
 
     //Connection weight
     const strokeList = connectedLinks.map(genre => genre[2]);
@@ -137,7 +148,7 @@ class BarChart extends Component {
         d3.forceCenter((canvasWidth - 100) / 2, canvasHeight / 2)
       );
 
-    const link = svg
+    const link = vis
       .append('g')
       .attr('stroke', '#999')
       .attr('stroke-opacity', 0.6)
@@ -146,7 +157,7 @@ class BarChart extends Component {
       .join('line')
       .attr('stroke-width', d => 3 * d.value);
 
-    const node = svg
+    const node = vis
       .append('g')
       .selectAll('g')
       .data(nodes)
@@ -178,7 +189,7 @@ class BarChart extends Component {
       .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
     node.on('click', d => {
-      svg.remove();
+      vis.remove();
       d3.select('#tab1Button').style('display', 'inline');
       d3.select('#tab2Button').style('display', 'inline');
       d3.select('#titleBar').html(d.id.split('_').join(' '));
@@ -225,6 +236,12 @@ class BarChart extends Component {
         .select('text')
         .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
     });
+  }
+
+  redraw(transition) {
+    // if mouse down then we are dragging not panning
+    // if (this.nodeMouseDown) return;
+    (transition ? vis.transition() : vis).attr('transform', d3.event.transform);
   }
 
   render() {
