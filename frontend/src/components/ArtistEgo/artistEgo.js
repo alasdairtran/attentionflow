@@ -91,6 +91,8 @@ function drawArtistEgo(nodesArr, linksArr, oWidth) {
     }
   }
 
+  filteredLinksArr = filteredLinksArr.filter(link => link[1] !== null);
+
   let tooltip = d3
     .select('#graphContainer')
     .append('div')
