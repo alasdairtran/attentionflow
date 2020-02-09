@@ -6,6 +6,8 @@ import { getIncomingOutgoing } from './incomingOutgoing';
 import { getSongsByArtist } from './songsByArtist';
 import { drawSongEgo } from '../SongEgo/songEgo';
 
+import '../../scenes/assets/vevovis.css';
+
 const drag = simulation => {
   function dragstarted(d) {
     if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -54,6 +56,7 @@ export function getArtistEgo(artist, oWidth) {
       } else {
         d3.select('#graphContainer').html('');
         drawArtistEgo(res.data.artists, res.data.links, oWidth);
+        drawHopSlider();
       }
     })
     .catch(function(error) {
@@ -61,6 +64,53 @@ export function getArtistEgo(artist, oWidth) {
     });
 }
 
+var btns = {};
+function drawHopSlider() {
+  console.log('drawHopSlider');
+
+  var container = document.getElementById('graphContainer');
+  var div = document.createElement('div');
+  div.classList.add('egohops');
+  div.innerHTML = 'N-hop ego network';
+
+  // <div role="group" class="btn-group-sm btn-group btn-group-toggle" data-toggle="buttons">
+  // <label class="btn btn-primary">
+  //     <input type="radio" name="options" id="option1" autocomplete="off" checked>
+  //     One
+  // </label>
+  var btngroup = document.createElement('div');
+  btngroup.role = 'group';
+  btngroup.className = 'egohops-buttons btn-group';
+
+  for (var i = 1; i <= 3; i++) {
+    btns[i] = document.createElement('button');
+    btns[i].className = 'egohops-label btn btn-outline-secondary';
+    btns[i].textContent = '' + i;
+    btns[i].addEventListener('click', changeNumberHops);
+    btngroup.appendChild(btns[i]);
+  }
+  btns[1].classList.remove('btn-outline-secondary');
+  btns[1].classList.add('btn-secondary');
+
+  div.appendChild(btngroup);
+  container.appendChild(div);
+}
+function changeNumberHops(e) {
+  var selected = parseInt(this.innerHTML);
+  alert('button value change: ' + selected);
+  for (var i = 1; i <= 3; i++) {
+    btns[i].classList.remove('btn-secondary');
+    btns[i].classList.add('btn-outline-secondary');
+  }
+  btns[selected].classList.remove('btn-outline-secondary');
+  btns[selected].classList.add('btn-secondary');
+
+  /////////////////////////////////////////////
+  //   DO SOMETHING when changing # of hops  //
+  /////////////////////////////////////////////
+}
+
+var vis;
 function drawArtistEgo(nodesArr, linksArr, oWidth) {
   let len = linksArr.length;
   let filteredLinksArr = [];
@@ -111,11 +161,27 @@ function drawArtistEgo(nodesArr, linksArr, oWidth) {
   const canvasHeight = oWidth * 0.6;
   const canvasWidth = oWidth;
   const verticalMargin = 30;
-  const svg = d3
+  const outer = d3
     .select('#graphContainer')
     .append('svg')
     .attr('width', canvasWidth)
-    .attr('height', canvasHeight);
+    .attr('height', canvasHeight)
+    .attr('pointer-events', 'all');
+  outer
+    .append('rect')
+    .attr('class', 'background')
+    .attr('width', '100%')
+    .attr('height', '100%')
+    .style('fill', '#FFF')
+    .call(
+      d3.zoom().on('zoom', function(transition) {
+        (transition ? vis.transition() : vis).attr(
+          'transform',
+          d3.event.transform
+        );
+      })
+    );
+  vis = outer.append('g');
 
   const strokeList = filteredLinksArr.map(d => d[2]);
   const minStroke = 0.5;
@@ -178,7 +244,7 @@ function drawArtistEgo(nodesArr, linksArr, oWidth) {
     .force('charge', d3.forceManyBody().strength(-1000))
     .force('center', d3.forceCenter((canvasWidth - 100) / 2, canvasHeight / 2));
 
-  const link = svg
+  const link = vis
     .append('g')
     .attr('stroke', '#999')
     .attr('stroke-opacity', 0.6)
@@ -187,7 +253,7 @@ function drawArtistEgo(nodesArr, linksArr, oWidth) {
     .join('line')
     .attr('stroke-width', d => 3 * d.value);
 
-  const node = svg
+  const node = vis
     .append('g')
     .selectAll('g')
     .data(nodes)
@@ -218,7 +284,7 @@ function drawArtistEgo(nodesArr, linksArr, oWidth) {
     .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
 
   node.on('click', d => {
-    svg.remove();
+    vis.remove();
     d3.select('#titleBar').html(d.id);
     let oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getArtistEgo(d.id, oWidth);
@@ -227,19 +293,28 @@ function drawArtistEgo(nodesArr, linksArr, oWidth) {
   });
 
   simulation.on('tick', () => {
+    // ## this code makes nodes bounded in the panel
+    // node
+    //   .attr('cx', function(d) {
+    //     return (d.x = Math.max(
+    //       nodeScale * d.radius + 20,
+    //       Math.min(canvasWidth - 20 - nodeScale * d.radius, d.x)
+    //     ));
+    //   })
+    //   .attr('cy', function(d) {
+    //     return (d.y = Math.max(
+    //       nodeScale * d.radius + 20,
+    //       Math.min(canvasHeight - 20 - nodeScale * d.radius, d.y)
+    //     ));
+    //   })
+    //   .attr('transform', function(d) {
+    //     return 'translate(' + d.x + ',' + d.y + ')';
+    //   });
+
+    // ## this code makes nodes NOT bounded in the panel
     node
-      .attr('cx', function(d) {
-        return (d.x = Math.max(
-          nodeScale * d.radius + 20,
-          Math.min(canvasWidth - 20 - nodeScale * d.radius, d.x)
-        ));
-      })
-      .attr('cy', function(d) {
-        return (d.y = Math.max(
-          nodeScale * d.radius + 20,
-          Math.min(canvasHeight - 20 - nodeScale * d.radius, d.y)
-        ));
-      })
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
       .attr('transform', function(d) {
         return 'translate(' + d.x + ',' + d.y + ')';
       });

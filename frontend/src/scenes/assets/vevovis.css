@@ -1,0 +1,16 @@
+.egohops {
+  position: absolute;
+  text-align: center;
+  width: 124px;
+  right: 15px;
+  top: 10px;
+}
+
+.egohops-buttons {
+  margin-top: 3px;
+  width: 90%;
+  height: 24px;
+}
+.egohops-label {
+  padding: 2px;
+}
