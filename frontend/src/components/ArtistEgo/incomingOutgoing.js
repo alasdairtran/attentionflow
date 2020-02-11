@@ -225,15 +225,32 @@ function drawIncomingOutgoing(
     .attr('y', verticalMargin / 2)
     .attr('text-anchor', 'start');
 
+  console.log(incoming);
+
+  let sumIn = 0;
+  incoming.forEach(node => (sumIn += node[3]));
+  let sumOut = 0;
+  outgoing.forEach(node => (sumOut += node[3]));
+
+  let inMargin = verticalMargin;
+  let outMargin = verticalMargin;
+  if (sumIn > sumOut) {
+    outMargin =
+      canvasHeight / 2 - ((canvasHeight / 2 - verticalMargin) * sumOut) / sumIn;
+  } else {
+    inMargin =
+      canvasHeight / 2 - ((canvasHeight / 2 - verticalMargin) * sumIn) / sumOut;
+  }
+
   svg
     .append('polygon')
     .style('fill', 'grey')
     .attr(
       'points',
       '300,' +
-        verticalMargin +
+        inMargin +
         ' 300,' +
-        (canvasHeight - verticalMargin) +
+        (canvasHeight - inMargin) +
         ' ' +
         canvasWidth / 2 +
         ',' +
@@ -250,11 +267,11 @@ function drawIncomingOutgoing(
       canvasWidth -
         300 +
         ',' +
-        verticalMargin +
+        outMargin +
         ' ' +
         (canvasWidth - 300) +
         ',' +
-        (canvasHeight - verticalMargin) +
+        (canvasHeight - outMargin) +
         ' ' +
         canvasWidth / 2 +
         ',' +

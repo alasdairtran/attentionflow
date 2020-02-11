@@ -38,8 +38,14 @@ class BarChart extends Component {
   }
 
   drawBarChart(oWidth) {
-    let linksArr = this.props.genreLinks.filter(genre => genre[1] !== null);
-    let genres = this.props.genres.filter(genre => genre[0] !== 'genre');
+    let linksArr =
+      this.props.genreLinks === null
+        ? []
+        : this.props.genreLinks.filter(genre => genre[1] !== null);
+    let genres =
+      this.props.genres === null
+        ? []
+        : this.props.genres.filter(genre => genre[0] !== 'genre');
 
     let connectedLinks = [];
     const loops = linksArr.length;

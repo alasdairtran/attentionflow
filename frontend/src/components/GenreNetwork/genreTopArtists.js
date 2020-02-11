@@ -64,11 +64,16 @@ export function getGenreTopArtists(genre, oWidth) {
     });
 }
 
-function drawGenreTopArtists(artistsArr, linksUnfiltered, oWidth) {
+function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
+  let artistsArr =
+    artistsArrUnchecked[0][0] === null ? [] : artistsArrUnchecked;
   let artistNames = artistsArr.map(artist => artist[0]);
-  let linksArr = linksUnfiltered.filter(
-    link => link[1] !== null && artistNames.includes(link[1])
-  );
+  let linksArr =
+    linksUnfiltered[0] === null
+      ? []
+      : linksUnfiltered.filter(
+          link => link[1] !== null && artistNames.includes(link[1])
+        );
   let len = linksArr.length;
   let filteredLinksArr = [];
   for (let i = 0; i < len; i++) {

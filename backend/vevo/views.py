@@ -203,8 +203,8 @@ def get_genre_incoming_outgoing(request):
                               "OPTIONAL MATCH (v)-[s]->(w:G) where w.genre <> 'Music' "
                               "OPTIONAL MATCH (x:G)-[r]->(v) where x.genre <> 'Music' "
                               "RETURN [v.genre, size((v)-[:B]->()), size((v)<-[:RG]-())] as central,"
-                              "collect(distinct [w.genre, size((w)-->(:V)), s.weight]) as outgoing,"
-                              "collect(distinct[x.genre, size((x)-->(:V)), r.weight]) as incoming ",
+                              "collect(distinct [w.genre, size((w)-->(:V)), s.weight, size((:V)--(w))]) as outgoing,"
+                              "collect(distinct[x.genre, size((x)-->(:V)), r.weight, size((:V)--(x))]) as incoming ",
                               {"genre": genre})
         result = results.single()
 
@@ -318,8 +318,8 @@ def get_artist_incoming_outgoing(request):
                               "OPTIONAL MATCH (v)-[s]->(w:A) "
                               "OPTIONAL MATCH (x:A)-[r]->(v) "
                               "RETURN [v.artist, size((v)-->(:V)), size((v)<--(:A))] as central,"
-                              "collect(distinct [w.artist, size((w)-->(:V)), s.weight]) as outgoing,"
-                              "collect(distinct [x.artist, size((x)-->(:V)), r.weight]) as incoming ",
+                              "collect(distinct [w.artist, size((w)-->(:V)), s.weight, size((w)--(:V))]) as outgoing,"
+                              "collect(distinct [x.artist, size((x)-->(:V)), r.weight, size((x)--(:V))]) as incoming ",
                               {"artist": artist})
         result = results.single()
 
