@@ -163,7 +163,7 @@ export default class AnalyticsDashboard1 extends Component {
       d3.select('#tab2Button').style('display', 'inline');
       d3.select('#tab3Button').style('display', 'none');
       d3.select('#titleBar').html(document.getElementById('search-text').value);
-      getSongEgo(document.getElementById('search-text').value, oWidth);
+      getSongEgo(document.getElementById('search-text').value, oWidth, 1);
       getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
     }
   };

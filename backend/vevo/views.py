@@ -11,32 +11,22 @@ NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
 def get_1hop_song(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
-
     title = request.GET["title"]
     with driver.session() as session:
-        results = session.run("MATCH (a:V {title:{title}}) "
-                              "OPTIONAL MATCH (b:V)-[z]->(a) "
-                              "OPTIONAL MATCH (c:V)<-[y]-(a) "
-                              "WITH a, collect(b) + collect(c) AS videoList, "
-                              "collect([b.title, a.title, z.weight]) + collect([a.title, c.title, y.weight]) AS links "
-                              "UNWIND videoList AS videos "
-                              "OPTIONAL MATCH (videos)-[x]->(e:V) WHERE e IN videoList "
-                              "WITH a + videoList as videoList, links + collect([videos.title, e.title, x.weight]) AS links "
-                              "UNWIND videoList as videos "
-                              "WITH collect(DISTINCT [videos.title, videos.totalView, size((:V)-->(videos))]) as videos, links "
-                              "RETURN videos as videos, "
-                              "links as links ",
+        results = session.run("MATCH (v:V {title:{title}}) "
+                              "OPTIONAL MATCH (v)-[s]-(w:V) "
+                              "OPTIONAL MATCH (w)-[r]-(x:V) "
+                              "RETURN [[v.title, v.totalView, size((:V)-->(v))]] + collect(distinct [w.title, w.totalView, size(()-->(w))]) as videos,"
+                              "collect(distinct [w.title, x.title, r.weight]) + collect(distinct [v.title, w.title, s.weight]) as links ",
                               {"title": title})
 
         result = results.single()
 
     driver.close()
-
     output = {
         "videos": result['videos'],
         "links": result['links'],
     }
-
     return JsonResponse(output)
 
 @csrf_exempt
@@ -46,24 +36,16 @@ def get_2hop_song(request):
 
     title = request.GET["title"]
     with driver.session() as session:
-        results = session.run("MATCH (a:V {title:{title}}) "
-                              "OPTIONAL MATCH (b:V)-[z]->(a) "
-                              "OPTIONAL MATCH (c:V)<-[y]-(a) "
-                              "WITH a, collect(b) + collect(c) AS videoList, "
-                              "collect([b.title, a.title, z.weight]) + collect([a.title, c.title, y.weight]) AS links "
-                              "UNWIND videoList AS videos "
-                              "OPTIONAL MATCH (videos)-[x]->(e:V) "
-                              "OPTIONAL MATCH (videos)<-[w]-(f:V) "
-                              "WITH a + videoList + collect(e) + collect(f) as videoList, "
-                              "links + collect([videos.title, e.title, x.weight]) + collect([f.title, videos.title, w.weight]) AS links, "
-                              "collect(e) + collect(f) as checkingList "
-                              "UNWIND checkingList as checking "
-                              "OPTIONAL MATCH (checking)-[v]->(g:V) where g in videoList "
-                              "WITH videoList, links + collect([checking.title, g.title, v.weight]) as links "
-                              "UNWIND videoList as videos "
-                              "WITH collect(DISTINCT [videos.title, videos.totalView, size((:V)-->(videos))]) as videos, links "
-                              "RETURN videos as videos, "
-                              "links as links ",
+        results = session.run("MATCH (v:V {title:{title}}) "
+                              "OPTIONAL MATCH (v)-[s]-(w:V) "
+                              "OPTIONAL MATCH (w)-[r]-(x:V) "
+                              "OPTIONAL MATCH (x)-[t]-(z:V) "
+                              "RETURN [[v.title, v.totalView, size((:V)-->(v))]] + "
+                              "collect(distinct [w.title, w.totalView, size(()-->(w))]) + "
+                              "collect(distinct [x.title, x.totalView, size(()-->(x))]) as videos, "
+                              "collect(distinct [v.title, w.title, s.weight]) + "
+                              "collect(distinct [w.title, x.title, r.weight]) + "
+                              "collect(distinct [x.title, z.title, t.weight]) as links ",
                               {"title": title})
 
         result = results.single()
@@ -84,29 +66,19 @@ def get_3hop_song(request):
 
     title = request.GET["title"]
     with driver.session() as session:
-        results = session.run("MATCH (a:V {title:{title}}) "
-                              "OPTIONAL MATCH (b:V)-[z]->(a) "
-                              "OPTIONAL MATCH (c:V)<-[y]-(a) "
-                              "WITH a, collect(b) + collect(c) AS videoList, "
-                              "collect([b.title, a.title, z.weight]) + collect([a.title, c.title, y.weight]) AS links "
-                              "UNWIND videoList AS videos "
-                              "OPTIONAL MATCH (videos)-[x]->(e:V) "
-                              "OPTIONAL MATCH (videos)<-[w]-(f:V) "
-                              "WITH a + videoList + collect(e) + collect(f) as videoList, "
-                              "links + collect([videos.title, e.title, x.weight]) + collect([f.title, videos.title, w.weight]) AS links, "
-                              "collect(e) + collect(f) as checkingList "
-                              "UNWIND checkingList as checking "
-                              "OPTIONAL MATCH (checking)-[v]->(g:V) "
-                              "OPTIONAL MATCH (checking)<-[u]-(h:V) "
-                              "WITH videoList + collect(g) + collect(h) as videoList, "
-                              "links + collect([checking.title, g.title, v.weight]) + collect([h.title, checking.title, u.weight]) AS links, "
-                              "collect(g) + collect(h) as checkingList "
-                              "UNWIND checkingList as checking "
-                              "OPTIONAL MATCH (checking)-[t]->(i:V) where i in videoList "
-                              "UNWIND videoList as videos "
-                              "WITH collect(DISTINCT [videos.title, videos.totalView, size((:V)-->(videos))]) as videos, links + collect([checking.title, i.title, t.weight]) as links "
-                              "RETURN videos as videos, "
-                              "links as links ",
+        results = session.run("MATCH (v:V {title:{title}}) "
+                              "OPTIONAL MATCH (v)-[s]-(w:V) "
+                              "OPTIONAL MATCH (w)-[r]-(x:V) "
+                              "OPTIONAL MATCH (x)-[t]-(z:V) "
+                              "OPTIONAL MATCH (z)-[u]-(y:V) "
+                              "RETURN [[v.title, v.totalView, size((:V)-->(v))]] + "
+                              "collect(distinct [w.title, w.totalView, size(()-->(w))]) + "
+                              "collect(distinct [x.title, x.totalView, size(()-->(x))]) + "
+                              "collect(distinct [z.title, z.totalView, size(()-->(z))]) as videos, "
+                              "collect(distinct [v.title, w.title, s.weight]) + "
+                              "collect(distinct [w.title, x.title, r.weight]) + "
+                              "collect(distinct [x.title, z.title, t.weight]) + "
+                              "collect(distinct [z.title, y.title, u.weight]) as links ",
                               {"title": title})
 
         result = results.single()
@@ -253,18 +225,13 @@ def get_1hop_artist(request):
 
     artist = request.GET["artist"]
     with driver.session() as session:
-        results = session.run("MATCH (a:A {artist:{artist}}) "
-                              "OPTIONAL MATCH (b:A)-[z]->(a) "
-                              "OPTIONAL MATCH (c:A)<-[y]-(a) "
-                              "WITH a, collect(b) + collect(c) AS videoList, "
-                              "collect([b.artist, a.artist, z.weight]) + collect([a.artist, c.artist, y.weight]) AS links "
-                              "UNWIND videoList AS videos "
-                              "OPTIONAL MATCH (videos)-[x]->(e:A) WHERE e IN videoList "
-                              "WITH a + videoList as videoList, links + collect([videos.artist, e.artist, x.weight]) AS links "
-                              "UNWIND videoList as videos "
-                              "WITH collect(DISTINCT [videos.artist, size((videos)-->(:V)), size((:A)-->(videos))]) as videos, links "
-                              "RETURN videos as artists, "
-                              "links as links ",
+        results = session.run("MATCH (v:A {artist:{artist}}) "
+                              "OPTIONAL MATCH (v)-[s]-(w:A) "
+                              "OPTIONAL MATCH (w)-[r]-(x:A) "
+                              "RETURN [[v.artist, size((v)-->(:V)), size((:A)-->(v))]] + "
+                              "collect(distinct [w.artist, size((w)-->(:V)), size((:A)-->(w))]) as artists, "
+                              "collect(distinct [v.artist, w.artist, s.weight]) + "
+                              "collect(distinct [w.artist, x.artist, r.weight]) as links ",
                               {"artist": artist})
         result = results.single()
 
@@ -284,24 +251,16 @@ def get_2hop_artist(request):
 
     artist = request.GET["artist"]
     with driver.session() as session:
-        results = session.run("MATCH (a:A {artist:{artist}}) "
-                              "OPTIONAL MATCH (b:A)-[z]->(a) "
-                              "OPTIONAL MATCH (c:A)<-[y]-(a) "
-                              "WITH a, collect(b) + collect(c) AS videoList, "
-                              "collect([b.artist, a.artist, z.weight]) + collect([a.artist, c.artist, y.weight]) AS links "
-                              "UNWIND videoList AS videos "
-                              "OPTIONAL MATCH (videos)-[x]->(e:A) "
-                              "OPTIONAL MATCH (videos)<-[w]-(f:A) "
-                              "WITH a + videoList + collect(e) + collect(f) as videoList, "
-                              "links + collect([videos.artist, e.artist, x.weight]) + collect([f.artist, videos.artist, w.weight]) AS links, "
-                              "collect(e) + collect(f) as checkingList "
-                              "UNWIND checkingList as checking "
-                              "OPTIONAL MATCH (checking)-[v]->(g:A) where g in videoList "
-                              "WITH videoList, links + collect([checking.artist, g.artist, v.weight]) as links "
-                              "UNWIND videoList as videos "
-                              "WITH collect(DISTINCT [videos.artist, size((videos)-->(:V)), size((:A)-->(videos))]) as videos, links "
-                              "RETURN videos as artists, "
-                              "links as links ",
+        results = session.run("MATCH (v:A {artist:{artist}}) "
+                              "OPTIONAL MATCH (v)-[s]-(w:A) "
+                              "OPTIONAL MATCH (w)-[r]-(x:A) "
+                              "OPTIONAL MATCH (x)-[t]-(z:A) "
+                              "RETURN [[v.artist, size((v)-->(:V)), size((:A)-->(v))]] + "
+                              "collect(distinct [w.artist, size((w)-->(:V)), size((:A)-->(w))]) + "
+                              "collect(distinct [x.artist, size((x)-->(:V)), size((:A)-->(x))]) as artists, "
+                              "collect(distinct [v.artist, w.artist, s.weight]) + "
+                              "collect(distinct [w.artist, x.artist, r.weight]) + "
+                              "collect(distinct [x.artist, z.artist, t.weight]) as links ",
                               {"artist": artist})
 
         result = results.single()
@@ -320,34 +279,30 @@ def get_3hop_artist(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
-    title = request.GET["title"]
+    artist = request.GET["artist"]
     with driver.session() as session:
-        results = session.run("MATCH (v:A {artist:{title}}) "
+        results = session.run("MATCH (v:A {artist:{artist}}) "
                               "OPTIONAL MATCH (v)-[s]-(w:A) "
                               "OPTIONAL MATCH (w)-[r]-(x:A) "
                               "OPTIONAL MATCH (x)-[t]-(z:A) "
                               "OPTIONAL MATCH (z)-[u]-(y:A) "
-                              "RETURN [v.artist, size((v)-->(:V)), size((:A)-->(v))] as title,"
-                              "collect(distinct [w.artist, size((w)-->(:V)), size((:A)-->(w)), s.weight]) as level1,"
-                              "collect(distinct [x.artist, size((x)-->(:V)), size((:A)-->(x))]) as level2,"
-                              "collect(distinct [z.artist, size((z)-->(:V)), size((:A)-->(z))]) as level3,"
-                              "collect(distinct [w.artist, x.artist, r.weight]) as linksArr1,"
-                              "collect(distinct [x.artist, z.artist, t.weight]) as linksArr2,"
-                              "collect(distinct [z.artist, y.artist, u.weight]) as linksArr3 ",
-                              {"title": title})
+                              "RETURN [[v.artist, size((v)-->(:V)), size((:A)-->(v))]] + "
+                              "collect(distinct [w.artist, size((w)-->(:V)), size((:A)-->(w))]) + "
+                              "collect(distinct [x.artist, size((x)-->(:V)), size((:A)-->(x))]) + "
+                              "collect(distinct [z.artist, size((z)-->(:V)), size((:A)-->(z))]) as artists, "
+                              "collect(distinct [v.artist, w.artist, s.weight]) + "
+                              "collect(distinct [w.artist, x.artist, r.weight]) + "
+                              "collect(distinct [x.artist, z.artist, t.weight]) + "
+                              "collect(distinct [z.artist, y.artist, u.weight]) as links ",
+                              {"artist": artist})
 
         result = results.single()
 
     driver.close()
 
     output = {
-        "title": result['title'],
-        "level1": result['level1'],
-        "level2": result['level2'],
-        "level3": result['level3'],
-        "linksArr1": result['linksArr1'],
-        "linksArr2": result['linksArr2'],
-        "linksArr3": result['linksArr3'],
+        "artists": result['artists'],
+        "links": result['links'],
     }
 
     return JsonResponse(output)

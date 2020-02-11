@@ -305,7 +305,7 @@ class GenreBubbles extends Component {
           d3.select('#tab3Button').style('display', 'none');
           d3.select('#titleBar').html(d.data.name);
           let oWidth = document.getElementById('headerBar').offsetWidth - 50;
-          getSongEgo(d.data.name, oWidth);
+          getSongEgo(d.data.name, oWidth, 1);
           getIncomingOutgoing(d.data.name, oWidth);
         } else if (focus === d.parent.parent) {
           focus = d.parent;

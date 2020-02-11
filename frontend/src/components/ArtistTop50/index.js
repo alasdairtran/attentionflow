@@ -209,7 +209,7 @@ class BarChart extends Component {
       tooltip.style('visibility', 'hidden');
       d3.select('#titleBar').html(d.id);
       let oWidth = document.getElementById('headerBar').offsetWidth - 50;
-      getArtistEgo(d.id, oWidth);
+      getArtistEgo(d.id, oWidth, 1);
       getSongsByArtist(d.id, oWidth);
       getIncomingOutgoing(d.id, oWidth);
     });

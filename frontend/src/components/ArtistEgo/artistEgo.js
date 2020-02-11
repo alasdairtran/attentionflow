@@ -33,7 +33,7 @@ const drag = simulation => {
     .on('end', dragended);
 };
 
-export function getArtistEgo(artist, oWidth) {
+export function getArtistEgo(artist, oWidth, hops) {
   d3.select('#graphContainer').html('');
   d3.select('#graphContainer')
     .append('div')
@@ -50,13 +50,20 @@ export function getArtistEgo(artist, oWidth) {
     },
   };
   axios
-    .get('/vevo/1hop_artist/', options)
+    .get(
+      hops === 1
+        ? '/vevo/1hop_artist/'
+        : hops === 2
+        ? '/vevo/2hop_artist/'
+        : '/vevo/3hop_artist/',
+      options
+    )
     .then(res => {
       if (res.data.error) {
       } else {
         d3.select('#graphContainer').html('');
         drawArtistEgo(res.data.artists, res.data.links, oWidth);
-        drawHopSlider();
+        drawHopSlider(artist, oWidth, hops);
       }
     })
     .catch(function(error) {
@@ -65,9 +72,7 @@ export function getArtistEgo(artist, oWidth) {
 }
 
 var btns = {};
-function drawHopSlider() {
-  console.log('drawHopSlider');
-
+function drawHopSlider(artist, oWidth, hops) {
   var container = document.getElementById('graphContainer');
   var div = document.createElement('div');
   div.classList.add('egohops');
@@ -89,59 +94,43 @@ function drawHopSlider() {
     btns[i].addEventListener('click', changeNumberHops);
     btngroup.appendChild(btns[i]);
   }
-  btns[1].classList.remove('btn-outline-secondary');
-  btns[1].classList.add('btn-secondary');
+  btns[hops].classList.remove('btn-outline-secondary');
+  btns[hops].classList.add('btn-secondary');
 
   div.appendChild(btngroup);
   container.appendChild(div);
-}
-function changeNumberHops(e) {
-  var selected = parseInt(this.innerHTML);
-  alert('button value change: ' + selected);
-  for (var i = 1; i <= 3; i++) {
-    btns[i].classList.remove('btn-secondary');
-    btns[i].classList.add('btn-outline-secondary');
-  }
-  btns[selected].classList.remove('btn-outline-secondary');
-  btns[selected].classList.add('btn-secondary');
 
-  /////////////////////////////////////////////
-  //   DO SOMETHING when changing # of hops  //
-  /////////////////////////////////////////////
+  function changeNumberHops(e) {
+    var selected = parseInt(this.innerHTML);
+    for (var i = 1; i <= 3; i++) {
+      btns[i].classList.remove('btn-secondary');
+      btns[i].classList.add('btn-outline-secondary');
+    }
+    btns[selected].classList.remove('btn-outline-secondary');
+    btns[selected].classList.add('btn-secondary');
+
+    /////////////////////////////////////////////
+    //   DO SOMETHING when changing # of hops  //
+    /////////////////////////////////////////////
+    if (selected === 1 && hops !== 1) {
+      getArtistEgo(artist, oWidth, 1);
+    } else if (selected === 2 && hops !== 2) {
+      getArtistEgo(artist, oWidth, 2);
+    } else if (selected === 3 && hops !== 3) {
+      getArtistEgo(artist, oWidth, 3);
+    }
+  }
 }
 
 var vis;
-function drawArtistEgo(nodesArr, linksArr, oWidth) {
-  let len = linksArr.length;
-  let filteredLinksArr = [];
-  for (let i = 0; i < len; i++) {
-    let checking = linksArr.shift();
-    let duplicate = false;
-    for (let j = 0; j < linksArr.length; j++) {
-      if (checking[0] === linksArr[j][0] && checking[1] === linksArr[j][1]) {
-        duplicate = true;
-        break;
-      }
-    }
-    if (!duplicate) {
-      let found = false;
-      for (let j = 0; j < filteredLinksArr.length; j++) {
-        if (
-          checking[0] === filteredLinksArr[j][1] &&
-          checking[1] === filteredLinksArr[j][0]
-        ) {
-          filteredLinksArr[j][2] += checking[2];
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        filteredLinksArr.push(checking);
-      }
-    }
-  }
-
-  console.log(filteredLinksArr);
+function drawArtistEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
+  let nodeTitles = nodesArrUnfiltered.map(node => node[0]);
+  let nodesArr = nodesArrUnfiltered.filter(
+    (node, index) => nodeTitles.indexOf(node[0]) === index
+  );
+  let filteredLinksArr = linksArrUnfiltered.filter(link =>
+    nodeTitles.includes(link[1])
+  );
 
   let tooltip = d3
     .select('#graphContainer')
@@ -222,6 +211,44 @@ function drawArtistEgo(nodesArr, linksArr, oWidth) {
     target: link[1],
     value: strokeScale(link[2]),
   }));
+  let setLinks = [];
+  let loops = links.length;
+  for (let i = 0; i < loops; i++) {
+    let found = false;
+    let checking = links.shift();
+    for (let j = 0; j < links.length; j++) {
+      if (
+        ((links[j].source === checking.source &&
+          links[j].target === checking.target) ||
+          (links[j].source === checking.target &&
+            links[j].target === checking.source)) &&
+        links[j].value === checking.value
+      ) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      let found2 = false;
+      for (let j = 0; j < setLinks.length; j++) {
+        if (
+          (setLinks[j].source === checking.source &&
+            setLinks[j].target === checking.target) ||
+          (setLinks[j].source === checking.target &&
+            setLinks[j].target === checking.source)
+        ) {
+          found2 = true;
+          setLinks[j].value += checking.value;
+          break;
+        }
+      }
+      if (!found2) {
+        setLinks.push(checking);
+      }
+    }
+  }
+
+  links = setLinks;
 
   const simulation = d3
     .forceSimulation(nodes)
@@ -287,7 +314,7 @@ function drawArtistEgo(nodesArr, linksArr, oWidth) {
     vis.remove();
     d3.select('#titleBar').html(d.id);
     let oWidth = document.getElementById('headerBar').offsetWidth - 50;
-    getArtistEgo(d.id, oWidth);
+    getArtistEgo(d.id, oWidth, 1);
     getSongsByArtist(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
   });

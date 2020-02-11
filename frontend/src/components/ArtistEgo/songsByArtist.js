@@ -258,7 +258,7 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
     d3.select('#tab3Button').style('display', 'none');
     d3.select('#titleBar').html(d.id);
     let oWidth = document.getElementById('headerBar').offsetWidth - 50;
-    getSongEgo(d.id, oWidth);
+    getSongEgo(d.id, oWidth, 1);
     getIncomingOutgoing(d.id, oWidth);
   });
 }

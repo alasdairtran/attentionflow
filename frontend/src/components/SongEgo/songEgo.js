@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import { getSongInfo } from './popout';
 import { getIncomingOutgoing } from './incomingOutgoing';
+import { getArtistEgo } from '../ArtistEgo/artistEgo';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -30,7 +31,7 @@ const drag = simulation => {
     .on('end', dragended);
 };
 
-export function getSongEgo(title, oWidth) {
+export function getSongEgo(title, oWidth, hops) {
   d3.select('#graphContainer').html('');
   d3.select('#graphContainer')
     .append('div')
@@ -47,13 +48,21 @@ export function getSongEgo(title, oWidth) {
     },
   };
   axios
-    .get('/vevo/1hop_song/', options)
+    .get(
+      hops === 1
+        ? '/vevo/1hop_song/'
+        : hops === 2
+        ? '/vevo/2hop_song/'
+        : '/vevo/3hop_song/',
+      options
+    )
     .then(res => {
       d3.select('#graphContainer').html('');
       if (res.data.error) {
         console.log('error');
       } else {
         drawSongEgo(res.data.videos, res.data.links, oWidth);
+        drawHopSlider(title, oWidth, hops);
       }
     })
     .catch(function(error) {
@@ -61,36 +70,65 @@ export function getSongEgo(title, oWidth) {
     });
 }
 
-export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
-  let linksArr = linksArrUnfiltered.filter(link => link[2] !== null);
-  let len = linksArr.length;
-  let filteredLinksArr = [];
-  for (let i = 0; i < len; i++) {
-    let checking = linksArr.shift();
-    let duplicate = false;
-    for (let j = 0; j < linksArr.length; j++) {
-      if (checking[0] === linksArr[j][0] && checking[1] === linksArr[j][1]) {
-        duplicate = true;
-        break;
-      }
+var btns = {};
+function drawHopSlider(title, oWidth, hops) {
+  var container = document.getElementById('graphContainer');
+  var div = document.createElement('div');
+  div.classList.add('egohops');
+  div.innerHTML = 'N-hop ego network';
+
+  // <div role="group" class="btn-group-sm btn-group btn-group-toggle" data-toggle="buttons">
+  // <label class="btn btn-primary">
+  //     <input type="radio" name="options" id="option1" autocomplete="off" checked>
+  //     One
+  // </label>
+  var btngroup = document.createElement('div');
+  btngroup.role = 'group';
+  btngroup.className = 'egohops-buttons btn-group';
+
+  for (var i = 1; i <= 3; i++) {
+    btns[i] = document.createElement('button');
+    btns[i].className = 'egohops-label btn btn-outline-secondary';
+    btns[i].textContent = '' + i;
+    btns[i].addEventListener('click', changeNumberHops);
+    btngroup.appendChild(btns[i]);
+  }
+  btns[hops].classList.remove('btn-outline-secondary');
+  btns[hops].classList.add('btn-secondary');
+
+  div.appendChild(btngroup);
+  container.appendChild(div);
+
+  function changeNumberHops(e) {
+    var selected = parseInt(this.innerHTML);
+    for (var i = 1; i <= 3; i++) {
+      btns[i].classList.remove('btn-secondary');
+      btns[i].classList.add('btn-outline-secondary');
     }
-    if (!duplicate) {
-      let found = false;
-      for (let j = 0; j < filteredLinksArr.length; j++) {
-        if (
-          checking[0] === filteredLinksArr[j][1] &&
-          checking[1] === filteredLinksArr[j][0]
-        ) {
-          filteredLinksArr[j][2] += checking[2];
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        filteredLinksArr.push(checking);
-      }
+    btns[selected].classList.remove('btn-outline-secondary');
+    btns[selected].classList.add('btn-secondary');
+
+    /////////////////////////////////////////////
+    //   DO SOMETHING when changing # of hops  //
+    /////////////////////////////////////////////
+    if (selected === 1 && hops !== 1) {
+      getSongEgo(title, oWidth, 1);
+    } else if (selected === 2 && hops !== 2) {
+      getSongEgo(title, oWidth, 2);
+    } else if (selected === 3 && hops !== 3) {
+      getSongEgo(title, oWidth, 3);
     }
   }
+}
+
+export function drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
+  let nodeTitles = nodesArrUnfiltered.map(node => node[0]);
+  let nodesArr = nodesArrUnfiltered.filter(
+    (node, index) => nodeTitles.indexOf(node[0]) === index
+  );
+  let filteredLinksArr = linksArrUnfiltered.filter(link =>
+    nodeTitles.includes(link[1])
+  );
 
   const canvasHeight = oWidth / 2;
   const canvasWidth = oWidth;
@@ -139,6 +177,45 @@ export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
     target: link[1],
     value: strokeScale(link[2]),
   }));
+
+  let setLinks = [];
+  let loops = links.length;
+  for (let i = 0; i < loops; i++) {
+    let found = false;
+    let checking = links.shift();
+    for (let j = 0; j < links.length; j++) {
+      if (
+        ((links[j].source === checking.source &&
+          links[j].target === checking.target) ||
+          (links[j].source === checking.target &&
+            links[j].target === checking.source)) &&
+        links[j].value === checking.value
+      ) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      let found2 = false;
+      for (let j = 0; j < setLinks.length; j++) {
+        if (
+          (setLinks[j].source === checking.source &&
+            setLinks[j].target === checking.target) ||
+          (setLinks[j].source === checking.target &&
+            setLinks[j].target === checking.source)
+        ) {
+          found2 = true;
+          setLinks[j].value += checking.value;
+          break;
+        }
+      }
+      if (!found2) {
+        setLinks.push(checking);
+      }
+    }
+  }
+
+  links = setLinks;
 
   const simulation = d3
     .forceSimulation(nodes)
@@ -219,7 +296,7 @@ export function drawSongEgo(nodesArr, linksArrUnfiltered, oWidth) {
     svg.remove();
     d3.select('#titleBar').html(d.id);
     let oWidth = document.getElementById('headerBar').offsetWidth - 50;
-    getSongEgo(d.id, oWidth);
+    getSongEgo(d.id, oWidth, 1);
     getIncomingOutgoing(d.id, oWidth);
   });
 

@@ -10,7 +10,7 @@ class BarChart extends Component {
     d3.select('#tab1Button').style('display', 'inline');
     d3.select('#tab2Button').style('display', 'inline');
     d3.select('#titleBar').html(this.props.title);
-    getSongEgo(this.props.title, oWidth);
+    getSongEgo(this.props.title, oWidth, 1);
     getIncomingOutgoing(this.props.title, oWidth);
   }
 

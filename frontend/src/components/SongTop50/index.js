@@ -206,7 +206,7 @@ class BarChart extends Component {
       d3.select('#tab2Button').style('display', 'inline');
       d3.select('#titleBar').html(d.id);
       let oWidth = document.getElementById('headerBar').offsetWidth - 50;
-      getSongEgo(d.id, oWidth);
+      getSongEgo(d.id, oWidth, 1);
       getIncomingOutgoing(d.id, oWidth);
     });
 
