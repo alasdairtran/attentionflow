@@ -198,6 +198,8 @@ function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
 
   node.append('title').text(d => d.id);
 
+  nodes.sort((a, b) => a.radius - b.radius);
+  const radiusLimit = nodes.length > 19 ? nodes[19].radius : 0;
   node
     .append('text')
     .call(drag(simulation))
@@ -209,7 +211,7 @@ function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
     })
     .attr('y', 3)
     .style('font-size', '12px')
-    .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
+    .style('visibility', d => (d.radius > radiusLimit ? 'visible' : 'hidden'));
 
   let tooltip = d3
     .select('#graphContainer')
@@ -275,6 +277,8 @@ function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
     d3.select(this)
       .style('stroke', 'none')
       .select('text')
-      .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
+      .style('visibility', d =>
+        d.radius > radiusLimit ? 'visible' : 'hidden'
+      );
   });
 }

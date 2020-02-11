@@ -180,6 +180,8 @@ class BarChart extends Component {
 
     node.append('title').text(d => d.id);
 
+    nodes.sort((a, b) => a.radius - b.radius);
+    const radiusLimit = nodes.length > 19 ? nodes[19].radius : 0;
     node
       .append('text')
       .call(drag(simulation))
@@ -192,7 +194,9 @@ class BarChart extends Component {
       .attr('y', 5)
       .style('fill', '#000')
       .style('font-size', '14px')
-      .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
+      .style('visibility', d =>
+        d.radius > radiusLimit ? 'visible' : 'hidden'
+      );
 
     node.on('click', d => {
       vis.remove();
@@ -250,7 +254,9 @@ class BarChart extends Component {
       d3.select(this)
         .style('stroke', 'none')
         .select('text')
-        .style('visibility', d => (d.radius > 6 ? 'visible' : 'hidden'));
+        .style('visibility', d =>
+          d.radius > radiusLimit ? 'visible' : 'hidden'
+        );
     });
   }
 
