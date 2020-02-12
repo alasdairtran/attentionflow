@@ -7,6 +7,7 @@ import BasicOverview from './Basic/';
 import GenreOverview from './GenreOverview';
 import ArtistOverview from './ArtistOverview';
 import SongOverview from './SongOverview';
+import GenreNetwork from './GenreNetwork';
 import SongEgo from './SongEgo';
 import ArtistEgo from './ArtistEgo';
 // Layout
@@ -23,7 +24,8 @@ const Overview = ({ match }) => (
       <div className="app-main__outer">
         <div className="app-main__inner">
           <Route path={`${match.url}/basic`} component={BasicOverview} />
-          <Route path={`${match.url}/genre`} component={GenreOverview} />
+          <Route exact path={`${match.url}/genre`} component={GenreOverview} />
+          <Route path={`${match.url}/genre/:id`} component={GenreNetwork} />
           <Route
             exact
             path={`${match.url}/artist`}
