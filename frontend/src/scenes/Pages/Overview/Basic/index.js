@@ -122,7 +122,7 @@ export default class AnalyticsDashboard1 extends Component {
     let finishedArtists = false;
     let finishedSongs = false;
     let totalSongs = 0;
-    axios
+    /*axios
       .get('/vevo/genre_bubbles/', options)
       .then(res => {
         if (res.data.error) {
@@ -228,7 +228,27 @@ export default class AnalyticsDashboard1 extends Component {
       })
       .catch(function(error) {
         console.error(error);
-      });
+      });*/
+    axios.get('/vevo/genre_bubbles_single/', options).then(res =>
+      this.setState({
+        isLoaded: true,
+        isLoading: false,
+        hasError: false,
+        bubblesInfo: {
+          name: 'genres',
+          children: res.data.rootArr.map(genreObject => ({
+            name: genreObject[0],
+            children: genreObject[1].map(artistObject => ({
+              name: artistObject[0],
+              children: artistObject[1].map(songObject => ({
+                name: songObject[0],
+                size: songObject[1],
+              })),
+            })),
+          })),
+        },
+      })
+    );
   };
 
   // For search box

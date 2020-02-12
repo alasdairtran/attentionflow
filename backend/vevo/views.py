@@ -365,7 +365,7 @@ def get_genre_bubbles(request):
                                   auth=("neo4j", NEO4J_PASS))
 
     with driver.session() as session:
-        results = session.run("MATCH (g:G) where g.genre <> 'Music' and g.genre <> 'genre' "
+        results = session.run("MATCH (g:G) where g.genre <> 'Music' and g.genre <> 'genre' and g.genre <> 'Film' "
                               "RETURN collect(g.genre) as genres ")
         result = results.single()
 
@@ -495,6 +495,32 @@ def get_top_50_artists(request):
     output = {
         "artists": result['artists'],
         "links": result['links'],
+    }
+
+    return JsonResponse(output)
+
+@csrf_exempt
+def get_genre_bubbles_single(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+
+    with driver.session() as session:
+        results = session.run("MATCH (g:G) WHERE g.genre <> 'Music' and g.genre <> 'genre' and g.genre <> 'Film' "
+                              "OPTIONAL MATCH (a:A)--()--(g) "
+                              "OPTIONAL MATCH (a)--(v:V)--(g) "
+                              "WITH distinct g, a, v, sum(v.totalView) as views "
+                              "WITH distinct g, views, v,  a ORDER BY views desc "
+                              "WITH distinct g, v, collect(a)[..case when count(a)/40 > 5 then count(a)/40 else 5 end] as artistsList "
+                              "UNWIND artistsList as artists "
+                              "WITH distinct g, artists, collect([v.title, v.totalView])[..5] as videos "
+                              "WITH distinct g, collect([artists.artist, videos]) as artists "
+                              "RETURN collect([g.genre, artists]) as rootArr ")
+        result = results.single()
+
+    driver.close()
+
+    output = {
+        "rootArr": result['rootArr']
     }
 
     return JsonResponse(output)

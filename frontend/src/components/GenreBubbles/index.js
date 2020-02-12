@@ -12,20 +12,25 @@ class GenreBubbles extends Component {
   drawGenreBubbles(oWidth) {
     let bubblesInfo = this.props.bubblesInfo;
     let root = JSON.parse(JSON.stringify(bubblesInfo));
+    let viewsList = [];
     root.children.forEach(genreObject => {
-      genreObject.children.forEach(artistObject => {
-        artistObject.children = artistObject.children
-          .slice(0, Math.floor(artistObject.name[1] / 2000000000) + 1)
-          .map(songObject => ({
-            name: songObject.name[0],
-            size: songObject.size,
-          }));
-      });
+      genreObject.children.forEach(artistObject =>
+        viewsList.push(
+          ...artistObject.children.map(songObject => songObject.size)
+        )
+      );
     });
+    viewsList.sort((a, b) => b - a);
+    let viewsCutoff = viewsList.length < 500 ? 0 : viewsList[500];
     root.children.forEach(genreObject => {
       genreObject.children.forEach(artistObject => {
-        artistObject.name = artistObject.name[0];
+        artistObject.children = artistObject.children.filter(
+          songObject => songObject.size > viewsCutoff
+        );
+        if (artistObject.children === [])
+          genreObject.children.remove(artistObject);
       });
+      if (genreObject.children === []) root.children.remove(genreObject);
     });
 
     let color = d3.scaleSequential(d3.interpolateGnBu).domain([-1, 5]);
