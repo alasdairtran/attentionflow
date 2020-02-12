@@ -10,7 +10,7 @@ class Nav extends Component {
 
   render() {
     return (
-      <Fragment>
+      <>
         <h5 className="app-sidebar__heading">Menu</h5>
         <MetisMenu
           content={MainNav}
@@ -27,7 +27,7 @@ class Nav extends Component {
           iconNamePrefix=""
           classNameStateIcon="pe-7s-angle-down"
         />
-      </Fragment>
+      </>
     );
   }
 

@@ -5,12 +5,12 @@ import cx from 'classnames';
 import '../../../Pages/Overview/Basic';
 import Autosuggest from 'react-autosuggest';
 
-var titles = [];
+let titles = [];
 
-//suggestion to output
+// suggestion to output
 const getSuggestionValue = suggestion => suggestion.name;
 
-//render suggestion list
+// render suggestion list
 const renderSuggestion = suggestion => <div>{suggestion.name}</div>;
 
 class SearchBox extends React.Component {
@@ -24,11 +24,14 @@ class SearchBox extends React.Component {
   }
 
   onChangeValue = (event, { newValue }) => {
-    this.setState({
-      value: newValue,
-    } , () => {
-      console.log("New state in ASYNC callback:", this.state.value);
-    });
+    this.setState(
+      {
+        value: newValue,
+      },
+      () => {
+        console.log('New state in ASYNC callback:', this.state.value);
+      }
+    );
   };
 
   onSuggestionsFetchRequested = ({ value }) => {
@@ -43,11 +46,11 @@ class SearchBox extends React.Component {
       .get('/vevo/suggestions/', options)
       .then(res => {
         titles = [];
-        var result = res.data.title;
-        for (var i = 0; i < result.length; i++) {
+        const result = res.data.title;
+        for (let i = 0; i < result.length; i++) {
           titles.push({ name: result[i] });
         }
-        if(inputLength > 0){
+        if (inputLength > 0) {
           this.setState({
             suggestions: titles,
           });
@@ -65,20 +68,20 @@ class SearchBox extends React.Component {
   };
 
   render() {
-    const { value = '', suggestions = titles} = this.state;
+    const { value = '', suggestions = titles } = this.state;
 
     // default place holder
     const inputProps = {
       className: 'search-input',
       id: 'search-text',
       placeholder: 'Type the title',
-      value: value,
+      value,
       onChange: this.onChangeValue,
     };
 
     return (
-      <Fragment>
-        <div class="search-wrapper active">
+      <>
+        <div className="search-wrapper active">
           <div className="input-holder">
             <Autosuggest
               suggestions={suggestions}
@@ -86,9 +89,9 @@ class SearchBox extends React.Component {
               onSuggestionsClearRequested={this.onSuggestionsClearRequested}
               getSuggestionValue={getSuggestionValue}
               renderSuggestion={renderSuggestion}
-              alwaysRenderSuggestions={true}
+              alwaysRenderSuggestions
               inputProps={inputProps}
-            ></Autosuggest>
+            />
 
             <button
               onClick={() => {
@@ -103,7 +106,7 @@ class SearchBox extends React.Component {
             </button>
           </div>
         </div>
-      </Fragment>
+      </>
     );
   }
 }

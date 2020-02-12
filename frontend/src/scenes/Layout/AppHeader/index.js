@@ -11,20 +11,20 @@ import SearchBox from './Components/SearchBox';
 
 class Header extends React.Component {
   render() {
-    let {
+    const {
       headerBackgroundColor,
       enableMobileMenuSmall,
       enableHeaderShadow,
     } = this.props;
     return (
-      <Fragment>
+      <>
         <ReactCSSTransitionGroup
           component="div"
           className={cx('app-header', headerBackgroundColor, {
             'header-shadow': enableHeaderShadow,
           })}
           transitionName="HeaderAnimation"
-          transitionAppear={true}
+          transitionAppear
           transitionAppearTimeout={1500}
           transitionEnter={false}
           transitionLeave={false}
@@ -41,7 +41,7 @@ class Header extends React.Component {
             </div>
           </div>
         </ReactCSSTransitionGroup>
-      </Fragment>
+      </>
     );
   }
 }

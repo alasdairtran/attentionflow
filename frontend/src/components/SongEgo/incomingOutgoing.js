@@ -42,7 +42,7 @@ export function getIncomingOutgoing(title, oWidth) {
     .style('margin', '100px auto');
   const options = {
     params: {
-      title: title,
+      title,
     },
   };
   axios
@@ -51,9 +51,9 @@ export function getIncomingOutgoing(title, oWidth) {
       if (res.data.error) {
         console.log('error');
       } else {
-        let incoming = res.data.incoming;
-        let outgoing = res.data.outgoing;
-        let central = res.data.title;
+        const { incoming } = res.data;
+        const { outgoing } = res.data;
+        const central = res.data.title;
         d3.select('#graphContainer2').html('');
         drawIncomingOutgoing(incoming, outgoing, central, oWidth);
       }
@@ -81,7 +81,7 @@ function drawIncomingOutgoing(
     .attr('width', canvasWidth)
     .attr('height', canvasHeight);
 
-  let tooltip = d3
+  const tooltip = d3
     .select('#graphContainer2')
     .append('div')
     .style('position', 'absolute')
@@ -173,11 +173,11 @@ function drawIncomingOutgoing(
       d3.forceX().x(function(d) {
         if (d.type === 'I') {
           return horizontalMargin;
-        } else if (d.type === 'O') {
-          return canvasWidth - horizontalMargin;
-        } else {
-          return canvasWidth / 2;
         }
+        if (d.type === 'O') {
+          return canvasWidth - horizontalMargin;
+        }
+        return canvasWidth / 2;
       })
     )
     .force(
@@ -188,15 +188,15 @@ function drawIncomingOutgoing(
             ? canvasHeight / 2
             : ((canvasHeight - verticalMargin * 2) / (inLength - 1)) * i +
                 verticalMargin;
-        } else if (d.type === 'O') {
+        }
+        if (d.type === 'O') {
           return outLength === 1
             ? canvasHeight / 2
             : ((canvasHeight - verticalMargin * 2) / (outLength - 1)) *
                 (i - inLength) +
                 verticalMargin;
-        } else {
-          return canvasHeight / 2;
         }
+        return canvasHeight / 2;
       })
     );
 
@@ -228,7 +228,7 @@ function drawIncomingOutgoing(
   node.on('click', d => {
     svg.remove();
     d3.select('#titleBar').html(d.id);
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getSongEgo(d.id, oWidth, 1);
     getIncomingOutgoing(d.id, oWidth);
   });
@@ -279,14 +279,8 @@ function drawIncomingOutgoing(
     .style('fill', 'grey')
     .attr(
       'points',
-      '300,' +
-        inMargin +
-        ' 300,' +
-        (canvasHeight - inMargin) +
-        ' ' +
-        canvasWidth / 2 +
-        ',' +
-        canvasHeight / 2
+      `300,${inMargin} 300,${canvasHeight - inMargin} ${canvasWidth /
+        2},${canvasHeight / 2}`
     )
     .lower()
     .style('opacity', '20%');
@@ -296,25 +290,15 @@ function drawIncomingOutgoing(
     .style('fill', 'grey')
     .attr(
       'points',
-      canvasWidth -
-        300 +
-        ',' +
-        outMargin +
-        ' ' +
-        (canvasWidth - 300) +
-        ',' +
-        (canvasHeight - outMargin) +
-        ' ' +
-        canvasWidth / 2 +
-        ',' +
-        canvasHeight / 2
+      `${canvasWidth - 300},${outMargin} ${canvasWidth - 300},${canvasHeight -
+        outMargin} ${canvasWidth / 2},${canvasHeight / 2}`
     )
     .lower()
     .style('opacity', '20%');
 
   simulation.on('tick', () => {
     node.attr('transform', function(d) {
-      return 'translate(' + d.x + ',' + d.y + ')';
+      return `translate(${d.x},${d.y})`;
     });
   });
 }

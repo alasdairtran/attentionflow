@@ -3,7 +3,7 @@ import { Route } from 'react-router-dom';
 
 // DASHBOARDS
 
-import BasicOverview from './Basic/';
+import BasicOverview from './Basic';
 import GenreOverview from './GenreOverview';
 import ArtistOverview from './ArtistOverview';
 import SongOverview from './SongOverview';
@@ -12,12 +12,12 @@ import SongEgo from './SongEgo';
 import ArtistEgo from './ArtistEgo';
 // Layout
 
-import AppHeader from '../../Layout/AppHeader/';
-import AppSidebar from '../../Layout/AppSidebar/';
-import AppFooter from '../../Layout/AppFooter/';
+import AppHeader from '../../Layout/AppHeader';
+import AppSidebar from '../../Layout/AppSidebar';
+import AppFooter from '../../Layout/AppFooter';
 
 const Overview = ({ match }) => (
-  <Fragment>
+  <>
     <AppHeader />
     <div className="app-main">
       <AppSidebar />
@@ -38,7 +38,7 @@ const Overview = ({ match }) => (
         <AppFooter />
       </div>
     </div>
-  </Fragment>
+  </>
 );
 
 export default Overview;

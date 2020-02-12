@@ -13,14 +13,14 @@ export function getSongInfo(d, tooltip) {
       if (res.data.error) {
         console.log('error');
       } else {
-        let artist = res.data.artist;
-        let totalViews = res.data.totalViews;
-        let genre = res.data.genre;
-        let publishDate = new Date(res.data.publishDate);
-        let averageWatch = res.data.averageWatch;
-        let channelID = res.data.channelID;
-        let duration = res.data.duration;
-        let dailyViews = res.data.dailyViews;
+        const { artist } = res.data;
+        const { totalViews } = res.data;
+        const { genre } = res.data;
+        const publishDate = new Date(res.data.publishDate);
+        const { averageWatch } = res.data;
+        const { channelID } = res.data;
+        const { duration } = res.data;
+        const { dailyViews } = res.data;
         drawPopout(
           d.id,
           artist,
@@ -52,77 +52,65 @@ function drawPopout(
   dailyViews,
   tooltip
 ) {
-  let averageWatchWidth = ((averageWatch * 60) / timeInSeconds(duration)) * 430;
+  const averageWatchWidth =
+    ((averageWatch * 60) / timeInSeconds(duration)) * 430;
 
   tooltip.html(
-    '<div style="background-color:dimgrey;height:100px;width:200px;margin-right:10px;display:inline-block;float:left;position:relative;">' +
-      '<div style="background-color:black;position:absolute;bottom:5px;right:5px;height:15px;color:white;font-size:10px;padding-right:2px;padding-left:2px">' +
-      formatTime(duration) +
-      '</div>' +
-      '</div>' +
-      '<div id="songInfo"style="height:100px;width:220px;display:inline-block;">' +
-      '<h6>' +
-      title +
-      '</h6>' +
-      '<p style="color:#656565;">' +
-      artist +
-      '</br>' +
-      d3.format('.3s')(totalViews) +
-      ' views &#183 ' +
-      publishDate.toLocaleDateString(publishDate, {
+    `${'<div style="background-color:dimgrey;height:100px;width:200px;margin-right:10px;display:inline-block;float:left;position:relative;">' +
+      '<div style="background-color:black;position:absolute;bottom:5px;right:5px;height:15px;color:white;font-size:10px;padding-right:2px;padding-left:2px">'}${formatTime(
+      duration
+    )}</div>` +
+      `</div>` +
+      `<div id="songInfo"style="height:100px;width:220px;display:inline-block;">` +
+      `<h6>${title}</h6>` +
+      `<p style="color:#656565;">${artist}</br>${d3.format('.3s')(
+        totalViews
+      )} views &#183 ${publishDate.toLocaleDateString(publishDate, {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
-      }) +
-      '</p>' +
-      '</div>' +
-      '<br/>' +
-      formatGenres(genre) +
-      '<br/>' +
-      '<div style="height:30px;width:430px;background-color:grey;position:relative;z-index:150;vertical-align:middle">' +
-      '<div style="background-color:limegreen;position:absolute;bottom:0px;left:0px;z-index:151;height:30px;width:' +
-      averageWatchWidth +
-      'px;">' +
-      '</div>' +
-      '<p style="z-index:152;position:absolute;margin-top:4px;margin-left:5px">Average Watch Time: ' +
-      Math.floor(averageWatch) +
-      ':' +
-      (Math.round((averageWatch % 1) * 60) < 10 ? '0' : '') +
-      Math.round((averageWatch % 1) * 60) +
-      '/' +
-      formatTime(duration) +
-      '</p>' +
-      '</div>' +
-      '<br/>' +
-      'Daily Views' +
-      '<br/>' +
-      "<div id='dailyViewsGraph'></div>"
+      })}</p>` +
+      `</div>` +
+      `<br/>${formatGenres(genre)}<br/>` +
+      `<div style="height:30px;width:430px;background-color:grey;position:relative;z-index:150;vertical-align:middle">` +
+      `<div style="background-color:limegreen;position:absolute;bottom:0px;left:0px;z-index:151;height:30px;width:${averageWatchWidth}px;">` +
+      `</div>` +
+      `<p style="z-index:152;position:absolute;margin-top:4px;margin-left:5px">Average Watch Time: ${Math.floor(
+        averageWatch
+      )}:${Math.round((averageWatch % 1) * 60) < 10 ? '0' : ''}${Math.round(
+        (averageWatch % 1) * 60
+      )}/${formatTime(duration)}</p>` +
+      `</div>` +
+      `<br/>` +
+      `Daily Views` +
+      `<br/>` +
+      `<div id='dailyViewsGraph'></div>`
   );
 
-  let graphWidth = 430;
-  let graphHeight = 100;
-  let viewsArray = JSON.parse(dailyViews);
+  const graphWidth = 430;
+  const graphHeight = 100;
+  const viewsArray = JSON.parse(dailyViews);
 
-  let dailyViewsGraph = d3
+  const dailyViewsGraph = d3
     .select('#dailyViewsGraph')
     .append('svg')
     .attr('width', graphWidth)
     .attr('height', graphHeight);
 
-  let x = d3
+  const x = d3
     .scaleLinear()
     .domain([0, viewsArray.length])
     .range([40, graphWidth - 1]);
-  let y = d3
+  const y = d3
     .scaleLinear()
     .domain([0, d3.max(viewsArray)])
     .range([graphHeight - 10, 10]);
 
-  let xAxis = d3
+  const xAxis = d3
     .axisBottom()
     .scale(x)
     .tickValues([]);
-  let yAxis = d3
+  const yAxis = d3
     .axisLeft()
     .scale(y)
     .ticks(7)
@@ -156,7 +144,7 @@ function formatTime(timeString) {
     return null;
   }
   let finalArr = [];
-  let len = timeString.length;
+  const len = timeString.length;
   for (let i = 1; i <= len; i++) {
     if (timeString.charAt(len - i) === 'M') {
       if (finalArr.length === 0) {
@@ -192,7 +180,7 @@ function formatGenres(genreString) {
     return 'Genre: Other';
   }
   let output = arr.length > 1 ? 'Genres: ' : 'Genre: ';
-  arr.forEach(genre => (output += genre.split('_').join(' ') + ', '));
+  arr.forEach(genre => (output += `${genre.split('_').join(' ')}, `));
   return output.slice(0, -2);
 }
 
@@ -202,7 +190,7 @@ function timeInSeconds(time) {
   }
   let total = 0;
   let multiplier = 1;
-  let len = time.length;
+  const len = time.length;
   for (let i = 1; i <= len; i++) {
     if (time.charAt(len - i) === 'M') {
       multiplier = 60;

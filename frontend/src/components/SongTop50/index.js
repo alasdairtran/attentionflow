@@ -32,7 +32,7 @@ const drag = simulation => {
     .on('end', dragended);
 };
 
-var vis;
+let vis;
 class BarChart extends Component {
   constructor(props) {
     super(props);
@@ -44,13 +44,13 @@ class BarChart extends Component {
   }
 
   componentDidMount() {
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     this.drawSongExample(oWidth);
   }
 
   drawSongExample(oWidth) {
-    let songsArr = this.props.songs;
-    let linksArr = this.props.links.filter(link => link[1] !== null);
+    const songsArr = this.props.songs;
+    const linksArr = this.props.links.filter(link => link[1] !== null);
 
     const canvasHeight = oWidth / 2;
     const canvasWidth = oWidth;
@@ -111,12 +111,12 @@ class BarChart extends Component {
       value: strokeScale(video[2]),
     }));
 
-    let nodeTitles = songsArr.map(song => song[0]);
-    let filteredLinks = [];
-    let loops = links.length;
+    const nodeTitles = songsArr.map(song => song[0]);
+    const filteredLinks = [];
+    const loops = links.length;
     for (let i = 0; i < loops; i++) {
       let found = false;
-      let checking = links.shift();
+      const checking = links.shift();
       if (nodeTitles.includes(checking.target)) {
         for (let j = 0; j < filteredLinks.length; j++) {
           if (
@@ -200,7 +200,7 @@ class BarChart extends Component {
         d.radius > radiusLimit ? 'visible' : 'hidden'
       );
 
-    let tooltip = d3
+    const tooltip = d3
       .select('#graphContainer')
       .append('div')
       .style('position', 'absolute')
@@ -266,7 +266,7 @@ class BarChart extends Component {
         .attr('cx', d => d.x)
         .attr('cy', d => d.y)
         .attr('transform', function(d) {
-          return 'translate(' + d.x + ',' + d.y + ')';
+          return `translate(${d.x},${d.y})`;
         });
       link
         .attr('x1', d => d.source.x)
@@ -287,7 +287,7 @@ class BarChart extends Component {
       console.log('redirecting');
       return <Redirect push to={`/overview/song/${this.state.title}`} />;
     }
-    return <div ref="canvas"></div>;
+    return <div ref="canvas" />;
   }
 }
 

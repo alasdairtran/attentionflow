@@ -3,8 +3,6 @@ import axios from 'axios';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
-import SongTop50 from '../../../../components/SongTop50';
-import SongEgo from '../../../../components/SongEgo';
 import {
   Row,
   Col,
@@ -16,9 +14,6 @@ import {
   TabContent,
   TabPane,
 } from 'reactstrap';
-
-import PageTitle from '../../../Layout/AppMain/PageTitle';
-
 import {
   AreaChart,
   Area,
@@ -31,7 +26,6 @@ import {
   Tooltip,
   LineChart,
 } from 'recharts';
-
 import {
   faAngleUp,
   faArrowRight,
@@ -39,11 +33,15 @@ import {
   faArrowLeft,
   faAngleDown,
 } from '@fortawesome/free-solid-svg-icons';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import * as d3 from 'd3';
+import SongTop50 from '../../../../components/SongTop50';
+import SongEgo from '../../../../components/SongEgo';
+
+import PageTitle from '../../../Layout/AppMain/PageTitle';
+
 import { getSongEgo } from '../../../../components/SongEgo/songEgo';
 import { getIncomingOutgoing } from '../../../../components/SongEgo/incomingOutgoing';
-import * as d3 from 'd3';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -159,7 +157,7 @@ export default class AnalyticsDashboard1 extends Component {
         hasError: false,
         isLoading: false,
       });
-      let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+      const oWidth = document.getElementById('headerBar').offsetWidth - 50;
       d3.select('#tab1Button').style('display', 'inline');
       d3.select('#tab2Button').style('display', 'inline');
       d3.select('#tab3Button').style('display', 'none');
@@ -171,46 +169,41 @@ export default class AnalyticsDashboard1 extends Component {
 
   render() {
     return (
-      <Fragment>
+      <>
         <ReactCSSTransitionGroup
           component="div"
           transitionName="TabsAnimation"
-          transitionAppear={true}
+          transitionAppear
           transitionAppearTimeout={0}
           transitionEnter={false}
           transitionLeave={false}
         >
           <div>
-            <button
-              id="display"
-              hidden="hidden"
-              onClick={this.display}
-            ></button>
+            <button id="display" hidden="hidden" onClick={this.display} />
             {this.state.hasError && (
-              <div class="alert alert-danger" role="alert">
+              <div className="alert alert-danger" role="alert">
                 {this.state.errorMessage}
               </div>
             )}
             <Row>
               <Col md="12" lg="12">
                 <Card className="mb-3">
-                  <CardHeader id={'headerBar'} className="card-header-tab">
+                  <CardHeader id="headerBar" className="card-header-tab">
                     <div className="card-header-title">
                       <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
                         {' '}
                       </i>
-                      <h6 id={'titleBar'}>Top 50 Songs</h6>
+                      <h6 id="titleBar">Top 50 Songs</h6>
                     </div>
                     <div className="btn-actions-pane-right">
                       <Button
                         outline
-                        className={
-                          'border-0 btn-pill btn-wide btn-transition ' +
-                          classnames({
+                        className={`border-0 btn-pill btn-wide btn-transition ${classnames(
+                          {
                             active: this.state.activeTab1 === '11',
-                          })
-                        }
-                        id={'tab1Button'}
+                          }
+                        )}`}
+                        id="tab1Button"
                         color="primary"
                         onClick={() => {
                           this.toggle1('11');
@@ -221,13 +214,12 @@ export default class AnalyticsDashboard1 extends Component {
                       </Button>
                       <Button
                         outline
-                        className={
-                          'ml-1 btn-pill btn-wide border-0 btn-transition ' +
-                          classnames({
+                        className={`ml-1 btn-pill btn-wide border-0 btn-transition ${classnames(
+                          {
                             active: this.state.activeTab1 === '22',
-                          })
-                        }
-                        id={'tab2Button'}
+                          }
+                        )}`}
+                        id="tab2Button"
                         color="primary"
                         onClick={() => {
                           this.toggle1('22');
@@ -238,13 +230,12 @@ export default class AnalyticsDashboard1 extends Component {
                       </Button>
                       <Button
                         outline
-                        className={
-                          'ml-1 btn-pill btn-wide border-0 btn-transition ' +
-                          classnames({
+                        className={`ml-1 btn-pill btn-wide border-0 btn-transition ${classnames(
+                          {
                             active: this.state.activeTab1 === '22',
-                          })
-                        }
-                        id={'tab3Button'}
+                          }
+                        )}`}
+                        id="tab3Button"
                         color="primary"
                         onClick={() => {
                           this.toggle1('33');
@@ -412,7 +403,7 @@ export default class AnalyticsDashboard1 extends Component {
                 </div>
               </Col>
             </Row>
-            {/*)}*/}
+            {/* )} */}
             <div className="row">
               <div className="col-md-6 col-lg-3">
                 <div className="card-shadow-danger mb-3 widget-chart widget-chart2 text-left card">
@@ -433,7 +424,7 @@ export default class AnalyticsDashboard1 extends Component {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: '71%' }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       </div>
@@ -465,7 +456,7 @@ export default class AnalyticsDashboard1 extends Component {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: '54%' }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       </div>
@@ -497,7 +488,7 @@ export default class AnalyticsDashboard1 extends Component {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: '32%' }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       </div>
@@ -529,7 +520,7 @@ export default class AnalyticsDashboard1 extends Component {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: '89%' }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       </div>
@@ -637,7 +628,7 @@ export default class AnalyticsDashboard1 extends Component {
             </Row>
           </div>
         </ReactCSSTransitionGroup>
-      </Fragment>
+      </>
     );
   }
 }

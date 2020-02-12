@@ -6,7 +6,7 @@ import { getIncomingOutgoing } from './incomingOutgoing';
 
 class BarChart extends Component {
   componentDidMount() {
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     d3.select('#tab1Button').style('display', 'inline');
     d3.select('#tab2Button').style('display', 'inline');
     d3.select('#titleBar').html(this.props.title);
@@ -15,7 +15,7 @@ class BarChart extends Component {
   }
 
   render() {
-    return <div ref="canvas"></div>;
+    return <div ref="canvas" />;
   }
 }
 

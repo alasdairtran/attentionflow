@@ -27,12 +27,12 @@ class AppMobileMenu extends React.Component {
   }
 
   toggleMobileSidebar = () => {
-    let { enableMobileMenu, setEnableMobileMenu } = this.props;
+    const { enableMobileMenu, setEnableMobileMenu } = this.props;
     setEnableMobileMenu(!enableMobileMenu);
   };
 
   toggleMobileSmall = () => {
-    let { enableMobileMenuSmall, setEnableMobileMenuSmall } = this.props;
+    const { enableMobileMenuSmall, setEnableMobileMenuSmall } = this.props;
     setEnableMobileMenuSmall(!enableMobileMenuSmall);
   };
 
@@ -46,10 +46,10 @@ class AppMobileMenu extends React.Component {
   };
 
   render() {
-    let { enableMobileMenu } = this.props;
+    const { enableMobileMenu } = this.props;
 
     return (
-      <Fragment>
+      <>
         <div className="app-header__mobile-menu">
           <div onClick={this.toggleMobileSidebar}>
             <Hamburger
@@ -82,7 +82,7 @@ class AppMobileMenu extends React.Component {
             </Button>
           </span>
         </div>
-      </Fragment>
+      </>
     );
   }
 }

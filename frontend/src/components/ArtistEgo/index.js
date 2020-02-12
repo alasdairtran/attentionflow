@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
 
+import { Redirect } from 'react-router-dom';
 import { getIncomingOutgoing } from './incomingOutgoing';
 import { getSongsByArtist } from './songsByArtist';
 import { getArtistEgo } from './artistEgo';
-import { Redirect } from 'react-router-dom';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -43,7 +43,7 @@ class BarChart extends Component {
   }
 
   componentDidMount() {
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     d3.select('#titleBar').html(this.props.name);
     getArtistEgo(this.props.name, oWidth, 1);
     getSongsByArtist(this.props.name, oWidth);
@@ -52,12 +52,12 @@ class BarChart extends Component {
   }
 
   drawBarChart(oWidth) {
-    let nodesArr = this.props.artists;
-    let linksArr = this.props.links.filter(link => link[2] !== null);
-    let len = linksArr.length;
-    let filteredLinksArr = [];
+    const nodesArr = this.props.artists;
+    const linksArr = this.props.links.filter(link => link[2] !== null);
+    const len = linksArr.length;
+    const filteredLinksArr = [];
     for (let i = 0; i < len; i++) {
-      let checking = linksArr.shift();
+      const checking = linksArr.shift();
       let duplicate = false;
       for (let j = 0; j < linksArr.length; j++) {
         if (checking[0] === linksArr[j][0] && checking[1] === linksArr[j][1]) {
@@ -83,7 +83,7 @@ class BarChart extends Component {
       }
     }
 
-    let tooltip = d3
+    const tooltip = d3
       .select(this.refs.canvas)
       .append('div')
       .style('position', 'absolute')
@@ -140,7 +140,7 @@ class BarChart extends Component {
       colour: colourScale(node[2]),
     }));
 
-    let links = filteredLinksArr.map(link => ({
+    const links = filteredLinksArr.map(link => ({
       source: link[0],
       target: link[1],
       value: strokeScale(link[2]),
@@ -236,7 +236,7 @@ class BarChart extends Component {
           ));
         })
         .attr('transform', function(d) {
-          return 'translate(' + d.x + ',' + d.y + ')';
+          return `translate(${d.x},${d.y})`;
         });
       link
         .attr('x1', d => d.source.x)
@@ -268,7 +268,7 @@ class BarChart extends Component {
       console.log('redirecting');
       return <Redirect push to={`/overview/artist/${this.state.name}`} />;
     }
-    return <div ref="canvas"></div>;
+    return <div ref="canvas" />;
   }
 }
 

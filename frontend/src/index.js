@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 // import registerServiceWorker from './registerServiceWorker';
+import { HashRouter } from 'react-router-dom';
 import { unregister } from './scenes/registerServiceWorker';
 
-import { HashRouter } from 'react-router-dom';
 import './scenes/assets/base.css';
 import Main from './scenes/Pages/Main';
 import configureStore from './scenes/config/configureStore';

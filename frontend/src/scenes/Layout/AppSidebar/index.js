@@ -2,11 +2,10 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import cx from 'classnames';
 
-import Nav from '../AppNav/VerticalNavWrapper';
-
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import PerfectScrollbar from 'react-perfect-scrollbar';
+import Nav from '../AppNav/VerticalNavWrapper';
 import HeaderLogo from '../AppLogo';
 
 import { setEnableMobileMenu } from '../../reducers/ThemeOptions';
@@ -15,12 +14,12 @@ class AppSidebar extends Component {
   state = {};
 
   toggleMobileSidebar = () => {
-    let { enableMobileMenu, setEnableMobileMenu } = this.props;
+    const { enableMobileMenu, setEnableMobileMenu } = this.props;
     setEnableMobileMenu(!enableMobileMenu);
   };
 
   render() {
-    let {
+    const {
       backgroundColor,
       enableBackgroundImage,
       enableSidebarShadow,
@@ -29,7 +28,7 @@ class AppSidebar extends Component {
     } = this.props;
 
     return (
-      <Fragment>
+      <>
         <div
           className="sidebar-mobile-overlay"
           onClick={this.toggleMobileSidebar}
@@ -40,7 +39,7 @@ class AppSidebar extends Component {
             'sidebar-shadow': enableSidebarShadow,
           })}
           transitionName="SidebarAnimation"
-          transitionAppear={true}
+          transitionAppear
           transitionAppearTimeout={1500}
           transitionEnter={false}
           transitionLeave={false}
@@ -55,12 +54,12 @@ class AppSidebar extends Component {
             className={cx('app-sidebar-bg', backgroundImageOpacity)}
             style={{
               backgroundImage: enableBackgroundImage
-                ? 'url(' + backgroundImage + ')'
+                ? `url(${backgroundImage})`
                 : null,
             }}
-          ></div>
+          />
         </ReactCSSTransitionGroup>
-      </Fragment>
+      </>
     );
   }
 }

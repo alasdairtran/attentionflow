@@ -16,7 +16,7 @@ class Main extends React.Component {
   }
 
   render() {
-    let {
+    const {
       colorScheme,
       enableFixedHeader,
       enableFixedSidebar,
@@ -31,10 +31,10 @@ class Main extends React.Component {
       <ResizeDetector
         handleWidth
         render={({ width }) => (
-          <Fragment>
+          <>
             <div
               className={cx(
-                'app-container app-theme-' + colorScheme,
+                `app-container app-theme-${colorScheme}`,
                 { 'fixed-header': enableFixedHeader },
                 { 'fixed-sidebar': enableFixedSidebar || width < 1250 },
                 { 'fixed-footer': enableFixedFooter },
@@ -47,7 +47,7 @@ class Main extends React.Component {
             >
               <AppMain />
             </div>
-          </Fragment>
+          </>
         )}
       />
     );

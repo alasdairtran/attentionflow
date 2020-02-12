@@ -22,7 +22,7 @@ class HeaderLogo extends React.Component {
   }
 
   toggleEnableClosedSidebar = () => {
-    let { enableClosedSidebar, setEnableClosedSidebar } = this.props;
+    const { enableClosedSidebar, setEnableClosedSidebar } = this.props;
     setEnableClosedSidebar(!enableClosedSidebar);
   };
 
@@ -36,12 +36,12 @@ class HeaderLogo extends React.Component {
   };
 
   render() {
-    let { enableClosedSidebar } = this.props;
+    const { enableClosedSidebar } = this.props;
 
     const {} = this.state;
 
     return (
-      <Fragment>
+      <>
         <div className="app-header__logo">
           <div className="logo-name">VevoViz</div>
           <div className="header__pane ml-auto">
@@ -55,7 +55,7 @@ class HeaderLogo extends React.Component {
           </div>
         </div>
         <AppMobileMenu />
-      </Fragment>
+      </>
     );
   }
 }

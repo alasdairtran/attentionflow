@@ -30,28 +30,28 @@ const drag = simulation => {
     .on('end', dragended);
 };
 
-var vis;
+let vis;
 class BarChart extends Component {
   componentDidMount() {
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     this.drawBarChart(oWidth);
   }
 
   drawBarChart(oWidth) {
-    let linksArr =
+    const linksArr =
       this.props.genreLinks === null
         ? []
         : this.props.genreLinks.filter(genre => genre[1] !== null);
-    let genres =
+    const genres =
       this.props.genres === null
         ? []
         : this.props.genres.filter(genre => genre[0] !== 'genre');
 
-    let connectedLinks = [];
+    const connectedLinks = [];
     const loops = linksArr.length;
     for (let i = 0; i < loops; i++) {
       let found = false;
-      let checking = linksArr.shift();
+      const checking = linksArr.shift();
       for (let j = 0; j < connectedLinks.length; j++) {
         if (
           connectedLinks[j][1] === checking[0] &&
@@ -87,7 +87,7 @@ class BarChart extends Component {
       .call(d3.zoom().on('zoom', this.redraw));
     vis = outer.append('g');
 
-    //Connection weight
+    // Connection weight
     const strokeList = connectedLinks.map(genre => genre[2]);
     const minStroke = 0.5;
     const maxStroke = 5;
@@ -98,7 +98,7 @@ class BarChart extends Component {
       .domain([minWeight, maxWeight])
       .range([minStroke, maxStroke]);
 
-    //In-degree (other genres)
+    // In-degree (other genres)
     const radiusList = genres.map(d => d[2]);
     const maxRadius = 10;
     const minRadius = 3;
@@ -109,7 +109,7 @@ class BarChart extends Component {
       .domain([minViews, maxViews])
       .range([minRadius, maxRadius]);
 
-    //No. of songs in genre
+    // No. of songs in genre
     const nodeScale = 5;
     const colourList = genres.map(d => d[1]);
     const minInDegree = d3.min(colourList);
@@ -124,7 +124,7 @@ class BarChart extends Component {
       colour: colourScale(genre[1]),
     }));
 
-    let links = connectedLinks.map(video => ({
+    const links = connectedLinks.map(video => ({
       source: video[0],
       target: video[1],
       value: strokeScale(video[2]),
@@ -203,7 +203,7 @@ class BarChart extends Component {
       d3.select('#tab1Button').style('display', 'inline');
       d3.select('#tab2Button').style('display', 'inline');
       d3.select('#titleBar').html(d.id.split('_').join(' '));
-      let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+      const oWidth = document.getElementById('headerBar').offsetWidth - 50;
       getGenreTopArtists(d.id, oWidth);
       getIncomingOutgoing(d.id, oWidth);
     });
@@ -224,7 +224,7 @@ class BarChart extends Component {
           ));
         })
         .attr('transform', function(d) {
-          return 'translate(' + d.x + ',' + d.y + ')';
+          return `translate(${d.x},${d.y})`;
         });
 
       // ## this code makes nodes NOT bounded in the panel
@@ -267,7 +267,7 @@ class BarChart extends Component {
   }
 
   render() {
-    return <div ref="canvas"></div>;
+    return <div ref="canvas" />;
   }
 }
 

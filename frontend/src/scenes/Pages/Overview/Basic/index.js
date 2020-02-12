@@ -3,9 +3,6 @@ import axios from 'axios';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
 
-import GenreBubbles from '../../../../components/GenreBubbles';
-import SongEgo from '../../../../components/SongEgo';
-
 import {
   Row,
   Col,
@@ -17,8 +14,6 @@ import {
   TabContent,
   TabPane,
 } from 'reactstrap';
-
-import PageTitle from '../../../Layout/AppMain/PageTitle';
 
 import {
   AreaChart,
@@ -43,6 +38,9 @@ import {
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as d3 from 'd3';
+import PageTitle from '../../../Layout/AppMain/PageTitle';
+import SongEgo from '../../../../components/SongEgo';
+import GenreBubbles from '../../../../components/GenreBubbles';
 import { getSongEgo } from '../../../../components/SongEgo/songEgo';
 import { getIncomingOutgoing } from '../../../../components/SongEgo/incomingOutgoing';
 
@@ -114,15 +112,15 @@ export default class AnalyticsDashboard1 extends Component {
 
   fetchExample = e => {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
-    let options = {};
-    let genreObjects = [];
+    const options = {};
+    const genreObjects = [];
     let bubblesInfo;
-    let finished = false;
-    let finishedGenres = false;
-    let finishedArtists = false;
-    let finishedSongs = false;
-    let totalSongs = 0;
-    /*axios
+    const finished = false;
+    const finishedGenres = false;
+    const finishedArtists = false;
+    const finishedSongs = false;
+    const totalSongs = 0;
+    /* axios
       .get('/vevo/genre_bubbles/', options)
       .then(res => {
         if (res.data.error) {
@@ -228,7 +226,7 @@ export default class AnalyticsDashboard1 extends Component {
       })
       .catch(function(error) {
         console.error(error);
-      });*/
+      }); */
     axios.get('/vevo/genre_bubbles_single/', options).then(res =>
       this.setState({
         isLoaded: true,
@@ -278,7 +276,7 @@ export default class AnalyticsDashboard1 extends Component {
       d3.select('#tab2Button').style('display', 'inline');
       d3.select('#tab3Button').style('display', 'none');
       d3.select('#titleBar').html(document.getElementById('search-text').value);
-      let oWidth = document.getElementById('headerBar').clientWidth;
+      const oWidth = document.getElementById('headerBar').clientWidth;
       getSongEgo(document.getElementById('search-text').value, oWidth, 1);
       getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
     }
@@ -286,27 +284,23 @@ export default class AnalyticsDashboard1 extends Component {
 
   render() {
     return (
-      <Fragment>
+      <>
         <ReactCSSTransitionGroup
           component="div"
           transitionName="TabsAnimation"
-          transitionAppear={true}
+          transitionAppear
           transitionAppearTimeout={0}
           transitionEnter={false}
           transitionLeave={false}
         >
           <div>
-            <button
-              id="display"
-              hidden="hidden"
-              onClick={this.display}
-            ></button>
+            <button id="display" hidden="hidden" onClick={this.display} />
             <PageTitle
               heading="vevoviz"
               subheading="An interactive visualisation exploring how YouTube music videos drive attention to each other."
               icon="pe-7s-car icon-gradient bg-mean-fruit"
             />
-            <Row id={'bubblesPage'}>
+            <Row id="bubblesPage">
               <Col md="9" lg="9">
                 <div id="graphContainerBubbles">
                   {this.state.isLoading ? (
@@ -333,40 +327,39 @@ export default class AnalyticsDashboard1 extends Component {
               </Col>
               <Col md="3" lg="3">
                 <div
-                  id={'bubblesInfo1'}
+                  id="bubblesInfo1"
                   className="card mb-3 bg-arielle-smile widget-chart text-white card-border"
                 />
                 <div
-                  id={'bubblesInfo2'}
+                  id="bubblesInfo2"
                   className="card mb-3 bg-midnight-bloom widget-chart text-white card-border"
                 />
                 <div
-                  id={'bubblesInfo3'}
+                  id="bubblesInfo3"
                   className="card mb-3 bg-grow-early widget-chart text-white card-border"
                 />
-                {/*<div id={'bubblesInfo4'} style={{visibility: 'hidden'}} className="card mb-3 bg-love-kiss widget-chart card-border"/>*/}
+                {/* <div id={'bubblesInfo4'} style={{visibility: 'hidden'}} className="card mb-3 bg-love-kiss widget-chart card-border"/> */}
               </Col>
             </Row>
-            <Row id={'nonBubblesPage'} style={{ display: 'none' }}>
+            <Row id="nonBubblesPage" style={{ display: 'none' }}>
               <Col md="12" lg="12">
                 <Card className="mb-3">
-                  <CardHeader id={'headerBar'} className="card-header-tab">
+                  <CardHeader id="headerBar" className="card-header-tab">
                     <div className="card-header-title">
                       <i className="header-icon lnr-rocket icon-gradient bg-tempting-azure">
                         {' '}
                       </i>
-                      <h6 id={'titleBar'} />
+                      <h6 id="titleBar" />
                     </div>
                     <div className="btn-actions-pane-right">
                       <Button
                         outline
-                        className={
-                          'border-0 btn-pill btn-wide btn-transition ' +
-                          classnames({
+                        className={`border-0 btn-pill btn-wide btn-transition ${classnames(
+                          {
                             active: this.state.activeTab1 === '11',
-                          })
-                        }
-                        id={'tab1Button'}
+                          }
+                        )}`}
+                        id="tab1Button"
                         color="primary"
                         onClick={() => {
                           this.toggle1('11');
@@ -376,13 +369,12 @@ export default class AnalyticsDashboard1 extends Component {
                       </Button>
                       <Button
                         outline
-                        className={
-                          'ml-1 btn-pill btn-wide border-0 btn-transition ' +
-                          classnames({
+                        className={`ml-1 btn-pill btn-wide border-0 btn-transition ${classnames(
+                          {
                             active: this.state.activeTab1 === '22',
-                          })
-                        }
-                        id={'tab2Button'}
+                          }
+                        )}`}
+                        id="tab2Button"
                         color="primary"
                         onClick={() => {
                           this.toggle1('22');
@@ -392,13 +384,12 @@ export default class AnalyticsDashboard1 extends Component {
                       </Button>
                       <Button
                         outline
-                        className={
-                          'ml-1 btn-pill btn-wide border-0 btn-transition ' +
-                          classnames({
+                        className={`ml-1 btn-pill btn-wide border-0 btn-transition ${classnames(
+                          {
                             active: this.state.activeTab1 === '33',
-                          })
-                        }
-                        id={'tab3Button'}
+                          }
+                        )}`}
+                        id="tab3Button"
                         color="primary"
                         onClick={() => {
                           this.toggle1('33');
@@ -410,7 +401,7 @@ export default class AnalyticsDashboard1 extends Component {
                   </CardHeader>
                   <TabContent activeTab={this.state.activeTab1}>
                     <TabPane tabId="11">
-                      <div id="graphContainer" className="col-md-12"></div>
+                      <div id="graphContainer" className="col-md-12" />
                     </TabPane>
                     <TabPane tabId="22">
                       <div id="graphContainer2" />
@@ -565,7 +556,7 @@ export default class AnalyticsDashboard1 extends Component {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: '71%' }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       </div>
@@ -597,7 +588,7 @@ export default class AnalyticsDashboard1 extends Component {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: '54%' }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       </div>
@@ -629,7 +620,7 @@ export default class AnalyticsDashboard1 extends Component {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: '32%' }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       </div>
@@ -661,7 +652,7 @@ export default class AnalyticsDashboard1 extends Component {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: '89%' }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       </div>
@@ -769,7 +760,7 @@ export default class AnalyticsDashboard1 extends Component {
             </Row>
           </div>
         </ReactCSSTransitionGroup>
-      </Fragment>
+      </>
     );
   }
 }

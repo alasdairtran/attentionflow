@@ -10,7 +10,7 @@ const Overview = lazy(() => import('../../Pages/Overview'));
 
 const AppMain = () => {
   return (
-    <Fragment>
+    <>
       {/* Overview */}
 
       <Suspense
@@ -32,7 +32,7 @@ const AppMain = () => {
       </Suspense>
 
       <Route exact path="/" render={() => <Redirect to="/overview/basic" />} />
-    </Fragment>
+    </>
   );
 };
 

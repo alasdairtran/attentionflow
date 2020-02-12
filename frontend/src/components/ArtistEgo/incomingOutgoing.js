@@ -42,7 +42,7 @@ export function getIncomingOutgoing(artist, oWidth) {
     .style('margin', '100px auto');
   const options = {
     params: {
-      artist: artist,
+      artist,
     },
   };
   axios
@@ -51,9 +51,9 @@ export function getIncomingOutgoing(artist, oWidth) {
       if (res.data.error) {
         console.log('error');
       } else {
-        let central = res.data.central;
-        let incoming = res.data.incoming;
-        let outgoing = res.data.outgoing;
+        const { central } = res.data;
+        const { incoming } = res.data;
+        const { outgoing } = res.data;
         d3.select('#graphContainer3').html('');
         drawIncomingOutgoing(incoming, outgoing, central, oWidth);
       }
@@ -159,11 +159,11 @@ function drawIncomingOutgoing(
       d3.forceX().x(function(d) {
         if (d.type === 'I') {
           return 300;
-        } else if (d.type === 'O') {
-          return canvasWidth - 300;
-        } else {
-          return canvasWidth / 2;
         }
+        if (d.type === 'O') {
+          return canvasWidth - 300;
+        }
+        return canvasWidth / 2;
       })
     )
     .force(
@@ -174,15 +174,15 @@ function drawIncomingOutgoing(
             ? canvasHeight / 2
             : ((canvasHeight - verticalMargin * 2) / (inLength - 1)) * i +
                 verticalMargin;
-        } else if (d.type === 'O') {
+        }
+        if (d.type === 'O') {
           return outLength === 1
             ? canvasHeight / 2
             : ((canvasHeight - verticalMargin * 2) / (outLength - 1)) *
                 (i - inLength) +
                 verticalMargin;
-        } else {
-          return canvasHeight / 2;
         }
+        return canvasHeight / 2;
       })
     );
 
@@ -247,14 +247,8 @@ function drawIncomingOutgoing(
     .style('fill', 'grey')
     .attr(
       'points',
-      '300,' +
-        inMargin +
-        ' 300,' +
-        (canvasHeight - inMargin) +
-        ' ' +
-        canvasWidth / 2 +
-        ',' +
-        canvasHeight / 2
+      `300,${inMargin} 300,${canvasHeight - inMargin} ${canvasWidth /
+        2},${canvasHeight / 2}`
     )
     .lower()
     .style('opacity', '20%');
@@ -264,18 +258,8 @@ function drawIncomingOutgoing(
     .style('fill', 'grey')
     .attr(
       'points',
-      canvasWidth -
-        300 +
-        ',' +
-        outMargin +
-        ' ' +
-        (canvasWidth - 300) +
-        ',' +
-        (canvasHeight - outMargin) +
-        ' ' +
-        canvasWidth / 2 +
-        ',' +
-        canvasHeight / 2
+      `${canvasWidth - 300},${outMargin} ${canvasWidth - 300},${canvasHeight -
+        outMargin} ${canvasWidth / 2},${canvasHeight / 2}`
     )
     .lower()
     .style('opacity', '20%');
@@ -283,7 +267,7 @@ function drawIncomingOutgoing(
   node.on('click', d => {
     svg.remove();
     d3.select('#titleBar').html(d.id);
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getArtistEgo(d.id, oWidth, 1);
     getSongsByArtist(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
@@ -291,7 +275,7 @@ function drawIncomingOutgoing(
 
   simulation.on('tick', () => {
     node.attr('transform', function(d) {
-      return 'translate(' + d.x + ',' + d.y + ')';
+      return `translate(${d.x},${d.y})`;
     });
   });
 }

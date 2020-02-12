@@ -44,7 +44,7 @@ export function getSongEgo(title, oWidth, hops) {
     .style('margin', '100px auto');
   const options = {
     params: {
-      title: title,
+      title,
     },
   };
   axios
@@ -70,10 +70,10 @@ export function getSongEgo(title, oWidth, hops) {
     });
 }
 
-var btns = {};
+const btns = {};
 function drawHopSlider(title, oWidth, hops) {
-  var container = document.getElementById('graphContainer');
-  var div = document.createElement('div');
+  const container = document.getElementById('graphContainer');
+  const div = document.createElement('div');
   div.classList.add('egohops');
   div.innerHTML = 'N-hop ego network';
 
@@ -82,14 +82,14 @@ function drawHopSlider(title, oWidth, hops) {
   //     <input type="radio" name="options" id="option1" autocomplete="off" checked>
   //     One
   // </label>
-  var btngroup = document.createElement('div');
+  const btngroup = document.createElement('div');
   btngroup.role = 'group';
   btngroup.className = 'egohops-buttons btn-group';
 
-  for (var i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 3; i++) {
     btns[i] = document.createElement('button');
     btns[i].className = 'egohops-label btn btn-outline-secondary';
-    btns[i].textContent = '' + i;
+    btns[i].textContent = `${i}`;
     btns[i].addEventListener('click', changeNumberHops);
     btngroup.appendChild(btns[i]);
   }
@@ -100,17 +100,17 @@ function drawHopSlider(title, oWidth, hops) {
   container.appendChild(div);
 
   function changeNumberHops(e) {
-    var selected = parseInt(this.innerHTML);
-    for (var i = 1; i <= 3; i++) {
+    const selected = parseInt(this.innerHTML);
+    for (let i = 1; i <= 3; i++) {
       btns[i].classList.remove('btn-secondary');
       btns[i].classList.add('btn-outline-secondary');
     }
     btns[selected].classList.remove('btn-outline-secondary');
     btns[selected].classList.add('btn-secondary');
 
-    /////////////////////////////////////////////
+    // ///////////////////////////////////////////
     //   DO SOMETHING when changing # of hops  //
-    /////////////////////////////////////////////
+    // ///////////////////////////////////////////
     if (selected === 1 && hops !== 1) {
       getSongEgo(title, oWidth, 1);
     } else if (selected === 2 && hops !== 2) {
@@ -122,11 +122,11 @@ function drawHopSlider(title, oWidth, hops) {
 }
 
 export function drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
-  let nodeTitles = nodesArrUnfiltered.map(node => node[0]);
-  let nodesArr = nodesArrUnfiltered.filter(
+  const nodeTitles = nodesArrUnfiltered.map(node => node[0]);
+  const nodesArr = nodesArrUnfiltered.filter(
     (node, index) => nodeTitles.indexOf(node[0]) === index
   );
-  let filteredLinksArr = linksArrUnfiltered.filter(link =>
+  const filteredLinksArr = linksArrUnfiltered.filter(link =>
     nodeTitles.includes(link[1])
   );
 
@@ -178,11 +178,11 @@ export function drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
     value: strokeScale(link[2]),
   }));
 
-  let setLinks = [];
-  let loops = links.length;
+  const setLinks = [];
+  const loops = links.length;
   for (let i = 0; i < loops; i++) {
     let found = false;
-    let checking = links.shift();
+    const checking = links.shift();
     for (let j = 0; j < links.length; j++) {
       if (
         ((links[j].source === checking.source &&
@@ -279,7 +279,7 @@ export function drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
     .style('font-size', '12px')
     .style('visibility', d => (d.radius > radiusLimit ? 'visible' : 'hidden'));
 
-  let tooltip = d3
+  const tooltip = d3
     .select('#graphContainer')
     .append('div')
     .style('position', 'absolute')
@@ -297,7 +297,7 @@ export function drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
     tooltip.style('visibility', 'hidden');
     svg.remove();
     d3.select('#titleBar').html(d.id);
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getSongEgo(d.id, oWidth, 1);
     getIncomingOutgoing(d.id, oWidth);
   });
@@ -338,7 +338,7 @@ export function drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
         ));
       })
       .attr('transform', function(d) {
-        return 'translate(' + d.x + ',' + d.y + ')';
+        return `translate(${d.x},${d.y})`;
       });
     link
       .attr('x1', d => d.source.x)

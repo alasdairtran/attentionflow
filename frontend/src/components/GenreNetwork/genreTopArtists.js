@@ -44,7 +44,7 @@ export function getGenreTopArtists(genre, oWidth) {
     .style('margin', '100px auto');
   const options = {
     params: {
-      genre: genre,
+      genre,
     },
   };
   axios
@@ -53,8 +53,8 @@ export function getGenreTopArtists(genre, oWidth) {
       if (res.data.error) {
         console.log('error');
       } else {
-        let artists = res.data.artists;
-        let links = res.data.links;
+        const { artists } = res.data;
+        const { links } = res.data;
         d3.select('#graphContainer').html('');
         drawGenreTopArtists(artists, links, oWidth);
       }
@@ -65,19 +65,19 @@ export function getGenreTopArtists(genre, oWidth) {
 }
 
 function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
-  let artistsArr =
+  const artistsArr =
     artistsArrUnchecked[0][0] === null ? [] : artistsArrUnchecked;
-  let artistNames = artistsArr.map(artist => artist[0]);
-  let linksArr =
+  const artistNames = artistsArr.map(artist => artist[0]);
+  const linksArr =
     linksUnfiltered[0] === null
       ? []
       : linksUnfiltered.filter(
           link => link[1] !== null && artistNames.includes(link[1])
         );
-  let len = linksArr.length;
-  let filteredLinksArr = [];
+  const len = linksArr.length;
+  const filteredLinksArr = [];
   for (let i = 0; i < len; i++) {
-    let checking = linksArr.shift();
+    const checking = linksArr.shift();
     let duplicate = false;
     for (let j = 0; j < linksArr.length; j++) {
       if (checking[0] === linksArr[j][0] && checking[1] === linksArr[j][1]) {
@@ -145,7 +145,7 @@ function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
     colour: colourScale(video[2]),
   }));
 
-  let links = filteredLinksArr.map(video => ({
+  const links = filteredLinksArr.map(video => ({
     source: video[0],
     target: video[1],
     value: strokeScale(video[2]),
@@ -213,7 +213,7 @@ function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
     .style('font-size', '12px')
     .style('visibility', d => (d.radius > radiusLimit ? 'visible' : 'hidden'));
 
-  let tooltip = d3
+  const tooltip = d3
     .select('#graphContainer')
     .append('div')
     .style('position', 'absolute')
@@ -235,7 +235,7 @@ function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
     svg.remove();
     tooltip.style('visibility', 'hidden');
     d3.select('#titleBar').html(d.id);
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getArtistEgo(d.id, oWidth, 1);
     getSongsByArtist(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
@@ -256,7 +256,7 @@ function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
         ));
       })
       .attr('transform', function(d) {
-        return 'translate(' + d.x + ',' + d.y + ')';
+        return `translate(${d.x},${d.y})`;
       });
     link
       .attr('x1', d => d.source.x)

@@ -5,14 +5,14 @@ import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
 
 class GenreBubbles extends Component {
   componentDidMount() {
-    let oWidth = document.getElementById('graphContainerBubbles').offsetWidth;
+    const oWidth = document.getElementById('graphContainerBubbles').offsetWidth;
     this.drawGenreBubbles(oWidth);
   }
 
   drawGenreBubbles(oWidth) {
-    let bubblesInfo = this.props.bubblesInfo;
+    const { bubblesInfo } = this.props;
     let root = JSON.parse(JSON.stringify(bubblesInfo));
-    let viewsList = [];
+    const viewsList = [];
     root.children.forEach(genreObject => {
       genreObject.children.forEach(artistObject =>
         viewsList.push(
@@ -21,7 +21,7 @@ class GenreBubbles extends Component {
       );
     });
     viewsList.sort((a, b) => b - a);
-    let viewsCutoff = viewsList.length < 500 ? 0 : viewsList[500];
+    const viewsCutoff = viewsList.length < 500 ? 0 : viewsList[500];
     root.children.forEach(genreObject => {
       genreObject.children.forEach(artistObject => {
         artistObject.children = artistObject.children.filter(
@@ -33,25 +33,22 @@ class GenreBubbles extends Component {
       if (genreObject.children === []) root.children.remove(genreObject);
     });
 
-    let color = d3.scaleSequential(d3.interpolateGnBu).domain([-1, 5]);
+    const color = d3.scaleSequential(d3.interpolateGnBu).domain([-1, 5]);
 
-    let diameter = oWidth;
+    const diameter = oWidth;
 
-    let svg = d3
+    const svg = d3
       .select(this.refs.canvas)
       .append('svg')
       .attr('width', oWidth)
       .attr('height', oWidth)
       .attr('class', 'bubble');
 
-    let g = svg
+    const g = svg
       .append('g')
-      .attr(
-        'transform',
-        'translate(' + oWidth / 2 + ',' + (diameter / 2 + 10) + ')'
-      );
+      .attr('transform', `translate(${oWidth / 2},${diameter / 2 + 10})`);
 
-    let pack = d3
+    const pack = d3
       .pack()
       .size([diameter, diameter])
       .padding(3);
@@ -65,11 +62,11 @@ class GenreBubbles extends Component {
         return b.value - a.value;
       });
 
-    let focus = root,
-      nodes = pack(root).descendants(),
-      view;
+    let focus = root;
+    const nodes = pack(root).descendants();
+    let view;
 
-    let circle = g
+    const circle = g
       .selectAll('circle')
       .data(nodes)
       .enter()
@@ -97,11 +94,9 @@ class GenreBubbles extends Component {
             focus = d;
             zoom(d);
           }
-        } else {
-          if (d !== root) {
-            focus = d.parent;
-            zoom(d.parent);
-          }
+        } else if (d !== root) {
+          focus = d.parent;
+          zoom(d.parent);
         }
       })
       .style('cursor', 'pointer')
@@ -119,7 +114,7 @@ class GenreBubbles extends Component {
             d3.select('#bubblesInfo1')
               .append('h5')
               .text(d.data.name.split('_').join(' '));
-            //Genre Info
+            // Genre Info
             if (d.depth === 1) {
               let topArtists = [];
               bubblesInfo.children.forEach(genreObject => {
@@ -143,7 +138,7 @@ class GenreBubbles extends Component {
               let topSongs = [];
               bubblesInfo.children.forEach(genreObject => {
                 if (genreObject.name === d.data.name) {
-                  let songsList = [];
+                  const songsList = [];
                   genreObject.children.forEach(artistObject => {
                     songsList.push(...artistObject.children);
                   });
@@ -166,7 +161,7 @@ class GenreBubbles extends Component {
                 .html(d => d.name[0])
                 .style('text-align', 'left');
             }
-            //Artist Info
+            // Artist Info
             else if (d.depth === 2) {
               let topSongs = [];
               bubblesInfo.children.forEach(genreObject => {
@@ -192,7 +187,7 @@ class GenreBubbles extends Component {
                 .html(d => d)
                 .style('text-align', 'left');
             }
-            //Song Info
+            // Song Info
             else if (d.depth === 3) {
               d3.select('#bubblesInfo2')
                 .append('h6')
@@ -204,9 +199,9 @@ class GenreBubbles extends Component {
                 '<p>Daily Views</p>' + "<div id = 'dailyViewsGraph' />"
               );
 
-              let graphWidth =
+              const graphWidth =
                 document.getElementById('bubblesInfo3').offsetWidth - 40;
-              let graphHeight = 120;
+              const graphHeight = 120;
               let viewsArray = [];
               bubblesInfo.children.forEach(genreObject => {
                 if (genreObject.name === d.parent.parent.data.name) {
@@ -221,26 +216,26 @@ class GenreBubbles extends Component {
                 }
               });
 
-              let dailyViewsGraph = d3
+              const dailyViewsGraph = d3
                 .select('#dailyViewsGraph')
                 .append('svg')
                 .attr('width', graphWidth)
                 .attr('height', graphHeight);
 
-              let x = d3
+              const x = d3
                 .scaleLinear()
                 .domain([0, viewsArray.length])
                 .range([40, graphWidth - 1]);
-              let y = d3
+              const y = d3
                 .scaleLinear()
                 .domain([0, d3.max(viewsArray)])
                 .range([graphHeight - 10, 10]);
 
-              let xAxis = d3
+              const xAxis = d3
                 .axisBottom()
                 .scale(x)
                 .tickValues([]);
-              let yAxis = d3
+              const yAxis = d3
                 .axisLeft()
                 .scale(y)
                 .ticks(7)
@@ -272,7 +267,7 @@ class GenreBubbles extends Component {
         }
       });
 
-    let text = g
+    const text = g
       .selectAll('text')
       .data(nodes)
       .enter()
@@ -288,7 +283,7 @@ class GenreBubbles extends Component {
         return d.data.name.split('_').join(' ');
       });
 
-    let node = g.selectAll('circle,text');
+    const node = g.selectAll('circle,text');
 
     svg
       .style('background', 'transparent')
@@ -309,7 +304,7 @@ class GenreBubbles extends Component {
           d3.select('#tab2Button').style('display', 'inline');
           d3.select('#tab3Button').style('display', 'none');
           d3.select('#titleBar').html(d.data.name);
-          let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+          const oWidth = document.getElementById('headerBar').offsetWidth - 50;
           getSongEgo(d.data.name, oWidth, 1);
           getIncomingOutgoing(d.data.name, oWidth);
         } else if (focus === d.parent.parent) {
@@ -326,13 +321,17 @@ class GenreBubbles extends Component {
       .style('text-anchor', 'middle');
 
     function zoom(d) {
-      let focus0 = focus;
+      const focus0 = focus;
 
-      let transition = d3
+      const transition = d3
         .transition()
         .duration(750)
         .tween('zoom', function(d) {
-          let i = d3.interpolateZoom(view, [focus0.x, focus0.y, focus0.r * 2]);
+          const i = d3.interpolateZoom(view, [
+            focus0.x,
+            focus0.y,
+            focus0.r * 2,
+          ]);
           return function(t) {
             zoomTo(i(t));
           };
@@ -355,10 +354,10 @@ class GenreBubbles extends Component {
     }
 
     function zoomTo(v) {
-      let k = diameter / v[2];
+      const k = diameter / v[2];
       view = v;
       node.attr('transform', function(d) {
-        return 'translate(' + (d.x - v[0]) * k + ',' + (d.y - v[1]) * k + ')';
+        return `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`;
       });
       circle.attr('r', function(d) {
         return d.r * k;
@@ -367,7 +366,7 @@ class GenreBubbles extends Component {
   }
 
   render() {
-    return <div ref="canvas"></div>;
+    return <div ref="canvas" />;
   }
 }
 

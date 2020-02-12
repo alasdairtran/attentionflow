@@ -6,7 +6,7 @@ import TitleComponent2 from './PageTitleExamples/Variation2';
 
 class PageTitle extends Component {
   render() {
-    let {
+    const {
       enablePageTitleIcon,
       enablePageTitleSubheading,
 

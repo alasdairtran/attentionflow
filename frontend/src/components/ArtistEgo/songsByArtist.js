@@ -43,7 +43,7 @@ export function getSongsByArtist(artist, oWidth) {
     .style('margin', '100px auto');
   const options = {
     params: {
-      artist: artist,
+      artist,
     },
   };
   axios
@@ -52,8 +52,8 @@ export function getSongsByArtist(artist, oWidth) {
       if (res.data.error) {
         console.log('error');
       } else {
-        let songs = res.data.songs;
-        let songLinks = res.data.songLinks;
+        const { songs } = res.data;
+        const { songLinks } = res.data;
         d3.select('#graphContainer2').html('');
         drawSongsByArtist(songs, songLinks, oWidth);
       }
@@ -73,7 +73,7 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
     .attr('width', canvasWidth)
     .attr('height', canvasHeight);
 
-  let tooltip = d3
+  const tooltip = d3
     .select('#graphContainer2')
     .append('div')
     .style('position', 'absolute')
@@ -88,13 +88,13 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
     .style('visibility', 'hidden')
     .on('click', () => tooltip.style('visibility', 'hidden').html(''));
 
-  let linksArr = songLinks.filter(song => song[1] !== null);
+  const linksArr = songLinks.filter(song => song[1] !== null);
 
-  let connectedLinks = [];
+  const connectedLinks = [];
   const loops = linksArr.length;
   for (let i = 0; i < loops; i++) {
     let found = false;
-    let checking = linksArr.shift();
+    const checking = linksArr.shift();
     for (let j = 0; j < connectedLinks.length; j++) {
       if (
         connectedLinks[j][1] === checking[0] &&
@@ -144,7 +144,7 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
     colour: colourScale(genre[1]),
   }));
 
-  let links = connectedLinks.map(video => ({
+  const links = connectedLinks.map(video => ({
     source: video[0],
     target: video[1],
     value: strokeScale(video[2]),
@@ -227,7 +227,7 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
         ));
       })
       .attr('transform', function(d) {
-        return 'translate(' + d.x + ',' + d.y + ')';
+        return `translate(${d.x},${d.y})`;
       });
     link
       .attr('x1', d => d.source.x)
@@ -261,7 +261,7 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
     svg.remove();
     d3.select('#tab3Button').style('display', 'none');
     d3.select('#titleBar').html(d.id);
-    let oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getSongEgo(d.id, oWidth, 1);
     getIncomingOutgoing(d.id, oWidth);
   });
