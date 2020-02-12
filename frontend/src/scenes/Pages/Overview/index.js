@@ -7,6 +7,7 @@ import BasicOverview from './Basic/';
 import GenreOverview from './Genre';
 import ArtistOverview from './Artist';
 import SongOverview from './SongOverview';
+import SongEgo from './SongEgo';
 
 // Layout
 
@@ -25,6 +26,7 @@ const Overview = ({ match }) => (
           <Route path={`${match.url}/genre`} component={GenreOverview} />
           <Route path={`${match.url}/artist`} component={ArtistOverview} />
           <Route exact path={`${match.url}/song`} component={SongOverview} />
+          <Route path={`${match.url}/song/:id`} component={SongEgo} />
         </div>
         <AppFooter />
       </div>
