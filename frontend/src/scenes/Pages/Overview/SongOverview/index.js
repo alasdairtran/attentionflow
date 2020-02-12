@@ -77,6 +77,7 @@ export default class AnalyticsDashboard1 extends Component {
     super(props);
 
     this.state = {
+      songId: props.match.params.id,
       dropdownOpen: false,
       activeTab1: '11',
       isLoaded: false,

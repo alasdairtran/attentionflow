@@ -6,7 +6,7 @@ import { Route } from 'react-router-dom';
 import BasicOverview from './Basic/';
 import GenreOverview from './Genre';
 import ArtistOverview from './Artist';
-import SongOverview from './Song';
+import SongOverview from './SongOverview';
 
 // Layout
 
@@ -24,7 +24,7 @@ const Overview = ({ match }) => (
           <Route path={`${match.url}/basic`} component={BasicOverview} />
           <Route path={`${match.url}/genre`} component={GenreOverview} />
           <Route path={`${match.url}/artist`} component={ArtistOverview} />
-          <Route path={`${match.url}/song`} component={SongOverview} />
+          <Route exact path={`${match.url}/song`} component={SongOverview} />
         </div>
         <AppFooter />
       </div>
