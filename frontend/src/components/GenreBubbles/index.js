@@ -2,8 +2,18 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import { getSongEgo } from '../SongEgo/songEgo';
 import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
+import { Redirect } from 'react-router-dom';
 
 class GenreBubbles extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      clickedOnSong: false,
+      title: null,
+    };
+  }
+
   componentDidMount() {
     const oWidth = document.getElementById('graphContainerBubbles').offsetWidth;
     this.drawGenreBubbles(oWidth);
@@ -294,19 +304,16 @@ class GenreBubbles extends Component {
 
     zoomTo([root.x, root.y, root.r * 2]);
 
+    const that = this;
+
     d3.selectAll('.node--leaf')
       .style('fill', 'white')
       .on('click', function(d) {
         if (focus === d.parent) {
-          d3.select('#bubblesPage').style('display', 'none');
-          d3.select('#nonBubblesPage').style('display', 'inline');
-          d3.select('#tab1Button').style('display', 'inline');
-          d3.select('#tab2Button').style('display', 'inline');
-          d3.select('#tab3Button').style('display', 'none');
-          d3.select('#titleBar').html(d.data.name);
-          const oWidth = document.getElementById('headerBar').offsetWidth - 50;
-          getSongEgo(d.data.name, oWidth, 1);
-          getIncomingOutgoing(d.data.name, oWidth);
+          that.setState({
+            clickedOnSong: true,
+            title: d.data.name,
+          });
         } else if (focus === d.parent.parent) {
           focus = d.parent;
           zoom(d.parent);
@@ -366,6 +373,9 @@ class GenreBubbles extends Component {
   }
 
   render() {
+    if (this.state.clickedOnSong === true) {
+      return <Redirect push to={`/overview/song/${this.state.title}`} />;
+    }
     return <div ref="canvas" />;
   }
 }

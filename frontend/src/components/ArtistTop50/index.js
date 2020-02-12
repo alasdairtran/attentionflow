@@ -38,8 +38,8 @@ class BarChart extends Component {
     super(props);
 
     this.state = {
-      clickedOnSong: false,
-      title: null,
+      clickedOnArtist: false,
+      name: null,
     };
   }
 
