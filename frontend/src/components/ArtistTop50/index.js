@@ -5,6 +5,7 @@ import axios from 'axios';
 import { getIncomingOutgoing } from '../ArtistEgo/incomingOutgoing';
 import { getSongsByArtist } from '../ArtistEgo/songsByArtist';
 import { getArtistEgo } from '../ArtistEgo/artistEgo';
+import { Redirect } from 'react-router-dom';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -33,6 +34,15 @@ const drag = simulation => {
 
 var vis;
 class BarChart extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      clickedOnSong: false,
+      title: null,
+    };
+  }
+
   componentDidMount() {
     let oWidth = document.getElementById('headerBar').offsetWidth - 50;
     this.drawSongExample(oWidth);
@@ -206,16 +216,10 @@ class BarChart extends Component {
       .on('click', () => tooltip.style('visibility', 'hidden').html(''));
 
     node.on('click', d => {
-      d3.select('#tab1Button').style('display', 'inline');
-      d3.select('#tab2Button').style('display', 'inline');
-      d3.select('#tab3Button').style('display', 'inline');
-      vis.remove();
-      tooltip.style('visibility', 'hidden');
-      d3.select('#titleBar').html(d.id);
-      let oWidth = document.getElementById('headerBar').offsetWidth - 50;
-      getArtistEgo(d.id, oWidth, 1);
-      getSongsByArtist(d.id, oWidth);
-      getIncomingOutgoing(d.id, oWidth);
+      this.setState({
+        clickedOnArtist: true,
+        name: d.id,
+      });
     });
 
     simulation.on('tick', () => {
@@ -276,6 +280,10 @@ class BarChart extends Component {
   }
 
   render() {
+    if (this.state.clickedOnArtist === true) {
+      console.log('redirecting');
+      return <Redirect push to={`/overview/artist/${this.state.name}`} />;
+    }
     return <div ref="canvas"></div>;
   }
 }
