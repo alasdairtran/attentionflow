@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
+import { Redirect } from 'react-router-dom';
 
 import { getSongInfo } from '../SongEgo/popout';
 import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
@@ -33,6 +34,15 @@ const drag = simulation => {
 
 var vis;
 class BarChart extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      clickedOnSong: false,
+      title: null,
+    };
+  }
+
   componentDidMount() {
     let oWidth = document.getElementById('headerBar').offsetWidth - 50;
     this.drawSongExample(oWidth);
@@ -205,13 +215,10 @@ class BarChart extends Component {
       .style('visibility', 'hidden');
 
     node.on('click', d => {
-      vis.remove();
-      d3.select('#tab1Button').style('display', 'inline');
-      d3.select('#tab2Button').style('display', 'inline');
-      d3.select('#titleBar').html(d.id);
-      let oWidth = document.getElementById('headerBar').offsetWidth - 50;
-      getSongEgo(d.id, oWidth, 1);
-      getIncomingOutgoing(d.id, oWidth);
+      this.setState({
+        clickedOnSong: true,
+        title: d.id,
+      });
     });
 
     node.on('mouseover', function(d) {
@@ -276,6 +283,10 @@ class BarChart extends Component {
   }
 
   render() {
+    if (this.state.clickedOnSong === true) {
+      console.log('redirecting');
+      return <Redirect push to={`/overview/song/${this.state.title}`} />;
+    }
     return <div ref="canvas"></div>;
   }
 }
