@@ -5,7 +5,6 @@ import { Redirect } from 'react-router-dom';
 
 import { getSongInfo } from '../SongEgo/popout';
 import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
-import { getSongEgo } from '../SongEgo/songEgo';
 
 const drag = simulation => {
   function dragstarted(d) {

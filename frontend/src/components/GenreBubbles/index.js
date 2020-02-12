@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
-import { getSongEgo } from '../SongEgo/songEgo';
 import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
 import { Redirect } from 'react-router-dom';
 

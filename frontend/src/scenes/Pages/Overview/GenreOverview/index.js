@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import axios from 'axios';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classnames from 'classnames';
+import { Redirect } from 'react-router-dom';
 
 import {
   Row,
@@ -41,7 +42,6 @@ import * as d3 from 'd3';
 import PageTitle from '../../../Layout/AppMain/PageTitle';
 import SongEgo from '../../../../components/SongEgo';
 import GenreNetwork from '../../../../components/GenreNetwork';
-import { getSongEgo } from '../../../../components/SongEgo/songEgo';
 import { getIncomingOutgoing } from '../../../../components/SongEgo/incomingOutgoing';
 
 const data = [
@@ -76,6 +76,8 @@ export default class AnalyticsDashboard1 extends Component {
     super(props);
 
     this.state = {
+      clickedOnSong: false,
+      title: null,
       dropdownOpen: false,
       activeTab1: '11',
       isLoaded: false,
@@ -89,6 +91,12 @@ export default class AnalyticsDashboard1 extends Component {
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
+  }
+
+  componentWillReceiveProps(newProps) {
+    this.setState({
+      clickedOnSong: false,
+    });
   }
 
   componentDidMount() {
@@ -140,34 +148,17 @@ export default class AnalyticsDashboard1 extends Component {
 
   // For search box
   display = d => {
-    if (!this.state.isLoading) {
-      d.preventDefault();
-      d3.select('#graphContainer').html('');
-      d3.select('#graphContainer')
-        .append('div')
-        .style('width', '50px')
-        .style('height', '50px')
-        .style('border', '10px solid #f3f3f3')
-        .style('border-radius', '50%')
-        .style('border-top', '10px solid #3498db')
-        .style('animation', 'spin 2s linear infinite')
-        .style('margin', '100px auto');
-      this.setState({
-        isLoaded: true,
-        hasError: false,
-        isLoading: false,
-      });
-      d3.select('#tab1Button').style('display', 'inline');
-      d3.select('#tab2Button').style('display', 'inline');
-      d3.select('#tab3Button').style('display', 'none');
-      d3.select('#titleBar').html(document.getElementById('search-text').value);
-      const oWidth = document.getElementById('headerBar').clientWidth;
-      getSongEgo(document.getElementById('search-text').value, oWidth, 1);
-      getIncomingOutgoing(document.getElementById('search-text').value, oWidth);
-    }
+    this.setState({
+      clickedOnSong: true,
+      title: document.getElementById('search-text').value,
+    });
   };
 
   render() {
+    if (this.state.clickedOnSong === true) {
+      console.log('redirecting');
+      return <Redirect push to={`/overview/song/${this.state.title}`} />;
+    }
     return (
       <>
         <ReactCSSTransitionGroup

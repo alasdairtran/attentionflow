@@ -4,7 +4,6 @@ import axios from 'axios';
 
 import { getIncomingOutgoing } from './incomingOutgoing';
 import { getSongsByArtist } from './songsByArtist';
-import { drawSongEgo } from '../SongEgo/songEgo';
 
 import '../../scenes/assets/vevovis.css';
 
