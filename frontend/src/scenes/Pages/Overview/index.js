@@ -5,7 +5,7 @@ import { Route } from 'react-router-dom';
 
 import BasicOverview from './Basic/';
 import GenreOverview from './Genre';
-import ArtistOverview from './Artist';
+import ArtistOverview from './ArtistOverview';
 import SongOverview from './SongOverview';
 import SongEgo from './SongEgo';
 
