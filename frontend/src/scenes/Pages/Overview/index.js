@@ -4,7 +4,7 @@ import { Route } from 'react-router-dom';
 // DASHBOARDS
 
 import BasicOverview from './Basic/';
-import GenreOverview from './Genre';
+import GenreOverview from './GenreOverview';
 import ArtistOverview from './ArtistOverview';
 import SongOverview from './SongOverview';
 import SongEgo from './SongEgo';
