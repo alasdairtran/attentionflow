@@ -2,7 +2,7 @@
 
 An interactive visualisation exploring how YouTube music videos drive attention to each other.
 
-## Services
+## Service overview
 
 | Service       | Production                      | Development                     | Local                       |
 | ------------- | ------------------------------- | ------------------------------- | --------------------------- |
@@ -12,7 +12,7 @@ An interactive visualisation exploring how YouTube music videos drive attention 
 
 ## Getting Started
 
-Instructions on how to set up the local development on your Mac machine:
+How to set up the local development on your Mac machine:
 
 ```sh
 # Download brew
@@ -33,14 +33,40 @@ cd $HOME/projects/vevoviz/frontend && yarn
 # Migrate the postgres database
 cd $HOME/projects/vevoviz && docker-compose run backend python manage.py migrate --noinput
 
-# Start the local database and server
+# Start the frontend app and Neo4j database
 cd $HOME/projects/vevoviz
 docker-compose up
 ```
 
-and access the frontend at [http://localhost:3001/](http://localhost:3002/)
+The frontend app is available at [http://localhost:3002/](http://localhost:3002/) and Neo4j database is [http://localhost:7475/](http://localhost:7475/).
+Note that the local Neo4j database needs restore the data dump from the remote server.
 
-Before making a commit, ensure that you format the code properly:
+```sh
+cd $HOME/projects/vevoviz
+
+# Download the backup
+rsync -rlptzhe ssh --info=progress2 <username>@43.240.97.170:/mnt/vevoviz_prod/neo4j/data/backups neo4j/data/
+
+## if you see this error: "rsync: --info=progress2: unknown option"
+## make sure rsync is with the latest version (>=3.1.3)
+
+# Shut down neo4j
+docker-compose stop neo4j
+
+# Restore
+docker run \
+--name neo4j-restore \
+--mount type=bind,source=$HOME/projects/vevoviz/neo4j/data,target=/data \
+neo4j:3.5.12 bin/neo4j-admin load --database=graph.db --from=/data/backups/graph.db.dump --force
+
+# Start the database again
+docker-compose start neo4j
+
+# Delete the restore container
+docker rm neo4j-restore
+```
+
+Before making a commit, make sure that you format the code properly:
 
 ```sh
 # Format Python code
@@ -53,16 +79,14 @@ cd $HOME/projects/vevoviz/frontend && yarn pretty
 ## Working Remotely
 
 ```sh
-# Inside the CentOS virtual machine, to start the production app
+# Inside the Nectar virtual machine, start the production app
 cd /mnt/vevoviz_prod && sudo docker-compose -f docker-compose.prod.yml up -d
 
-# To start the development app
+# Start the development app
 cd /mnt/vevoviz_dev && sudo docker-compose up -d
 ```
 
-## Maintenance
-
-To back up the Neo4j database in the server:
+## Backing up the Neo4j database
 
 ```sh
 cd /mnt/vevoviz_prod
@@ -81,31 +105,4 @@ sudo docker-compose start neo4j
 
 # Delete the backup container
 sudo docker rm neo4j-dump
-```
-
-To restore the Neo4j database on our local machine:
-
-```sh
-cd $HOME/projects/vevoviz
-
-# Download the backup
-rsync -rlptzhe ssh --info=progress2 <username>@130.56.248.102:/mnt/vevoviz_prod/neo4j/data/backups neo4j/data/
-
-## if you see this error: rsync: --info=progress2: unknown option
-## make sure to add export /usr/bin/local:$PATH in your ~./bash_profile
-
-# Shut down neo4j
-docker-compose stop neo4j
-
-# Restore
-docker run \
---name neo4j-restore \
---mount type=bind,source=$HOME/projects/vevoviz/neo4j/data,target=/data \
-neo4j:3.5.12 bin/neo4j-admin load --database=graph.db --from=/data/backups/graph.db.dump --force
-
-# Start the database again
-docker-compose start neo4j
-
-# Delete the restore container
-docker rm neo4j-restore
 ```
