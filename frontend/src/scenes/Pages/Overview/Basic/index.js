@@ -249,6 +249,7 @@ export default class AnalyticsDashboard1 extends Component {
               children: artistObject[1].map(songObject => ({
                 name: songObject[0],
                 size: songObject[1],
+                dailyViews: songObject[2],
               })),
             })),
           })),

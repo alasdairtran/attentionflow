@@ -21,25 +21,18 @@ class GenreBubbles extends Component {
   drawGenreBubbles(oWidth) {
     const { bubblesInfo } = this.props;
     let root = JSON.parse(JSON.stringify(bubblesInfo));
-    const viewsList = [];
-    root.children.forEach(genreObject => {
-      genreObject.children.forEach(artistObject =>
-        viewsList.push(
-          ...artistObject.children.map(songObject => songObject.size)
-        )
-      );
-    });
-    viewsList.sort((a, b) => b - a);
-    const viewsCutoff = viewsList.length < 500 ? 0 : viewsList[500];
     root.children.forEach(genreObject => {
       genreObject.children.forEach(artistObject => {
-        artistObject.children = artistObject.children.filter(
-          songObject => songObject.size > viewsCutoff
-        );
-        if (artistObject.children === [])
-          genreObject.children.remove(artistObject);
+        artistObject.children.forEach((songObject, index) => {
+          if (songObject.size < 5000000 && index !== 0) {
+            artistObject.children.splice(index);
+            artistObject.children = artistObject.children.map(obj => ({
+              name: obj.name,
+              size: obj.size,
+            }));
+          }
+        });
       });
-      if (genreObject.children === []) root.children.remove(genreObject);
     });
 
     const color = d3.scaleSequential(d3.interpolateGnBu).domain([-1, 5]);
@@ -130,7 +123,7 @@ class GenreBubbles extends Component {
                 if (genreObject.name === d.data.name) {
                   topArtists = genreObject.children
                     .slice(0, 5)
-                    .map(artistObject => artistObject.name[0]);
+                    .map(artistObject => artistObject.name);
                 }
               });
               d3.select('#bubblesInfo2')
@@ -167,7 +160,7 @@ class GenreBubbles extends Component {
                 .data(topSongs)
                 .enter()
                 .append('li')
-                .html(d => d.name[0])
+                .html(d => d.name)
                 .style('text-align', 'left');
             }
             // Artist Info
@@ -176,10 +169,10 @@ class GenreBubbles extends Component {
               bubblesInfo.children.forEach(genreObject => {
                 if (genreObject.name === d.parent.data.name) {
                   genreObject.children.forEach(artistObject => {
-                    if (artistObject.name[0] === d.data.name) {
+                    if (artistObject.name === d.data.name) {
                       topSongs = artistObject.children
                         .slice(0, 5)
-                        .map(songObject => songObject.name[0]);
+                        .map(songObject => songObject.name);
                     }
                   });
                 }
@@ -204,73 +197,6 @@ class GenreBubbles extends Component {
               d3.select('#bubblesInfo2')
                 .append('p')
                 .html(d3.format(',')(d.data.size));
-              d3.select('#bubblesInfo3').html(
-                '<p>Daily Views</p>' + "<div id = 'dailyViewsGraph' />"
-              );
-
-              const graphWidth =
-                document.getElementById('bubblesInfo3').offsetWidth - 40;
-              const graphHeight = 120;
-              let viewsArray = [];
-              bubblesInfo.children.forEach(genreObject => {
-                if (genreObject.name === d.parent.parent.data.name) {
-                  genreObject.children.forEach(artistObject => {
-                    if (artistObject.name[0] === d.parent.data.name) {
-                      artistObject.children.forEach(songObject => {
-                        if (songObject.name[0] === d.data.name)
-                          viewsArray = JSON.parse(songObject.name[1]);
-                      });
-                    }
-                  });
-                }
-              });
-
-              const dailyViewsGraph = d3
-                .select('#dailyViewsGraph')
-                .append('svg')
-                .attr('width', graphWidth)
-                .attr('height', graphHeight);
-
-              const x = d3
-                .scaleLinear()
-                .domain([0, viewsArray.length])
-                .range([40, graphWidth - 1]);
-              const y = d3
-                .scaleLinear()
-                .domain([0, d3.max(viewsArray)])
-                .range([graphHeight - 10, 10]);
-
-              const xAxis = d3
-                .axisBottom()
-                .scale(x)
-                .tickValues([]);
-              const yAxis = d3
-                .axisLeft()
-                .scale(y)
-                .ticks(7)
-                .tickFormat(d3.format('.3s'));
-              dailyViewsGraph
-                .append('g')
-                .attr('transform', 'translate(0,110)')
-                .call(xAxis);
-              dailyViewsGraph
-                .append('g')
-                .attr('transform', 'translate(40,0)')
-                .call(yAxis);
-
-              dailyViewsGraph
-                .append('path')
-                .datum(viewsArray)
-                .attr('fill', 'none')
-                .attr('stroke', 'white')
-                .attr('stroke-width', 1.5)
-                .attr(
-                  'd',
-                  d3
-                    .line()
-                    .x((d, i) => x(i))
-                    .y(d => y(d))
-                );
             }
           }
         }

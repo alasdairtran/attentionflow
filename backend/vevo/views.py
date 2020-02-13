@@ -509,12 +509,12 @@ def get_genre_bubbles_single(request):
                               "OPTIONAL MATCH (a:A)--()--(g) "
                               "OPTIONAL MATCH (a)--(v:V)--(g) "
                               "WITH distinct g, a, v, sum(v.totalView) as views "
-                              "WITH distinct g, views, v,  a ORDER BY views desc "
-                              "WITH distinct g, v, collect(a)[..case when count(a)/40 > 5 then count(a)/40 else 5 end] as artistsList "
+                              "WITH g, v, a ORDER BY views desc "
+                              "WITH distinct g, v, collect(a) as artistsList "
                               "UNWIND artistsList as artists "
                               "WITH distinct g, artists, collect([v.title, v.totalView])[..5] as videos "
-                              "WITH distinct g, collect([artists.artist, videos]) as artists "
-                              "RETURN collect([g.genre, artists]) as rootArr ")
+                              "WITH distinct g, collect([artists.artist, videos])[..case when count(artists)/40 > 5 then count(artists)/40 else 5 end] as artists "
+                              "RETURN collect([g.genre, artists]) as rootArr")
         result = results.single()
 
     driver.close()
