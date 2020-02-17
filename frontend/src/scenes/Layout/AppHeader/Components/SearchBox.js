@@ -7,11 +7,41 @@ import Autosuggest from 'react-autosuggest';
 
 let titles = [];
 
-// suggestion to output
-const getSuggestionValue = suggestion => suggestion.name;
+class Video {
+  constructor(title) {
+    this.title = title;
+  }
+}
+
+class Artist {
+  constructor(artist) {
+    this.artist = artist;
+  }
+}
+
+// suggestion to output(in the text)
+const getSuggestionValue = suggestion => {
+  if(suggestion.name instanceof Artist){
+    return suggestion.name.artist;
+  } else {
+    return suggestion.name.title;
+  }
+}
 
 // render suggestion list
-const renderSuggestion = suggestion => <div>{suggestion.name}</div>;
+const renderSuggestion = suggestion => {
+  if(suggestion.name instanceof Artist){
+    return (
+      <div>A:{suggestion.name.artist}</div>
+    )
+  } else {
+    return <div>V:{suggestion.name.title}</div>
+  }
+};
+
+const onSuggestionSelected = (event, { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }) => {
+  console.log(suggestionValue);
+};
 
 class SearchBox extends React.Component {
   constructor(props) {
@@ -47,14 +77,19 @@ class SearchBox extends React.Component {
       .then(res => {
         titles = [];
         const result = res.data.title;
-        for (let i = 0; i < result.length; i++) {
-          titles.push({ name: result[i] });
+        const artist = res.data.artist;
+        for (let i = 0; i < artist.length && i<3; i++) {
+          titles.push({ name: new Artist(artist[i]) });
+        }
+        for (let i = 0; i < result.length && i <5; i++) {
+          titles.push({ name: new Video(result[i]) });
         }
         if (inputLength > 0) {
           this.setState({
             suggestions: titles,
           });
         }
+        console.log(result);
       })
       .catch(function(error) {
         console.error(error);
@@ -89,7 +124,7 @@ class SearchBox extends React.Component {
               onSuggestionsClearRequested={this.onSuggestionsClearRequested}
               getSuggestionValue={getSuggestionValue}
               renderSuggestion={renderSuggestion}
-              alwaysRenderSuggestions
+              onSuggestionSelected={onSuggestionSelected}
               inputProps={inputProps}
             />
 

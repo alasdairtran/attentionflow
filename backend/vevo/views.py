@@ -126,14 +126,17 @@ def get_suggestions(request):
 
     title = request.GET["title"]
     with driver.session() as session:
-        results = session.run("MATCH (v:V) WHERE toLower(v.title) CONTAINS \'" + title + "\' RETURN v.title AS title LIMIT 3")
-        records = list(results.records())
-        result = [record[0] for record in records]
+        result2 = session.run("CALL db.index.fulltext.queryNodes(\"titleAndArtist\", \"" + title +"\") YIELD node, score RETURN node.title AS title, node.artist AS artist ORDER BY node.totalView DESC")
+        key = result2.keys()
+        value = list(result2.records())
+        result_title = [v[0] for v in value if not v[0] is None]
+        result_artist = list({v[1] for v in value if not v[1] is None})
 
     driver.close()
 
     output = {
-        "title": result
+        "title": result_title,
+        "artist": result_artist
     }
     return JsonResponse(output)
 
