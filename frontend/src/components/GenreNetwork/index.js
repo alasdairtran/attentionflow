@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
-
-import { getIncomingOutgoing } from './incomingOutgoing';
-import { getGenreTopArtists } from './genreTopArtists';
+import { Redirect } from 'react-router-dom';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -32,6 +30,15 @@ const drag = simulation => {
 
 let vis;
 class BarChart extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      clickedOnGenre: false,
+      genre: null,
+    };
+  }
+
   componentDidMount() {
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     this.drawBarChart(oWidth);
@@ -199,13 +206,10 @@ class BarChart extends Component {
       );
 
     node.on('click', d => {
-      vis.remove();
-      d3.select('#tab1Button').style('display', 'inline');
-      d3.select('#tab2Button').style('display', 'inline');
-      d3.select('#titleBar').html(d.id.split('_').join(' '));
-      const oWidth = document.getElementById('headerBar').offsetWidth - 50;
-      getGenreTopArtists(d.id, oWidth);
-      getIncomingOutgoing(d.id, oWidth);
+      this.setState({
+        clickedOnGenre: true,
+        genre: d.id,
+      });
     });
 
     simulation.on('tick', () => {
@@ -267,7 +271,11 @@ class BarChart extends Component {
   }
 
   render() {
-    return <div ref="canvas" />;
+    if (this.state.clickedOnGenre === true) {
+      console.log('redirecting');
+      return <Redirect push to={`/overview/genre/${this.state.genre}`} />;
+    }
+    return <div ref="canvas"></div>;
   }
 }
 
