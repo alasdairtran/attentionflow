@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
 import { getSongInfo } from './popout';
+import { Redirect } from 'react-router-dom';
 
 import { getIncomingOutgoing } from './incomingOutgoing';
 
@@ -31,7 +32,25 @@ const drag = simulation => {
 };
 
 class BarChart extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      clickedOnSong: false,
+      title: null,
+    };
+  }
+
   componentDidMount() {
+    const oWidth = document.getElementById('headerBar').offsetWidth - 50;
+    d3.select('#tab1Button').style('display', 'inline');
+    d3.select('#tab2Button').style('display', 'inline');
+    d3.select('#titleBar').html(this.props.title);
+    this.getSongEgo(this.props.title, oWidth, 1);
+    getIncomingOutgoing(this.props.title, oWidth);
+  }
+
+  componentWillReceiveProps() {
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     d3.select('#tab1Button').style('display', 'inline');
     d3.select('#tab2Button').style('display', 'inline');
@@ -306,12 +325,11 @@ class BarChart extends Component {
       .style('visibility', 'hidden');
 
     node.on('click', d => {
-      tooltip.style('visibility', 'hidden');
-      svg.remove();
-      d3.select('#titleBar').html(d.id);
-      const oWidth = document.getElementById('headerBar').offsetWidth - 50;
-      this.getSongEgo(d.id, oWidth, 1);
-      getIncomingOutgoing(d.id, oWidth);
+      console.log('clicked');
+      this.setState({
+        clickedOnSong: true,
+        title: d.id,
+      });
     });
 
     node.on('mouseover', function(d) {
@@ -361,6 +379,14 @@ class BarChart extends Component {
   }
 
   render() {
+    if (this.state.clickedOnSong === true) {
+      console.log('redirecting to', this.state.title);
+      return (
+        <div>
+          <Redirect push to={`/overview/song/${this.state.title}`} />{' '}
+        </div>
+      );
+    }
     return <div ref="canvas" />;
   }
 }
