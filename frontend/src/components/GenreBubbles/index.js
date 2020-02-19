@@ -20,7 +20,6 @@ class GenreBubbles extends Component {
 
   drawGenreBubbles(oWidth) {
     const { bubblesInfo } = this.props;
-    console.log('here');
     let root = JSON.parse(JSON.stringify(bubblesInfo));
     root.children.forEach(genreObject => {
       genreObject.children.forEach(artistObject => {

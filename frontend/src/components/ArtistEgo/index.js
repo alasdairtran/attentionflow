@@ -3,6 +3,9 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 import { Redirect } from 'react-router-dom';
+import { getIncomingOutgoing } from './incomingOutgoing';
+import { getSongsByArtist } from './songsByArtist';
+import { getArtistEgo } from './artistEgo';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -42,7 +45,10 @@ class BarChart extends Component {
   componentDidMount() {
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     d3.select('#titleBar').html(this.props.name);
-    this.drawBarChart(oWidth);
+    getArtistEgo(this.props.name, oWidth, 1);
+    getSongsByArtist(this.props.name, oWidth);
+    getIncomingOutgoing(this.props.name, oWidth);
+    // this.drawBarChart(oWidth);
   }
 
   drawBarChart(oWidth) {
