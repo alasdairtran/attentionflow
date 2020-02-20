@@ -1,0 +1,110 @@
+// create video nodes from local json file
+CALL apoc.periodic.iterate('
+CALL apoc.load.json("file:///video_nodes.json") YIELD value
+','
+CREATE (v: V{embed: toInteger(value.embed)})
+SET v.videoId = value.vid,
+    v.publishedAt = datetime(value.published_at),
+    v.channelId = value.channel_id,
+    v.title = value.title,
+    v.description = value.description,
+    v.thumbnails = value.thumbnails,
+    v.duration = value.duration,
+    v.dailyView = value.daily_view,
+    v.totalView = toInteger(value.total_view),
+    v.avgWatch = value.avg_watch,
+    v.artistName = value.artist_name
+', {batchSize:100})
+
+// update index
+CREATE INDEX ON :V(embed)
+
+// create edges
+LOAD CSV WITH HEADERS FROM 'file:///video_edges.csv' AS e
+MATCH (a:V)
+MATCH (b:V)
+WHERE a.embed = toInteger(e.Source) AND b.embed = toInteger(e.Target)
+CREATE (a)-[r:RV]->(b)
+SET r.weight = toFloat(e.Weight)
+SET r.flux = toFloat(e.Flux)
+RETURN r
+
+//create artist nodes
+LOAD CSV WITH HEADERS FROM 'file:///artist_nodes.csv' AS n
+CREATE (a: A{channelId: n.ChannelId, artistName: n.ArtistName, numVideos: toInteger(n.NumVideos), numViews: toFloat(n.NumViews)})
+
+// update index
+CREATE INDEX ON :A(channelId)
+
+//create artist->artist edges
+LOAD CSV WITH HEADERS FROM 'file:///artist_edges.csv' AS e
+MATCH (a:A)
+MATCH (b:A)
+WHERE a.channelId = e.SourceChannel AND b.channelId = e.TargetChannel
+CREATE (a)-[r:RA]->(b)
+SET r.channelFlux = toFloat(e.ChannelFlux)
+RETURN r
+
+//create genre nodes
+LOAD CSV WITH HEADERS FROM 'file:///genre_nodes.csv' AS n
+CREATE (g: G{genre: n.Genre, numVideos: toInteger(n.NumVideos), numViews: toFloat(n.NumViews)})
+
+// update index
+CREATE INDEX ON :G(genre)
+
+//create genre->genre edges
+LOAD CSV WITH HEADERS FROM 'file:///genre_edges.csv' AS e
+MATCH (a:G)
+MATCH (b:G)
+WHERE a.genre = e.SourceGenre AND b.genre = e.TargetGenre
+CREATE (a)-[r:RG]->(b)
+SET r.genreFlux = toFloat(e.GenreFlux)
+RETURN r
+
+//create video->artist edge
+LOAD CSV WITH HEADERS FROM 'file:///video_artist.csv' AS e
+MATCH (a:V)
+MATCH (b:A)
+WHERE a.embed = toInteger(e.Embed) AND b.channelId = e.ChannelId
+CREATE (a)-[r:VA]->(b)
+RETURN r
+
+//create artist->video edge
+LOAD CSV WITH HEADERS FROM 'file:///video_artist.csv' AS e
+MATCH (a:V)
+MATCH (b:A)
+WHERE a.embed = toInteger(e.Embed) AND b.channelId = e.ChannelId
+CREATE (b)-[r:AV]->(a)
+RETURN r
+
+//create video->genre edge
+LOAD CSV WITH HEADERS FROM 'file:///video_genre.csv' AS e
+MATCH (a:V)
+MATCH (b:G)
+WHERE a.embed = toInteger(e.Embed) AND b.genre = e.Genre
+CREATE (a)-[r:VG]->(b)
+RETURN r
+
+//create genre->video edge
+LOAD CSV WITH HEADERS FROM 'file:///video_genre.csv' AS e
+MATCH (a:V)
+MATCH (b:G)
+WHERE a.embed = toInteger(e.Embed) AND b.genre = e.Genre
+CREATE (b)-[r:GV]->(a)
+RETURN r
+
+//create artist->genre edge
+LOAD CSV WITH HEADERS FROM 'file:///artist_genre.csv' AS e
+MATCH (a:A)
+MATCH (b:G)
+WHERE a.channelId = e.ChannelId AND b.genre = e.Genre
+CREATE (a)-[r:AG]->(b)
+RETURN r
+
+//create genre->artist edge
+LOAD CSV WITH HEADERS FROM 'file:///artist_genre.csv' AS e
+MATCH (a:A)
+MATCH (b:G)
+WHERE a.channelId = e.ChannelId AND b.genre = e.Genre
+CREATE (b)-[r:GA]->(a)
+RETURN r

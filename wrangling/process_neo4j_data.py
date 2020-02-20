@@ -15,7 +15,7 @@ def main():
     artist_info = os.path.join(input_dir, 'vevo_en_vid_artist_duration_vtitle.txt')
 
     # output files
-    output_dir = '/Users/siqiwu/Developments/GitWorks/vevoviz/wrangling'
+    output_dir = '/Users/siqiwu/Developments/GitWorks/vevoviz/neo4j/import'
     print('output dir:', output_dir)
     video_nodes_path = os.path.join(output_dir, 'video_nodes.json')
     video_edges_path = os.path.join(output_dir, 'video_edges.csv')
@@ -68,8 +68,11 @@ def main():
     genre_view_dict = defaultdict(list)
 
     video_artist = open(video_artist_path, 'w')
+    video_artist.write('{0},{1}\n'.format('Embed', 'ChannelId'))
     artist_genre = open(artist_genre_path, 'w')
+    artist_genre.write('{0},{1}\n'.format('ChannelId', 'Genre'))
     video_genre = open(video_genre_path, 'w')
+    video_genre.write('{0},{1}\n'.format('Embed', 'Genre'))
 
     with open(vevo_en_videos_60k) as fin:
         for line in fin:
@@ -91,6 +94,10 @@ def main():
                 total_view = video_json['insights']['totalView']
                 if 'avgWatch' in video_json['insights']:
                     avg_watch = video_json['insights']['avgWatch']
+                    if avg_watch < 1:
+                        avg_watch = 'PT{0}S'.format(int(60 * avg_watch))
+                    else:
+                        avg_watch = 'PT{0}M{1}S'.format(int(avg_watch), int(60 * (avg_watch - int(avg_watch))))
                 else:
                     avg_watch = None
                 genres = [x for x in video_json['topics'] if x.lower() != 'music']
