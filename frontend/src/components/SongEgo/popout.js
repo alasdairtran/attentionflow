@@ -13,32 +13,22 @@ export function getSongInfo(d, tooltip) {
       if (res.data.error) {
         console.log('error');
       } else {
-        const { artistName } = res.data;
+        const { artist } = res.data;
         const { totalViews } = res.data;
         const { genre } = res.data;
-        const publishedAt = new Date(res.data.publishedAt);
-        const { avgWatch } = res.data;
-        const { channelId } = res.data;
+        const publishDate = new Date(res.data.publishDate);
+        const { averageWatch } = res.data;
+        const { channelID } = res.data;
         const { duration } = res.data;
         const { dailyViews } = res.data;
-
-        console.log(artistName);
-        console.log(totalViews);
-        console.log(genre);
-        console.log(publishedAt);
-        console.log(avgWatch);
-        console.log(channelId);
-        console.log(duration);
-        console.log(dailyViews);
-
         drawPopout(
           d.id,
-          artistName,
+          artist,
           totalViews,
           genre,
-          publishedAt,
-          avgWatch,
-          channelId,
+          publishDate,
+          averageWatch,
+          channelID,
           duration,
           dailyViews,
           tooltip
@@ -52,18 +42,18 @@ export function getSongInfo(d, tooltip) {
 
 function drawPopout(
   title,
-  artistName,
+  artist,
   totalViews,
   genre,
-  publishedAt,
-  avgWatch,
-  channelId,
+  publishDate,
+  averageWatch,
+  channelID,
   duration,
   dailyViews,
   tooltip
 ) {
-  const avgWatchWidth =
-    (timeInSeconds(avgWatch) / timeInSeconds(duration)) * 430;
+  const averageWatchWidth =
+    ((averageWatch * 60) / timeInSeconds(duration)) * 430;
 
   tooltip.html(
     `${'<div style="background-color:dimgrey;height:100px;width:200px;margin-right:10px;display:inline-block;float:left;position:relative;">' +
@@ -73,9 +63,9 @@ function drawPopout(
       `</div>` +
       `<div id="songInfo"style="height:100px;width:220px;display:inline-block;">` +
       `<h6>${title}</h6>` +
-      `<p style="color:#656565;">${artistName}</br>${d3.format('.3s')(
+      `<p style="color:#656565;">${artist}</br>${d3.format('.3s')(
         totalViews
-      )} views &#183 ${publishedAt.toLocaleDateString(publishedAt, {
+      )} views &#183 ${publishDate.toLocaleDateString(publishDate, {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
@@ -83,12 +73,12 @@ function drawPopout(
       `</div>` +
       `<br/>${formatGenres(genre)}<br/>` +
       `<div style="height:30px;width:430px;background-color:grey;position:relative;z-index:150;vertical-align:middle">` +
-      `<div style="background-color:limegreen;position:absolute;bottom:0px;left:0px;z-index:151;height:30px;width:${avgWatchWidth}px;">` +
+      `<div style="background-color:limegreen;position:absolute;bottom:0px;left:0px;z-index:151;height:30px;width:${averageWatchWidth}px;">` +
       `</div>` +
-      `<p style="z-index:152;position:absolute;margin-top:4px;margin-left:5px">Average Watch Time: ${timeInSeconds(
-        avgWatch
-      )}:${timeInSeconds(avgWatch) < 10 ? '0' : ''}${timeInSeconds(
-        avgWatch
+      `<p style="z-index:152;position:absolute;margin-top:4px;margin-left:5px">Average Watch Time: ${Math.floor(
+        averageWatch
+      )}:${Math.round((averageWatch % 1) * 60) < 10 ? '0' : ''}${Math.round(
+        (averageWatch % 1) * 60
       )}/${formatTime(duration)}</p>` +
       `</div>` +
       `<br/>` +
@@ -200,7 +190,6 @@ function timeInSeconds(time) {
   }
   let total = 0;
   let multiplier = 1;
-  console.log(time);
   const len = time.length;
   for (let i = 1; i <= len; i++) {
     if (time.charAt(len - i) === 'M') {
