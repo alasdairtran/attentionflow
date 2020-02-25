@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
-import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
+import { getIncomingOutgoing } from '../VideoEgo/incomingOutgoing';
 import { Redirect } from 'react-router-dom';
 
 class GenreBubbles extends Component {
@@ -299,7 +299,7 @@ class GenreBubbles extends Component {
 
   render() {
     if (this.state.clickedOnSong === true) {
-      return <Redirect push to={`/overview/song/${this.state.title}`} />;
+      return <Redirect push to={`/overview/video/${this.state.videoId}`} />;
     }
     return <div ref="canvas" />;
   }

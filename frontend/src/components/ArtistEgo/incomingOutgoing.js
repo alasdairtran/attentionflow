@@ -1,33 +1,14 @@
 import * as d3 from 'd3';
 
 import axios from 'axios';
-import { getSongsByArtist } from './songsByArtist';
+import { getVideosByArtist } from './videosByArtist';
 import { getArtistEgo } from './artistEgo';
-
-const drag = simulation => {
-  function dragstarted(d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-  }
-
-  function dragged(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-  }
-
-  function dragended(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-  }
-
-  return d3
-    .drag()
-    .on('start', dragstarted)
-    .on('drag', dragged)
-    .on('end', dragended);
-};
+import {
+  strokeScaleFunc,
+  radiusScaleFunc,
+  colorScaleFunc,
+  drag,
+} from '../Helper/helper';
 
 export function getIncomingOutgoing(artist, oWidth) {
   d3.select('#graphContainer3').html('');
@@ -72,6 +53,7 @@ function drawIncomingOutgoing(
   const canvasWidth = oWidth;
   const canvasHeight = oWidth * 0.6;
   const verticalMargin = 100;
+
   const svg = d3
     .select('#graphContainer3')
     .append('svg')
@@ -269,7 +251,7 @@ function drawIncomingOutgoing(
     d3.select('#titleBar').html(d.id);
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getArtistEgo(d.id, oWidth, 1);
-    getSongsByArtist(d.id, oWidth);
+    getVideosByArtist(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
   });
 

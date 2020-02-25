@@ -8,12 +8,12 @@ SET v.videoId = value.vid,
     v.channelId = value.channel_id,
     v.title = value.title,
     v.description = value.description,
-    v.thumbnails = value.thumbnails,
     v.duration = value.duration,
     v.dailyView = value.daily_view,
     v.totalView = toInteger(value.total_view),
     v.avgWatch = value.avg_watch,
-    v.artistName = value.artist_name
+    v.artistName = value.artist_name,
+    v.genres = value.genres
 ', {batchSize:100})
 
 // update index
@@ -108,3 +108,6 @@ MATCH (b:G)
 WHERE a.channelId = e.ChannelId AND b.genre = e.Genre
 CREATE (b)-[r:GA]->(a)
 RETURN r
+
+// update index
+CREATE INDEX ON :V(videoId)

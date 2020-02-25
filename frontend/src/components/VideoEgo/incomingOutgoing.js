@@ -1,8 +1,8 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 
-import { getSongInfo } from './popout';
-import { getSongEgo } from './songEgo';
+import { getVideoInfo } from './popout';
+import { getVideoEgo } from './videoEgo';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -46,7 +46,7 @@ export function getIncomingOutgoing(title, oWidth) {
     },
   };
   axios
-    .get('/vevo/song_incoming_outgoing/', options)
+    .get('/vevo/video_incoming_outgoing/', options)
     .then(res => {
       if (res.data.error) {
         console.log('error');
@@ -229,7 +229,7 @@ function drawIncomingOutgoing(
     svg.remove();
     d3.select('#titleBar').html(d.id);
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
-    getSongEgo(d.id, oWidth, 1);
+    getVideoEgo(d.id, oWidth, 1);
     getIncomingOutgoing(d.id, oWidth);
   });
 
@@ -237,7 +237,7 @@ function drawIncomingOutgoing(
     d3.select(this).style('stroke', 'black');
     tooltip.html('');
     tooltip.style('visibility', 'visible');
-    getSongInfo(d, tooltip);
+    getVideoInfo(d, tooltip);
   });
 
   node.on('mouseleave', function() {

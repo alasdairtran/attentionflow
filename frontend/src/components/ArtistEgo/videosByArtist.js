@@ -1,36 +1,17 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 
-import { getSongInfo } from '../SongEgo/popout';
-import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
-import { getSongEgo } from '../SongEgo/songEgo';
+import { getVideoInfo } from '../VideoEgo/popout';
+import { getIncomingOutgoing } from '../VideoEgo/incomingOutgoing';
+import { getVideoEgo } from '../VideoEgo/videoEgo';
+import {
+  strokeScaleFunc,
+  radiusScaleFunc,
+  colorScaleFunc,
+  drag,
+} from '../Helper/helper';
 
-const drag = simulation => {
-  function dragstarted(d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-  }
-
-  function dragged(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-  }
-
-  function dragended(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-  }
-
-  return d3
-    .drag()
-    .on('start', dragstarted)
-    .on('drag', dragged)
-    .on('end', dragended);
-};
-
-export function getSongsByArtist(artist, oWidth) {
+export function getVideosByArtist(artist, oWidth) {
   d3.select('#graphContainer2').html('');
   d3.select('#graphContainer2')
     .append('div')
@@ -47,15 +28,15 @@ export function getSongsByArtist(artist, oWidth) {
     },
   };
   axios
-    .get('/vevo/songs_by_artist/', options)
+    .get('/vevo/videos_by_artist/', options)
     .then(res => {
       if (res.data.error) {
         console.log('error');
       } else {
-        const { songs } = res.data;
-        const { songLinks } = res.data;
+        const { videos } = res.data;
+        const { links } = res.data;
         d3.select('#graphContainer2').html('');
-        drawSongsByArtist(songs, songLinks, oWidth);
+        drawVideosByArtist(videos, links, oWidth);
       }
     })
     .catch(function(error) {
@@ -63,7 +44,7 @@ export function getSongsByArtist(artist, oWidth) {
     });
 }
 
-function drawSongsByArtist(songs, songLinks, oWidth) {
+function drawVideosByArtist(videos, videoLinks, oWidth) {
   const canvasWidth = oWidth;
   const canvasHeight = oWidth * 0.6;
 
@@ -88,13 +69,15 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
     .style('visibility', 'hidden')
     .on('click', () => tooltip.style('visibility', 'hidden').html(''));
 
-  const linksArr = songLinks.filter(song => song[1] !== null);
-
-  const connectedLinks = [];
-  const loops = linksArr.length;
+  console.log('error1');
+  console.log(videos);
+  console.log(videoLinks);
+  console.log('error2');
+  const connectedLinks = videoLinks;
+  const loops = videoLinks.length;
   for (let i = 0; i < loops; i++) {
     let found = false;
-    const checking = linksArr.shift();
+    const checking = videoLinks.shift();
     for (let j = 0; j < connectedLinks.length; j++) {
       if (
         connectedLinks[j][1] === checking[0] &&
@@ -120,7 +103,7 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
     .domain([minWeight, maxWeight])
     .range([minStroke, maxStroke]);
 
-  const radiusList = songs.map(d => d[2]);
+  const radiusList = videos.map(d => d[2]);
   const maxRadius = 15;
   const minRadius = 3;
   const minViews = d3.min(radiusList);
@@ -131,14 +114,14 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
     .range([minRadius, maxRadius]);
 
   const nodeScale = 4;
-  const colourList = songs.map(d => d[1]);
+  const colourList = videos.map(d => d[1]);
   const minInDegree = d3.min(colourList);
   const maxInDegree = d3.max(colourList);
   const colourScale = d3
     .scaleSequential(d3.interpolatePuBu)
     .domain([minInDegree, maxInDegree + 5]);
 
-  const nodes = songs.map(genre => ({
+  const nodes = videos.map(genre => ({
     id: genre[0],
     radius: radiusScale(genre[2]),
     colour: colourScale(genre[1]),
@@ -244,7 +227,7 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
       .style('visibility', 'visible');
     tooltip.html('');
     tooltip.style('visibility', 'visible');
-    getSongInfo(d, tooltip);
+    getVideoInfo(d, tooltip);
   });
 
   node.on('mouseleave', function() {
@@ -262,7 +245,7 @@ function drawSongsByArtist(songs, songLinks, oWidth) {
     d3.select('#tab3Button').style('display', 'none');
     d3.select('#titleBar').html(d.id);
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
-    getSongEgo(d.id, oWidth, 1);
+    getVideoEgo(d.id, oWidth, 1);
     getIncomingOutgoing(d.id, oWidth);
   });
 }

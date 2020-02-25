@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
 
-import { getSongInfo } from './popout';
+import { getVideoInfo } from './popout';
 import { getIncomingOutgoing } from './incomingOutgoing';
 import { getArtistEgo } from '../ArtistEgo/artistEgo';
 
@@ -31,7 +31,7 @@ const drag = simulation => {
     .on('end', dragended);
 };
 
-export function getSongEgo(title, oWidth, hops) {
+export function getVideoEgo(title, oWidth, hops) {
   d3.select('#graphContainer').html('');
   d3.select('#graphContainer')
     .append('div')
@@ -61,7 +61,7 @@ export function getSongEgo(title, oWidth, hops) {
       if (res.data.error) {
         console.log('error');
       } else {
-        drawSongEgo(res.data.videos, res.data.links, oWidth);
+        drawVideoEgo(res.data.videos, res.data.links, oWidth);
         drawHopSlider(title, oWidth, hops);
       }
     })
@@ -112,16 +112,16 @@ function drawHopSlider(title, oWidth, hops) {
     //   DO SOMETHING when changing # of hops  //
     // ///////////////////////////////////////////
     if (selected === 1 && hops !== 1) {
-      getSongEgo(title, oWidth, 1);
+      getVideoEgo(title, oWidth, 1);
     } else if (selected === 2 && hops !== 2) {
-      getSongEgo(title, oWidth, 2);
+      getVideoEgo(title, oWidth, 2);
     } else if (selected === 3 && hops !== 3) {
-      getSongEgo(title, oWidth, 3);
+      getVideoEgo(title, oWidth, 3);
     }
   }
 }
 
-export function drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
+export function drawVideoEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
   const nodeTitles = nodesArrUnfiltered.map(node => node[0]);
   const nodesArr = nodesArrUnfiltered.filter(
     (node, index) => nodeTitles.indexOf(node[0]) === index
@@ -298,7 +298,7 @@ export function drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
     svg.remove();
     d3.select('#titleBar').html(d.id);
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
-    getSongEgo(d.id, oWidth, 1);
+    getVideoEgo(d.id, oWidth, 1);
     getIncomingOutgoing(d.id, oWidth);
   });
 
@@ -310,7 +310,7 @@ export function drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
       .style('visibility', 'visible');
     tooltip.html('');
     tooltip.style('visibility', 'visible');
-    getSongInfo(d, tooltip);
+    getVideoInfo(d, tooltip);
   });
 
   node.on('mouseleave', function() {

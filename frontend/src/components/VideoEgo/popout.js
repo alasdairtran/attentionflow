@@ -1,14 +1,17 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 
-export function getSongInfo(d, tooltip) {
+export function getVideoInfo(d, tooltip) {
+  console.log('debug');
+  console.log(d);
   const options = {
     params: {
-      title: d.id,
+      id: d.id,
     },
   };
+  console.log(d.id);
   axios
-    .get('/vevo/song_info/', options)
+    .get('/vevo/video_info/', options)
     .then(res => {
       if (res.data.error) {
         console.log('error');

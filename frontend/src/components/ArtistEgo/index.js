@@ -1,36 +1,16 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
-import axios from 'axios';
 
 import { Redirect } from 'react-router-dom';
 import { getIncomingOutgoing } from './incomingOutgoing';
-import { getSongsByArtist } from './songsByArtist';
+import { getVideosByArtist } from './videosByArtist';
 import { getArtistEgo } from './artistEgo';
-
-const drag = simulation => {
-  function dragstarted(d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-  }
-
-  function dragged(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-  }
-
-  function dragended(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-  }
-
-  return d3
-    .drag()
-    .on('start', dragstarted)
-    .on('drag', dragged)
-    .on('end', dragended);
-};
+import {
+  strokeScaleFunc,
+  radiusScaleFunc,
+  colorScaleFunc,
+  drag,
+} from '../Helper/helper';
 
 class BarChart extends Component {
   constructor(props) {
@@ -45,15 +25,17 @@ class BarChart extends Component {
   componentDidMount() {
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     d3.select('#titleBar').html(this.props.name);
+    console.log(this.props);
     getArtistEgo(this.props.name, oWidth, 1);
-    getSongsByArtist(this.props.name, oWidth);
+    getVideosByArtist(this.props.name, oWidth);
     getIncomingOutgoing(this.props.name, oWidth);
     // this.drawBarChart(oWidth);
   }
 
   drawBarChart(oWidth) {
-    const nodesArr = this.props.artists;
-    const linksArr = this.props.links.filter(link => link[2] !== null);
+    const artistsArr = this.props.artists;
+    const linksArr = this.props.links;
+    //    const linksArr = this.props.links.filter(link => link[2] !== null);
     const len = linksArr.length;
     const filteredLinksArr = [];
     for (let i = 0; i < len; i++) {
@@ -116,7 +98,7 @@ class BarChart extends Component {
       .domain([minWeight, maxWeight])
       .range([minStroke, maxStroke]);
 
-    const radiusList = nodesArr.map(d => d[1]);
+    const radiusList = artistsArr.map(d => d[1]);
     const maxRadius = 15;
     const minRadius = 3;
     const minViews = d3.min(radiusList);
@@ -127,14 +109,14 @@ class BarChart extends Component {
       .range([minRadius, maxRadius]);
 
     const nodeScale = 4;
-    const colourList = nodesArr.map(d => d[2]);
+    const colourList = artistsArr.map(d => d[2]);
     const minInDegree = d3.min(colourList);
     const maxInDegree = d3.max(colourList);
     const colourScale = d3
       .scaleSequential(d3.interpolateYlGnBu)
       .domain([minInDegree, maxInDegree + 5]);
 
-    const nodes = nodesArr.map(node => ({
+    const nodes = artistsArr.map(node => ({
       id: node[0],
       radius: radiusScale(node[1]),
       colour: colourScale(node[2]),
@@ -264,9 +246,9 @@ class BarChart extends Component {
   }
 
   render() {
-    if (this.state.clickedOnSong === true) {
+    if (this.state.clickedOnArtist === true) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/artist/${this.state.name}`} />;
+      return <Redirect push to={`/overview/artist/${this.state.id}`} />;
     }
     return <div ref="canvas" />;
   }

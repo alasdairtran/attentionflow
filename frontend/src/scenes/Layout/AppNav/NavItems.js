@@ -18,7 +18,7 @@ export const ComponentsNav = [
   },
   {
     icon: 'pe-7s-music',
-    label: 'Song',
-    to: '#/overview/song',
+    label: 'Video',
+    to: '#/overview/video',
   },
 ];

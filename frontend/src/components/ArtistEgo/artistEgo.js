@@ -3,34 +3,14 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 import { getIncomingOutgoing } from './incomingOutgoing';
-import { getSongsByArtist } from './songsByArtist';
-
+import { getVideosByArtist } from './videosByArtist';
+import {
+  strokeScaleFunc,
+  radiusScaleFunc,
+  colorScaleFunc,
+  drag,
+} from '../Helper/helper';
 import '../../scenes/assets/vevovis.css';
-
-const drag = simulation => {
-  function dragstarted(d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-  }
-
-  function dragged(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-  }
-
-  function dragended(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-  }
-
-  return d3
-    .drag()
-    .on('start', dragstarted)
-    .on('drag', dragged)
-    .on('end', dragended);
-};
 
 export function getArtistEgo(artist, oWidth, hops) {
   d3.select('#graphContainer').html('');
@@ -171,38 +151,21 @@ function drawArtistEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
     );
   vis = outer.append('g');
 
-  const strokeList = filteredLinksArr.map(d => d[2]);
-  const minStroke = 0.5;
-  const maxStroke = 5;
-  const minWeight = d3.min(strokeList);
-  const maxWeight = d3.max(strokeList);
-  const strokeScale = d3
-    .scaleLinear()
-    .domain([minWeight, maxWeight])
-    .range([minStroke, maxStroke]);
+  const strokeList = filteredLinksArr.map(link => link[2]);
+  const strokeScale = strokeScaleFunc(strokeList);
 
-  const radiusList = nodesArr.map(d => d[1]);
-  const maxRadius = 15;
-  const minRadius = 3;
-  const minViews = d3.min(radiusList);
-  const maxViews = d3.max(radiusList);
-  const radiusScale = d3
-    .scaleLinear()
-    .domain([minViews, maxViews])
-    .range([minRadius, maxRadius]);
+  const radiusList = nodesArr.map(artist => artist[1]);
+  const radiusScale = radiusScaleFunc(radiusList);
+
+  const colourList = nodesArr.map(artist => artist[2]);
+  const colorScale = colorScaleFunc(colourList);
 
   const nodeScale = 4;
-  const colourList = nodesArr.map(d => d[2]);
-  const minInDegree = d3.min(colourList);
-  const maxInDegree = d3.max(colourList);
-  const colourScale = d3
-    .scaleSequential(d3.interpolateYlGnBu)
-    .domain([minInDegree, maxInDegree + 5]);
 
   const nodes = nodesArr.map(node => ({
     id: node[0],
     radius: radiusScale(node[1]),
-    colour: colourScale(node[2]),
+    colour: colorScale(node[2]),
   }));
 
   let links = filteredLinksArr.map(link => ({
@@ -316,7 +279,7 @@ function drawArtistEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
     d3.select('#titleBar').html(d.id);
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getArtistEgo(d.id, oWidth, 1);
-    getSongsByArtist(d.id, oWidth);
+    getVideosByArtist(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
   });
 

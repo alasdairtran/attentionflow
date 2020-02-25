@@ -40,9 +40,9 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as d3 from 'd3';
 import PageTitle from '../../../Layout/AppMain/PageTitle';
-import SongEgo from '../../../../components/SongEgo';
+import VideoEgo from '../../../../components/VideoEgo';
 import GenreBubbles from '../../../../components/GenreBubbles';
-import { getIncomingOutgoing } from '../../../../components/SongEgo/incomingOutgoing';
+import { getIncomingOutgoing } from '../../../../components/VideoEgo/incomingOutgoing';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -269,7 +269,7 @@ export default class AnalyticsDashboard1 extends Component {
   render() {
     if (this.state.clickedOnSong === true) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/song/${this.state.title}`} />;
+      return <Redirect push to={`/overview/video/${this.state.videoId}`} />;
     }
     return (
       <>
@@ -306,7 +306,7 @@ export default class AnalyticsDashboard1 extends Component {
                   ) : !this.state.search ? (
                     <GenreBubbles bubblesInfo={this.state.bubblesInfo} />
                   ) : (
-                    <SongEgo
+                    <VideoEgo
                       videos={this.state.videos}
                       links={this.state.links}
                     />

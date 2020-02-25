@@ -15,7 +15,6 @@ import {
   TabContent,
   TabPane,
 } from 'reactstrap';
-
 import {
   AreaChart,
   Area,
@@ -28,7 +27,6 @@ import {
   Tooltip,
   LineChart,
 } from 'recharts';
-
 import {
   faAngleUp,
   faArrowRight,
@@ -36,12 +34,14 @@ import {
   faArrowLeft,
   faAngleDown,
 } from '@fortawesome/free-solid-svg-icons';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as d3 from 'd3';
-import { getIncomingOutgoing } from '../../../../components/SongEgo/incomingOutgoing';
+import VideoTop50 from '../../../../components/VideoTop50';
+import VideoEgo from '../../../../components/VideoEgo';
+
 import PageTitle from '../../../Layout/AppMain/PageTitle';
-import SongTop50 from '../../../../components/SongTop50';
+
+import { getIncomingOutgoing } from '../../../../components/VideoEgo/incomingOutgoing';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -90,6 +90,8 @@ export default class AnalyticsDashboard1 extends Component {
     };
     this.toggle = this.toggle.bind(this);
     this.toggle1 = this.toggle1.bind(this);
+
+    console.log(this.state);
   }
 
   componentWillReceiveProps(newProps) {
@@ -121,7 +123,7 @@ export default class AnalyticsDashboard1 extends Component {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = {};
     axios
-      .get('/vevo/top_50_songs/', options)
+      .get('/vevo/top_50_videos/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -155,7 +157,7 @@ export default class AnalyticsDashboard1 extends Component {
   render() {
     if (this.state.clickedOnSong === true) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/song/${this.state.title}`} />;
+      return <Redirect push to={`/overview/video/${this.state.videoId}`} />;
     }
     return (
       <>
@@ -251,10 +253,11 @@ export default class AnalyticsDashboard1 extends Component {
                             }}
                           />
                         ) : (
-                          <SongTop50
-                            songs={this.state.songs}
-                            links={this.state.links}
-                          />
+                          <VideoEgo title={this.state.songId} />
+                          // <VideoTop50
+                          //   songs={this.state.songs}
+                          //   links={this.state.links}
+                          // />
                         )}
                       </div>
                     </TabPane>

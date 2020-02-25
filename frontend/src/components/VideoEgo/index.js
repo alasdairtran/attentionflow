@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
-import { getSongInfo } from './popout';
+import { getVideoInfo } from './popout';
 import { Redirect } from 'react-router-dom';
 
 import { getIncomingOutgoing } from './incomingOutgoing';
@@ -46,7 +46,7 @@ class BarChart extends Component {
     d3.select('#tab1Button').style('display', 'inline');
     d3.select('#tab2Button').style('display', 'inline');
     d3.select('#titleBar').html(this.props.title);
-    this.getSongEgo(this.props.title, oWidth, 1);
+    this.getVideoEgo(this.props.title, oWidth, 1);
     getIncomingOutgoing(this.props.title, oWidth);
   }
 
@@ -55,11 +55,11 @@ class BarChart extends Component {
     d3.select('#tab1Button').style('display', 'inline');
     d3.select('#tab2Button').style('display', 'inline');
     d3.select('#titleBar').html(this.props.title);
-    this.getSongEgo(this.props.title, oWidth, 1);
+    this.getVideoEgo(this.props.title, oWidth, 1);
     getIncomingOutgoing(this.props.title, oWidth);
   }
 
-  getSongEgo(title, oWidth, hops) {
+  getVideoEgo(title, oWidth, hops) {
     d3.select('#graphContainer').html('');
     d3.select('#graphContainer')
       .append('div')
@@ -89,7 +89,7 @@ class BarChart extends Component {
         if (res.data.error) {
           console.log('error');
         } else {
-          this.drawSongEgo(res.data.videos, res.data.links, oWidth);
+          this.drawVideoEgo(res.data.videos, res.data.links, oWidth);
           this.drawHopSlider(title, oWidth, hops);
         }
       })
@@ -141,16 +141,16 @@ class BarChart extends Component {
       //   DO SOMETHING when changing # of hops  //
       // ///////////////////////////////////////////
       if (selected === 1 && hops !== 1) {
-        that.getSongEgo(title, oWidth, 1);
+        that.getVideoEgo(title, oWidth, 1);
       } else if (selected === 2 && hops !== 2) {
-        that.getSongEgo(title, oWidth, 2);
+        that.getVideoEgo(title, oWidth, 2);
       } else if (selected === 3 && hops !== 3) {
-        that.getSongEgo(title, oWidth, 3);
+        that.getVideoEgo(title, oWidth, 3);
       }
     }
   }
 
-  drawSongEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
+  drawVideoEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
     const nodeTitles = nodesArrUnfiltered.map(node => node[0]);
     const nodesArr = nodesArrUnfiltered.filter(
       (node, index) => nodeTitles.indexOf(node[0]) === index
@@ -340,7 +340,7 @@ class BarChart extends Component {
         .style('visibility', 'visible');
       tooltip.html('');
       tooltip.style('visibility', 'visible');
-      getSongInfo(d, tooltip);
+      getVideoInfo(d, tooltip);
     });
 
     node.on('mouseleave', function() {
@@ -383,7 +383,7 @@ class BarChart extends Component {
       console.log('redirecting to', this.state.title);
       return (
         <div>
-          <Redirect push to={`/overview/song/${this.state.title}`} />{' '}
+          <Redirect push to={`/overview/video/${this.state.videoId}`} />{' '}
         </div>
       );
     }

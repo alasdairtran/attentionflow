@@ -6,9 +6,9 @@ import { Route } from 'react-router-dom';
 import BasicOverview from './Basic';
 import GenreOverview from './GenreOverview';
 import ArtistOverview from './ArtistOverview';
-import SongOverview from './SongOverview';
+import VideoOverview from './VideoOverview';
 import GenreNetwork from './GenreNetwork';
-import SongEgo from './SongEgo';
+import VideoEgo from './VideoEgo';
 import ArtistEgo from './ArtistEgo';
 // Layout
 
@@ -32,8 +32,8 @@ const Overview = ({ match }) => (
             component={ArtistOverview}
           />
           <Route path={`${match.url}/artist/:id`} component={ArtistEgo} />
-          <Route exact path={`${match.url}/song`} component={SongOverview} />
-          <Route path={`${match.url}/song/:id`} component={SongEgo} />
+          <Route exact path={`${match.url}/song`} component={VideoOverview} />
+          <Route path={`${match.url}/video/:id`} component={VideoEgo} />
         </div>
         <AppFooter />
       </div>

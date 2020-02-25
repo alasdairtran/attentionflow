@@ -3,8 +3,8 @@ import * as d3 from 'd3';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 
-import { getSongInfo } from '../SongEgo/popout';
-import { getIncomingOutgoing } from '../SongEgo/incomingOutgoing';
+import { getVideoInfo } from '../VideoEgo/popout';
+import { getIncomingOutgoing } from '../VideoEgo/incomingOutgoing';
 
 const drag = simulation => {
   function dragstarted(d) {
@@ -102,6 +102,7 @@ class BarChart extends Component {
       id: video[0],
       radius: radiusScale(video[1]),
       colour: colourScale(video[2]),
+      video: video,
     }));
 
     let links = linksArr.map(video => ({
@@ -228,7 +229,9 @@ class BarChart extends Component {
         .style('visibility', 'visible');
       tooltip.html('');
       tooltip.style('visibility', 'visible');
-      getSongInfo(d, tooltip);
+      console.log(d);
+      console.log('erroe');
+      getVideoInfo(d, tooltip);
     });
 
     node.on('mouseleave', function() {
@@ -284,7 +287,8 @@ class BarChart extends Component {
   render() {
     if (this.state.clickedOnSong === true) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/song/${this.state.title}`} />;
+      console.log(this.state);
+      return <Redirect push to={`/overview/video/${this.state.videoId}`} />;
     }
     return <div ref="canvas" />;
   }

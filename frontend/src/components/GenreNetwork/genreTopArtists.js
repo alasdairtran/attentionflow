@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 import { getIncomingOutgoing } from '../ArtistEgo/incomingOutgoing';
-import { getSongsByArtist } from '../ArtistEgo/songsByArtist';
+import { getVideosByArtist } from '../ArtistEgo/videosByArtist';
 import { getArtistEgo } from '../ArtistEgo/artistEgo';
 
 const drag = simulation => {
@@ -237,7 +237,7 @@ function drawGenreTopArtists(artistsArrUnchecked, linksUnfiltered, oWidth) {
     d3.select('#titleBar').html(d.id);
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getArtistEgo(d.id, oWidth, 1);
-    getSongsByArtist(d.id, oWidth);
+    getVideosByArtist(d.id, oWidth);
     getIncomingOutgoing(d.id, oWidth);
   });
 

@@ -1,36 +1,13 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
-import axios from 'axios';
 
 import { Redirect } from 'react-router-dom';
-import { getIncomingOutgoing } from '../ArtistEgo/incomingOutgoing';
-import { getSongsByArtist } from '../ArtistEgo/songsByArtist';
-import { getArtistEgo } from '../ArtistEgo/artistEgo';
-
-const drag = simulation => {
-  function dragstarted(d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-  }
-
-  function dragged(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-  }
-
-  function dragended(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-  }
-
-  return d3
-    .drag()
-    .on('start', dragstarted)
-    .on('drag', dragged)
-    .on('end', dragended);
-};
+import {
+  strokeScaleFunc,
+  radiusScaleFunc,
+  colorScaleFunc,
+  drag,
+} from '../Helper/helper';
 
 let vis;
 class BarChart extends Component {
@@ -39,18 +16,18 @@ class BarChart extends Component {
 
     this.state = {
       clickedOnArtist: false,
-      name: null,
+      id: null,
     };
   }
 
   componentDidMount() {
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
-    this.drawSongExample(oWidth);
+    this.drawVideoExample(oWidth);
   }
 
-  drawSongExample(oWidth) {
+  drawVideoExample(oWidth) {
     const artistsArr = this.props.artists;
-    const linksArr = this.props.links.filter(link => link[1] !== null);
+    const linksArr = this.props.links;
 
     const canvasHeight = oWidth * 0.6;
     const canvasWidth = oWidth;
@@ -69,73 +46,34 @@ class BarChart extends Component {
       .attr('height', '100%')
       .style('fill', '#FFF')
       .call(d3.zoom().on('zoom', this.redraw));
+
     vis = outer.append('g');
 
     const strokeList = linksArr.map(link => link[2]);
-    const minStroke = 0.5;
-    const maxStroke = 5;
-    const minWeight = d3.min(strokeList);
-    const maxWeight = d3.max(strokeList);
-    const strokeScale = d3
-      .scaleLinear()
-      .domain([minWeight, maxWeight])
-      .range([minStroke, maxStroke]);
+    const strokeScale = strokeScaleFunc(strokeList);
 
-    const viewsList = artistsArr.map(d => d[1]);
-    const maxRadius = 15;
-    const minRadius = 3;
-    const minViews = d3.min(viewsList);
-    const maxViews = d3.max(viewsList);
-    const radiusScale = d3
-      .scaleLinear()
-      .domain([minViews, maxViews])
-      .range([minRadius, maxRadius]);
+    const viewsList = artistsArr.map(artist => artist[2]);
+    const radiusScale = radiusScaleFunc(viewsList);
+
+    const inDegreeList = artistsArr.map(artist => artist[3]);
+    const colorScale = colorScaleFunc(inDegreeList);
+
+    let nodes = artistsArr.map(artist => ({
+      name: artist[0],
+      id: artist[1],
+      radius: radiusScale(artist[2]),
+      colour: colorScale(artist[3]),
+    }));
+
+    let links = linksArr.map(link => ({
+      source: link[0],
+      target: link[1],
+      value: strokeScale(link[2]),
+    }));
+
+    const nodeTitles = artistsArr.map(artist => artist[0]);
 
     const nodeScale = 4;
-    const inDegreeList = artistsArr.map(d => d[2]);
-    const minInDegree = d3.min(inDegreeList);
-    const maxInDegree = d3.max(inDegreeList);
-    const colourScale = d3
-      .scaleSequential(d3.interpolateYlGnBu)
-      .domain([minInDegree, maxInDegree + 5]);
-
-    const nodes = artistsArr.map(video => ({
-      id: video[0],
-      radius: radiusScale(video[1]),
-      colour: colourScale(video[2]),
-    }));
-
-    let links = linksArr.map(video => ({
-      source: video[0],
-      target: video[1],
-      value: strokeScale(video[2]),
-    }));
-
-    const nodeTitles = artistsArr.map(song => song[0]);
-    const filteredLinks = [];
-    const loops = links.length;
-    for (let i = 0; i < loops; i++) {
-      let found = false;
-      const checking = links.shift();
-      if (nodeTitles.includes(checking.target)) {
-        for (let j = 0; j < filteredLinks.length; j++) {
-          if (
-            filteredLinks[j].source === checking.target &&
-            filteredLinks[j].target === checking.source
-          ) {
-            found = true;
-            filteredLinks[j].value += checking.value;
-            break;
-          }
-        }
-        if (!found) {
-          filteredLinks.push(checking);
-        }
-      }
-    }
-
-    links = filteredLinks;
-
     const simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -181,7 +119,7 @@ class BarChart extends Component {
       .attr('stroke', '#ccc')
       .attr('stroke-width', 3);
 
-    node.append('title').text(d => d.id);
+    node.append('title').text(d => d.name);
 
     nodes.sort((a, b) => a.radius - b.radius);
     const radiusLimit = nodes.length > 19 ? nodes[19].radius : 0;
@@ -189,10 +127,10 @@ class BarChart extends Component {
       .append('text')
       .call(drag(simulation))
       .text(function(d) {
-        return d.id;
+        return d.name;
       })
       .attr('x', function(d) {
-        return -2.5 * (1 + d.id.length);
+        return -2.5 * (1 + d.name.length);
       })
       .attr('y', 3)
       .style('font-size', '12px')
@@ -218,7 +156,7 @@ class BarChart extends Component {
     node.on('click', d => {
       this.setState({
         clickedOnArtist: true,
-        name: d.id,
+        id: d.id,
       });
     });
 
@@ -282,7 +220,7 @@ class BarChart extends Component {
   render() {
     if (this.state.clickedOnArtist === true) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/artist/${this.state.name}`} />;
+      return <Redirect push to={`/overview/artist/${this.state.id}`} />;
     }
     return <div ref="canvas" />;
   }
