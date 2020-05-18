@@ -157,6 +157,7 @@ class BarChart extends Component {
       this.setState({
         clickedOnArtist: true,
         id: d.id,
+        name: d.name,
       });
     });
 

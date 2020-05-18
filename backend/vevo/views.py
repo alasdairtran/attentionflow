@@ -138,7 +138,7 @@ def get_video_info(request):
     videoId = request.GET['videoId']
     with driver.session() as session:
         results = session.run("MATCH (v:V {videoId:{videoId}}) "
-                              "RETURN v.artistName as artistName,"
+                              "RETURN v.channelArtistName as artistName,"
                               "v.genres as genres,"
                               "v.totalView as totalView,"
                               "v.publishedAt as publishedAt,"
@@ -191,7 +191,7 @@ def get_genre_incoming_outgoing(request):
         results = session.run("MATCH (v:G {genre:{genre}}) "
                               "OPTIONAL MATCH (v)-[s]->(w:G) where w.genre <> 'Music' "
                               "OPTIONAL MATCH (x:G)-[r]->(v) where x.genre <> 'Music' "
-                              "RETURN [v.genre, size((v)-[:B]->()), size((v)<-[:RG]-())] as central,"
+                              "RETURN [v.genre, size((v)-[:RG]->()), size((v)<-[:RG]-())] as central,"
                               "collect(distinct [w.genre, size((w)-->(:V)), s.weight, size((:V)--(w))]) as outgoing,"
                               "collect(distinct[x.genre, size((x)-->(:V)), r.weight, size((:V)--(x))]) as incoming ",
                               {"genre": genre})
@@ -215,9 +215,9 @@ def get_1hop_artist(request):
         results = session.run("MATCH (a:A {channelId:{channelId}}) "
                               "MATCH (x:A)-[s:RA]->(a) "
                               "MATCH (a)-[w:RA]->(y:A) "
-                              "RETURN [[a.artistName, a.channelId, a.numViews]] + "
-                              "collect(DISTINCT [x.artistName, x.channelId, x.numViews]) + "
-                              "collect(DISTINCT [y.artistName, y.channelId, y.numViews]) AS artists, "
+                              "RETURN [[a.artistName, a.channelId, a.numViews, size((:A)-->(a))]] + "
+                              "collect(DISTINCT [x.artistName, x.channelId, x.numViews, size((:A)-->(x))]) + "
+                              "collect(DISTINCT [y.artistName, y.channelId, y.numViews, size((:A)-->(y))]) AS artists, "
                               "collect(distinct [x.channelId, a.channelId, s.channelFlux]) + "
                               "collect(distinct [a.channelId, y.channelId, w.channelFlux]) AS links ",
                               {"channelId": channel_id})
@@ -235,19 +235,19 @@ def get_2hop_artist(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
-    artist = request.GET["artist"]
+    channel_id = request.GET["artist"]
     with driver.session() as session:
-        results = session.run("MATCH (v:A {artist:{artist}}) "
+        results = session.run("MATCH (v:A {channelId:{channelId}}) "
                               "OPTIONAL MATCH (v)-[s]-(w:A) "
                               "OPTIONAL MATCH (w)-[r]-(x:A) "
                               "OPTIONAL MATCH (x)-[t]-(z:A) "
-                              "RETURN [[v.artist, size((v)-->(:V)), size((:A)-->(v))]] + "
-                              "collect(distinct [w.artist, size((w)-->(:V)), size((:A)-->(w))]) + "
-                              "collect(distinct [x.artist, size((x)-->(:V)), size((:A)-->(x))]) as artists, "
-                              "collect(distinct [v.artist, w.artist, s.weight]) + "
-                              "collect(distinct [w.artist, x.artist, r.weight]) + "
-                              "collect(distinct [x.artist, z.artist, t.weight]) as links ",
-                              {"artist": artist})
+                              "RETURN [[v.artistName, v.channelId, v.numViews, size((:A)-->(v))]] + "
+                              "collect(distinct [w.artistName, w.channelId, w.numViews, size((:A)-->(w))]) + "
+                              "collect(distinct [x.artistName, x.channelId, x.numViews, size((:A)-->(x))]) as artists, "
+                              "collect(distinct [v.channelId, w.channelId, s.channelFlux]) + "
+                              "collect(distinct [w.channelId, x.channelId, r.channelFlux]) + "
+                              "collect(distinct [x.channelId, z.channelId, t.channelFlux]) as links ",
+                              {"channelId": channel_id})
     result = results.single()
     driver.close()
 
@@ -262,22 +262,22 @@ def get_3hop_artist(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
 
-    artist = request.GET["artist"]
+    channel_id = request.GET["artist"]
     with driver.session() as session:
-        results = session.run("MATCH (v:A {artist:{artist}}) "
+        results = session.run("MATCH (v:A {channelId:{channelId}}) "
                               "OPTIONAL MATCH (v)-[s]-(w:A) "
                               "OPTIONAL MATCH (w)-[r]-(x:A) "
                               "OPTIONAL MATCH (x)-[t]-(z:A) "
                               "OPTIONAL MATCH (z)-[u]-(y:A) "
-                              "RETURN [[v.artist, size((v)-->(:V)), size((:A)-->(v))]] + "
-                              "collect(distinct [w.artist, size((w)-->(:V)), size((:A)-->(w))]) + "
-                              "collect(distinct [x.artist, size((x)-->(:V)), size((:A)-->(x))]) + "
-                              "collect(distinct [z.artist, size((z)-->(:V)), size((:A)-->(z))]) as artists, "
-                              "collect(distinct [v.artist, w.artist, s.weight]) + "
-                              "collect(distinct [w.artist, x.artist, r.weight]) + "
-                              "collect(distinct [x.artist, z.artist, t.weight]) + "
-                              "collect(distinct [z.artist, y.artist, u.weight]) as links ",
-                              {"artist": artist})
+                              "RETURN [[v.artistName, v.channelId, v.numViews, size((:A)-->(v))]] + "
+                              "collect(distinct [w.artistName, w.channelId, size((w)-->(:V)), size((:A)-->(w))]) + "
+                              "collect(distinct [x.artistName, x.channelId, size((x)-->(:V)), size((:A)-->(x))]) + "
+                              "collect(distinct [z.artistName, z.channelId, size((z)-->(:V)), size((:A)-->(z))]) as artists, "
+                              "collect(distinct [v.channelId, w.channelId, s.channelFlux]) + "
+                              "collect(distinct [w.channelId, x.channelId, r.channelFlux]) + "
+                              "collect(distinct [x.channelId, z.channelId, t.channelFlux]) + "
+                              "collect(distinct [z.channelId, y.channelId, u.channelFlux]) as links ",
+                              {"channelId": channel_id})
     result = results.single()
     driver.close()
 
@@ -328,7 +328,8 @@ def get_videos_by_artist(request):
                               "WITH collect(v) AS k "
                               "MATCH (v)-[rv:RV]->(w:V) "
                               "WHERE v IN k AND w IN k "
-                              "RETURN collect(DISTINCT [v.title, v.totalView, size((:V)-->(v))]) AS videos, "
+                              "RETURN collect(DISTINCT [v.videoId, v.title, v.totalView, size((:V)-->(v))]) + "
+                              "collect(DISTINCT [w.videoId, w.title, w.totalView, size((:V)-->(w))]) AS videos, "
                               "collect([v.videoId, w.videoId, rv.weight, rv.flux]) AS links ",
                               {"channelId": channel_id})
     results = results.single()
@@ -366,13 +367,14 @@ def get_genre_top_artists(request):
                                   auth=("neo4j", NEO4J_PASS))
 
     genre = request.GET['genre']
+    print("get_genre_top_artists", genre)
     with driver.session() as session:
         results = session.run("MATCH (g:G {genre:{genre}}) "
                               "OPTIONAL MATCH (a:A)--()--(g) "
                               "OPTIONAL MATCH (a)--(v:V)--(g) "
                               "WITH g, a, sum(v.totalView) as views "
                               "WITH distinct g, views, a ORDER BY views desc "
-                              "RETURN collect([a.artist, views])[..case when count(a)/40 > 5 then count(a)/40 else 5 end] as artists ",
+                              "RETURN collect([a.artistName, views])[..case when count(a)/40 > 5 then count(a)/40 else 5 end] as artists ",
                               {"genre": genre})
     result = results.single()
     driver.close()
@@ -395,8 +397,8 @@ def get_genre_top_50_artists(request):
                               "WITH a, sum(v.totalView) as views "
                               "ORDER BY views desc limit 50 "
                               "OPTIONAL MATCH (a)-[r]->(b:A) "
-                              "RETURN collect(distinct [a.artist, views, size((:A)-->(a))]) as artists, "
-                              "collect([a.artist, b.artist, r.weight]) as links ",
+                              "RETURN collect(distinct [a.artistName, views, size((:A)-->(a))]) as artists, "
+                              "collect([a.artistName, b.artistName, r.weight]) as links ",
                               {"genre": genre})
     result = results.single()
     driver.close()
@@ -416,7 +418,7 @@ def get_genre_artist_top_videos(request):
     artist = request.GET['artist']
     limit = int(request.GET['limit'])
     with driver.session() as session:
-        results = session.run("MATCH (g:G {genre:{genre}})--(v:V)--(a:A {artist: {artist}}) "
+        results = session.run("MATCH (g:G {genre:{genre}})--(v:V)--(a:A {artistName: {artist}}) "
                               "WITH v ORDER BY v.totalView desc "
                               "RETURN collect([v.title, v.totalView, v.dailyView])[..case when {limit} > 5 then {limit} else 5 end] as videos ",
                               {"genre": genre, 'artist': artist, 'limit': limit})
@@ -439,10 +441,16 @@ def get_top_50_videos(request):
                               "ORDER BY v.totalView desc "
                               "LIMIT 50 "
                               "OPTIONAL MATCH (v)-[r:RV]->(w:V) "
-                              "RETURN collect(distinct [v.title, v.totalView, size(()-->(v))]) as videos, "
-                              "collect([v.title, w.title, r.weight]) as links ")
+                              "RETURN collect(distinct [v.videoId, v.title, v.totalView, size((:V)-->(v))]) + "
+                              "collect(distinct [w.videoId, w.title, w.totalView, size((:V)-->(w))]) as videos, "
+                              "collect([v.videoId, w.videoId, r.weight]) as links ")
     result = results.single()
     driver.close()
+
+    print(result)
+    print('get_top_50_videos')
+    print('num of videos', len(result['videos']))
+    print('num of links', len(result['links']))
 
     output = {
         "videos": result['videos'],
@@ -463,16 +471,16 @@ def get_top_50_artists(request):
                               "WHERE a IN k AND b IN k "
                               "RETURN collect(DISTINCT [a.artistName, a.channelId, a.numViews, size((:A)-->(a))]) AS artists, "
                               "collect([a.channelId, b.channelId, ra.channelFlux]) AS links")
-    results = results.single()
+    result = results.single()
     driver.close()
 
     print('get_top_50_artists')
-    print('num of artists', len(results['artists']))
-    print('num of links', len(results['links']))
+    print('num of artists', len(result['artists']))
+    print('num of links', len(result['links']))
 
     output = {
-        "artists": results['artists'],
-        "links": results['links'],
+        "artists": result['artists'],
+        "links": result['links'],
     }
     return JsonResponse(output)
 

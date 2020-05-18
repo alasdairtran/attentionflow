@@ -103,9 +103,9 @@ function drawHopSlider(artist, oWidth, hops) {
 
 let vis;
 function drawArtistEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
-  const nodeTitles = nodesArrUnfiltered.map(node => node[0]);
+  const nodeTitles = nodesArrUnfiltered.map(node => node[1]);
   const nodesArr = nodesArrUnfiltered.filter(
-    (node, index) => nodeTitles.indexOf(node[0]) === index
+    (node, index) => nodeTitles.indexOf(node[1]) === index
   );
   const filteredLinksArr = linksArrUnfiltered.filter(link =>
     nodeTitles.includes(link[1])
@@ -154,18 +154,19 @@ function drawArtistEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
   const strokeList = filteredLinksArr.map(link => link[2]);
   const strokeScale = strokeScaleFunc(strokeList);
 
-  const radiusList = nodesArr.map(artist => artist[1]);
+  const radiusList = nodesArr.map(artist => artist[2]);
   const radiusScale = radiusScaleFunc(radiusList);
 
-  const colourList = nodesArr.map(artist => artist[2]);
+  const colourList = nodesArr.map(artist => artist[3]);
   const colorScale = colorScaleFunc(colourList);
 
   const nodeScale = 4;
 
   const nodes = nodesArr.map(node => ({
-    id: node[0],
-    radius: radiusScale(node[1]),
-    colour: colorScale(node[2]),
+    name: node[0],
+    id: node[1],
+    radius: radiusScale(node[2]),
+    colour: colorScale(node[3]),
   }));
 
   let links = filteredLinksArr.map(link => ({
@@ -265,10 +266,10 @@ function drawArtistEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
     .append('text')
     .call(drag(simulation))
     .text(function(d) {
-      return d.id;
+      return d.name;
     })
     .attr('x', function(d) {
-      return -2.5 * (1 + d.id.length);
+      return -2.5 * (1 + d.name.length);
     })
     .attr('y', 3)
     .style('font-size', '12px')

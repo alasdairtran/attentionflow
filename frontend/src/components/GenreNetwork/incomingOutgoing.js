@@ -125,7 +125,7 @@ function drawIncomingOutgoing(
 
   const nodes = incoming.map(video => ({
     id: video[0],
-    radius: radiusScale(video[2]),
+    radius: radiusScale(video[3]),
     colour:
       video[1] < title[1]
         ? colourScaleLessViews(video[1])
@@ -136,7 +136,7 @@ function drawIncomingOutgoing(
   nodes.push(
     ...outgoing.map(video => ({
       id: video[0],
-      radius: radiusScale(video[2]),
+      radius: radiusScale(video[3]),
       colour:
         video[1] < title[1]
           ? colourScaleLessViews(video[1])

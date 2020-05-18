@@ -84,7 +84,6 @@ export default class AnalyticsDashboard1 extends Component {
       isLoading: true,
       hasError: false,
       errorMessage: '',
-      songs: [],
       links: [],
       videos: [],
     };
@@ -134,7 +133,7 @@ export default class AnalyticsDashboard1 extends Component {
           this.setState({
             isLoaded: true,
             isLoading: false,
-            songs: res.data.songs,
+            videos: res.data.videos,
             links: res.data.links,
           });
         }
@@ -252,7 +251,7 @@ export default class AnalyticsDashboard1 extends Component {
                           />
                         ) : (
                           <VideoTop50
-                            songs={this.state.songs}
+                            videos={this.state.videos}
                             links={this.state.links}
                           />
                         )}

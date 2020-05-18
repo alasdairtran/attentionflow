@@ -48,7 +48,7 @@ class BarChart extends Component {
   }
 
   drawSongExample(oWidth) {
-    const songsArr = this.props.songs;
+    const songsArr = this.props.videos;
     const linksArr = this.props.links.filter(link => link[1] !== null);
 
     const canvasHeight = oWidth / 2;
@@ -80,7 +80,7 @@ class BarChart extends Component {
       .domain([minWeight, maxWeight])
       .range([minStroke, maxStroke]);
 
-    const viewsList = songsArr.map(d => d[1]);
+    const viewsList = songsArr.map(d => d[2]);
     const maxRadius = 15;
     const minRadius = 3;
     const minViews = d3.min(viewsList);
@@ -91,7 +91,7 @@ class BarChart extends Component {
       .range([minRadius, maxRadius]);
 
     const nodeScale = 4;
-    const inDegreeList = songsArr.map(d => d[2]);
+    const inDegreeList = songsArr.map(d => d[3]);
     const minInDegree = d3.min(inDegreeList);
     const maxInDegree = d3.max(inDegreeList);
     const colourScale = d3
@@ -100,8 +100,9 @@ class BarChart extends Component {
 
     const nodes = songsArr.map(video => ({
       id: video[0],
-      radius: radiusScale(video[1]),
-      colour: colourScale(video[2]),
+      name: video[1],
+      radius: radiusScale(video[2]),
+      colour: colourScale(video[3]),
       video: video,
     }));
 
@@ -189,10 +190,10 @@ class BarChart extends Component {
       .append('text')
       .call(drag(simulation))
       .text(function(d) {
-        return d.id;
+        return d.name;
       })
       .attr('x', function(d) {
-        return -2.5 * (1 + d.id.length);
+        return -2.5 * (1 + !d.name ? 0 : d.name.length);
       })
       .attr('y', 3)
       .style('font-size', '12px')
@@ -217,7 +218,7 @@ class BarChart extends Component {
     node.on('click', d => {
       this.setState({
         clickedOnSong: true,
-        title: d.id,
+        title: d.name,
       });
     });
 

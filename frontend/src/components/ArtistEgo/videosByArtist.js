@@ -69,10 +69,6 @@ function drawVideosByArtist(videos, videoLinks, oWidth) {
     .style('visibility', 'hidden')
     .on('click', () => tooltip.style('visibility', 'hidden').html(''));
 
-  console.log('error1');
-  console.log(videos);
-  console.log(videoLinks);
-  console.log('error2');
   const connectedLinks = videoLinks;
   const loops = videoLinks.length;
   for (let i = 0; i < loops; i++) {
@@ -103,7 +99,7 @@ function drawVideosByArtist(videos, videoLinks, oWidth) {
     .domain([minWeight, maxWeight])
     .range([minStroke, maxStroke]);
 
-  const radiusList = videos.map(d => d[2]);
+  const radiusList = videos.map(d => d[3]);
   const maxRadius = 15;
   const minRadius = 3;
   const minViews = d3.min(radiusList);
@@ -114,17 +110,18 @@ function drawVideosByArtist(videos, videoLinks, oWidth) {
     .range([minRadius, maxRadius]);
 
   const nodeScale = 4;
-  const colourList = videos.map(d => d[1]);
+  const colourList = videos.map(d => d[2]);
   const minInDegree = d3.min(colourList);
   const maxInDegree = d3.max(colourList);
   const colourScale = d3
     .scaleSequential(d3.interpolatePuBu)
     .domain([minInDegree, maxInDegree + 5]);
 
-  const nodes = videos.map(genre => ({
-    id: genre[0],
-    radius: radiusScale(genre[2]),
-    colour: colourScale(genre[1]),
+  const nodes = videos.map(v => ({
+    id: v[0],
+    name: v[1],
+    radius: radiusScale(v[3]),
+    colour: colourScale(v[2]),
   }));
 
   const links = connectedLinks.map(video => ({
@@ -186,10 +183,10 @@ function drawVideosByArtist(videos, videoLinks, oWidth) {
     .append('text')
     .call(drag(simulation))
     .text(function(d) {
-      return d.id;
+      return d.name;
     })
     .attr('x', function(d) {
-      return -2.5 * (1 + d.id.length);
+      return -2.5 * (1 + d.name.length);
     })
     .attr('y', 3)
     .style('font-size', '12px')

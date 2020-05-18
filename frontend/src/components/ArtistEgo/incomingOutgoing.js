@@ -70,8 +70,8 @@ function drawIncomingOutgoing(
   const inLength = incoming.length;
   const outLength = outgoing.length;
 
-  const minWeight = d3.min(vidList.map(videoData => videoData[2]));
-  const maxWeight = d3.max(vidList.map(videoData => videoData[2]));
+  const minWeight = d3.min(vidList.map(videoData => videoData[3]));
+  const maxWeight = d3.max(vidList.map(videoData => videoData[3]));
   const maxRadius = Math.min(
     (canvasHeight - verticalMargin * 2) /
       Math.max(incoming.length, outgoing.length) /
@@ -86,48 +86,51 @@ function drawIncomingOutgoing(
 
   vidList.push(title);
 
-  const minViews = d3.min(vidList.map(videoData => videoData[1]));
-  const maxViews = d3.max(vidList.map(videoData => videoData[1]));
+  const minViews = d3.min(vidList.map(videoData => videoData[2]));
+  const maxViews = d3.max(vidList.map(videoData => videoData[2]));
   const minColour = '#0054FF';
   const maxColour = '#FFAB00';
   const neutralColour = '#808080';
-  const maxDifference = Math.max(title[1] - minViews, maxViews - title[1]);
+  const maxDifference = Math.max(title[2] - minViews, maxViews - title[2]);
   const colourScale = d3
     .scaleLinear()
-    .domain([title[1] - maxDifference, title[1] + maxDifference])
+    .domain([title[2] - maxDifference, title[2] + maxDifference])
     .range([minColour, maxColour]);
   const colourScaleLessViews = d3
     .scaleLinear()
-    .domain([minViews, title[1]])
+    .domain([minViews, title[2]])
     .range([minColour, neutralColour]);
   const colourScaleMoreViews = d3
     .scaleLinear()
-    .domain([title[1], maxViews])
+    .domain([title[2], maxViews])
     .range([neutralColour, maxColour]);
 
   const nodes = incoming.map(video => ({
-    id: video[0],
+    name: video[0],
+    id: video[1],
     radius: radiusScale(video[2]),
     colour:
-      video[1] < title[1]
-        ? colourScaleLessViews(video[1])
-        : colourScaleMoreViews(video[1]),
+      video[2] < title[2]
+        ? colourScaleLessViews(video[2])
+        : colourScaleMoreViews(video[2]),
     type: 'I',
   }));
 
   nodes.push(
     ...outgoing.map(video => ({
-      id: video[0],
-      radius: radiusScale(video[2]),
+      name: video[0],
+      id: video[1],
+      radius: radiusScale(video[3]),
       colour:
-        video[1] < title[1]
-          ? colourScaleLessViews(video[1])
-          : colourScaleMoreViews(video[1]),
+        video[2] < title[2]
+          ? colourScaleLessViews(video[2])
+          : colourScaleMoreViews(video[2]),
       type: 'O',
     }))
   );
   nodes.push({
-    id: title[0],
+    name: title[0],
+    id: title[1],
     radius: (maxRadius + minRadius) / 2,
     colour: 'rgb(128,128,128)',
     type: 'C',
@@ -184,7 +187,7 @@ function drawIncomingOutgoing(
   node
     .append('text')
     .text(function(d) {
-      return d.id;
+      return d.name;
     })
     .attr('text-anchor', d =>
       d.type === 'I' ? 'end' : d.type === 'O' ? 'start' : 'middle'
@@ -207,7 +210,7 @@ function drawIncomingOutgoing(
     .attr('y', verticalMargin / 2)
     .attr('text-anchor', 'start');
 
-  console.log(incoming);
+  console.log(nodes);
 
   let sumIn = 0;
   incoming.forEach(node => (sumIn += node[3]));
@@ -248,7 +251,7 @@ function drawIncomingOutgoing(
 
   node.on('click', d => {
     svg.remove();
-    d3.select('#titleBar').html(d.id);
+    d3.select('#titleBar').html(d.name);
     const oWidth = document.getElementById('headerBar').offsetWidth - 50;
     getArtistEgo(d.id, oWidth, 1);
     getVideosByArtist(d.id, oWidth);
