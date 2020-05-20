@@ -221,9 +221,9 @@ function drawArtistEgo(nodesArrUnfiltered, linksArrUnfiltered, oWidth) {
       d3
         .forceCollide()
         .radius(function(d) {
-          return nodeScale * d.radius + 10;
+          return nodeScale * d.radius + 20;
         })
-        .iterations(2)
+        .iterations(10)
     )
     .force('charge', d3.forceManyBody().strength(-1000))
     .force('center', d3.forceCenter((canvasWidth - 100) / 2, canvasHeight / 2));

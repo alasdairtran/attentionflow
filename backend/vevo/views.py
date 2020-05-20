@@ -69,7 +69,18 @@ def get_suggestions(request):
 
 @csrf_exempt
 def get_video_info(request):
-    output = search_video_basicinfo("rYEDA3JcQqw")
+    video_id = "rYEDA3JcQqw" # rolling in the deep
+    # video_id = "hLQl3WQQoQ0" # someone like you
+    # video_id = "YQHsXMglC9A" # hello
+    # video_id = "hT_nvWreIhg" # counting starss
+    # video_id = "KUmZp8pR1uc" # rehab
+    output = search_video_basicinfo(video_id)
+    sameartist = search_videos_by_artist(video_id, output["channelId"])
+    otherartist = search_1hop_video_id(video_id)
+    output["videos_1"] = sameartist["videos"]
+    output["links_1"] = sameartist["links"]
+    output["videos_2"] = otherartist["videos"]
+    output["links_2"] = otherartist["links"]
     return JsonResponse(output)
 
 @csrf_exempt
@@ -160,31 +171,7 @@ def get_artist_incoming_outgoing(request):
 
 @csrf_exempt
 def get_videos_by_artist(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-
-    channel_id = request.GET['artist']
-    with driver.session() as session:
-        results = session.run("MATCH (a:A {channelId:{channelId}}) "
-                              "MATCH (a)-[:AV]->(v:V) "
-                              "WITH collect(v) AS k "
-                              "MATCH (v)-[rv:RV]->(w:V) "
-                              "WHERE v IN k AND w IN k "
-                              "RETURN collect(DISTINCT [v.videoId, v.title, v.totalView, size((:V)-->(v))]) + "
-                              "collect(DISTINCT [w.videoId, w.title, w.totalView, size((:V)-->(w))]) AS videos, "
-                              "collect([v.videoId, w.videoId, rv.weight, rv.flux]) AS links ",
-                              {"channelId": channel_id})
-    results = results.single()
-    driver.close()
-
-    print('get_videos_by_artist')
-    print('num of videos', len(results['videos']))
-    print('num of links', len(results['links']))
-
-    output = {
-        "videos": results['videos'],
-        "links": results['links'],
-    }
+    output = search_videos_by_artist(request.GET['artist'])
     return JsonResponse(output)
 
 @csrf_exempt
