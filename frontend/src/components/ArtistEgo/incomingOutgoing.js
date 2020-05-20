@@ -210,8 +210,6 @@ function drawIncomingOutgoing(
     .attr('y', verticalMargin / 2)
     .attr('text-anchor', 'start');
 
-  console.log(nodes);
-
   let sumIn = 0;
   incoming.forEach(node => (sumIn += node[3]));
   let sumOut = 0;

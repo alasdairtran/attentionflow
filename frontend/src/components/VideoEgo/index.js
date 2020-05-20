@@ -73,17 +73,11 @@ class BarChart extends Component {
     const options = {
       params: {
         title,
+        hops,
       },
     };
     axios
-      .get(
-        hops === 1
-          ? '/vevo/1hop_song/'
-          : hops === 2
-          ? '/vevo/2hop_song/'
-          : '/vevo/3hop_song/',
-        options
-      )
+      .get('/vevo/egonet_video/', options)
       .then(res => {
         d3.select('#graphContainer').html('');
         if (res.data.error) {

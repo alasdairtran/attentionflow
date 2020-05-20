@@ -3,17 +3,13 @@ from django.urls import path
 from vevo import views
 
 urlpatterns = [
-    path('1hop_video/', views.get_1hop_video),
-    path('2hop_video/', views.get_2hop_video),
-    path('3hop_video/', views.get_3hop_video),
+    path('egonet_video/', views.get_video),
     path('video_incoming_outgoing/', views.get_video_incoming_outgoing),
     path('suggestions/', views.get_suggestions),
     path('video_info/', views.get_video_info),
     path('genre/', views.get_genre),
     path('genre_incoming_outgoing/', views.get_genre_incoming_outgoing),
-    path('1hop_artist/', views.get_1hop_artist),
-    path('2hop_artist/', views.get_2hop_artist),
-    path('3hop_artist/', views.get_3hop_artist),
+    path('egonet_artist/', views.get_artist),
     path('artist_incoming_outgoing/', views.get_artist_incoming_outgoing),
     path('videos_by_artist/', views.get_videos_by_artist),
     path('genre_bubbles/', views.get_genre_bubbles),

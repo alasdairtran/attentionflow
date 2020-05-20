@@ -26,17 +26,11 @@ export function getArtistEgo(artist, oWidth, hops) {
   const options = {
     params: {
       artist,
+      hops,
     },
   };
   axios
-    .get(
-      hops === 1
-        ? '/vevo/1hop_artist/'
-        : hops === 2
-        ? '/vevo/2hop_artist/'
-        : '/vevo/3hop_artist/',
-      options
-    )
+    .get('/vevo/egonet_artist/', options)
     .then(res => {
       if (res.data.error) {
       } else {

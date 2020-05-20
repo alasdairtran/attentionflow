@@ -4,85 +4,22 @@ import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from neo4j import GraphDatabase
+from datetime import date
+from .search import *
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
 
 @csrf_exempt
-def get_1hop_video(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-    video_id = request.GET["title"]
-    with driver.session() as session:
-        results = session.run("MATCH (v:V {title:{title}}) "
-                              "OPTIONAL MATCH (v)-[s]-(w:V) "
-                              "OPTIONAL MATCH (w)-[r]-(x:V) "
-                              "RETURN [[v.videoId, v.totalView, size((:V)-->(v))]] + collect(distinct [w.videoId, w.totalView, size(()-->(w))]) as videos,"
-                              "collect(distinct [w.title, x.title, r.weight]) + collect(distinct [v.title, w.title, s.weight]) as links ",
-                              {"title": title})
-    result = results.single()
-    driver.close()
-
-    output = {
-        "videos": result['videos'],
-        "links": result['links'],
-    }
-    return JsonResponse(output)
-
-@csrf_exempt
-def get_2hop_video(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-
+def get_video(request):
+    hop_count = int(request.GET["hops"])
     title = request.GET["title"]
-    with driver.session() as session:
-        results = session.run("MATCH (v:V {title:{title}}) "
-                              "OPTIONAL MATCH (v)-[s]-(w:V) "
-                              "OPTIONAL MATCH (w)-[r]-(x:V) "
-                              "OPTIONAL MATCH (x)-[t]-(z:V) "
-                              "RETURN [[v.videoId, v.totalView, size((:V)-->(v))]] + "
-                              "collect(distinct [w.videoId, w.totalView, size(()-->(w))]) + "
-                              "collect(distinct [x.videoId, x.totalView, size(()-->(x))]) as videos, "
-                              "collect(distinct [v.videoId, w.videoId, s.weight]) + "
-                              "collect(distinct [w.videoId, x.videoId, r.weight]) + "
-                              "collect(distinct [x.videoId, z.videoId, t.weight]) as links ",
-                              {"title": title})
-    result = results.single()
-    driver.close()
-
-    output = {
-        "videos": result['videos'],
-        "links": result['links'],
-    }
-    return JsonResponse(output)
-
-@csrf_exempt
-def get_3hop_video(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-
-    title = request.GET["title"]
-    with driver.session() as session:
-        results = session.run("MATCH (v:V {title:{title}}) "
-                              "OPTIONAL MATCH (v)-[s]-(w:V) "
-                              "OPTIONAL MATCH (w)-[r]-(x:V) "
-                              "OPTIONAL MATCH (x)-[t]-(z:V) "
-                              "OPTIONAL MATCH (z)-[u]-(y:V) "
-                              "RETURN [[v.videoId, v.totalView, size((:V)-->(v))]] + "
-                              "collect(distinct [w.videoId, w.totalView, size(()-->(w))]) + "
-                              "collect(distinct [x.videoId, x.totalView, size(()-->(x))]) + "
-                              "collect(distinct [z.videoId, z.totalView, size(()-->(z))]) as videos, "
-                              "collect(distinct [v.videoId, w.videoId, s.weight]) + "
-                              "collect(distinct [w.videoId, x.videoId, r.weight]) + "
-                              "collect(distinct [x.videoId, z.videoId, t.weight]) + "
-                              "collect(distinct [z.videoId, y.videoId, u.weight]) as links ",
-                              {"title": title})
-    result = results.single()
-    driver.close()
-
-    output = {
-        "videos": result['videos'],
-        "links": result['links'],
-    }
+    output = {}
+    if (hop_count == 1):
+        output = search_1hop_video(title)
+    elif (hop_count == 2):
+        output = search_2hop_video(title)
+    elif (hop_count == 3):
+        output = search_3hop_video(title)
     return JsonResponse(output)
 
 @csrf_exempt
@@ -132,34 +69,7 @@ def get_suggestions(request):
 
 @csrf_exempt
 def get_video_info(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-
-    videoId = request.GET['videoId']
-    with driver.session() as session:
-        results = session.run("MATCH (v:V {videoId:{videoId}}) "
-                              "RETURN v.channelArtistName as artistName,"
-                              "v.genres as genres,"
-                              "v.totalView as totalView,"
-                              "v.publishedAt as publishedAt,"
-                              "v.avgWatch as avgWatch,"
-                              "v.channelId as channelId,"
-                              "v.duration as duration,"
-                              "v.dailyView as dailyView",
-                              {"videoId": videoId})
-    results = results.single()
-    driver.close()
-
-    output = {
-        "artistName": results['artistName'],
-        "totalView": results['totalView'],
-        "genres": results['genres'],
-        "publishedAt": results['publishedAt'],
-        "avgWatch": results['avgWatch'],
-        "channelId": results['channelId'],
-        "duration": results['duration'],
-        "dailyView": results['dailyView'],
-    }
+    output = search_video_basicinfo("rYEDA3JcQqw")
     return JsonResponse(output)
 
 @csrf_exempt
@@ -206,86 +116,18 @@ def get_genre_incoming_outgoing(request):
     return JsonResponse(output)
 
 @csrf_exempt
-def get_1hop_artist(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-
-    channel_id = request.GET['artist']
-    with driver.session() as session:
-        results = session.run("MATCH (a:A {channelId:{channelId}}) "
-                              "MATCH (x:A)-[s:RA]->(a) "
-                              "MATCH (a)-[w:RA]->(y:A) "
-                              "RETURN [[a.artistName, a.channelId, a.numViews, size((:A)-->(a))]] + "
-                              "collect(DISTINCT [x.artistName, x.channelId, x.numViews, size((:A)-->(x))]) + "
-                              "collect(DISTINCT [y.artistName, y.channelId, y.numViews, size((:A)-->(y))]) AS artists, "
-                              "collect(distinct [x.channelId, a.channelId, s.channelFlux]) + "
-                              "collect(distinct [a.channelId, y.channelId, w.channelFlux]) AS links ",
-                              {"channelId": channel_id})
-    results = results.single()
-    driver.close()
-
-    output = {
-        "artists": results['artists'],
-        "links": results['links'],
-    }
-    return JsonResponse(output)
-
-@csrf_exempt
-def get_2hop_artist(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-
+def get_artist(request):
+    hop_count = int(request.GET["hops"])
     channel_id = request.GET["artist"]
-    with driver.session() as session:
-        results = session.run("MATCH (v:A {channelId:{channelId}}) "
-                              "OPTIONAL MATCH (v)-[s]-(w:A) "
-                              "OPTIONAL MATCH (w)-[r]-(x:A) "
-                              "OPTIONAL MATCH (x)-[t]-(z:A) "
-                              "RETURN [[v.artistName, v.channelId, v.numViews, size((:A)-->(v))]] + "
-                              "collect(distinct [w.artistName, w.channelId, w.numViews, size((:A)-->(w))]) + "
-                              "collect(distinct [x.artistName, x.channelId, x.numViews, size((:A)-->(x))]) as artists, "
-                              "collect(distinct [v.channelId, w.channelId, s.channelFlux]) + "
-                              "collect(distinct [w.channelId, x.channelId, r.channelFlux]) + "
-                              "collect(distinct [x.channelId, z.channelId, t.channelFlux]) as links ",
-                              {"channelId": channel_id})
-    result = results.single()
-    driver.close()
-
-    output = {
-        "artists": result['artists'],
-        "links": result['links'],
-    }
+    output = {}
+    if (hop_count == 1):
+        output = search_1hop_artist(channel_id)
+    elif (hop_count == 2):
+        output = search_2hop_artist(channel_id)
+    elif (hop_count == 3):
+        output = search_3hop_artist(channel_id)
     return JsonResponse(output)
 
-@csrf_exempt
-def get_3hop_artist(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
-
-    channel_id = request.GET["artist"]
-    with driver.session() as session:
-        results = session.run("MATCH (v:A {channelId:{channelId}}) "
-                              "OPTIONAL MATCH (v)-[s]-(w:A) "
-                              "OPTIONAL MATCH (w)-[r]-(x:A) "
-                              "OPTIONAL MATCH (x)-[t]-(z:A) "
-                              "OPTIONAL MATCH (z)-[u]-(y:A) "
-                              "RETURN [[v.artistName, v.channelId, v.numViews, size((:A)-->(v))]] + "
-                              "collect(distinct [w.artistName, w.channelId, size((w)-->(:V)), size((:A)-->(w))]) + "
-                              "collect(distinct [x.artistName, x.channelId, size((x)-->(:V)), size((:A)-->(x))]) + "
-                              "collect(distinct [z.artistName, z.channelId, size((z)-->(:V)), size((:A)-->(z))]) as artists, "
-                              "collect(distinct [v.channelId, w.channelId, s.channelFlux]) + "
-                              "collect(distinct [w.channelId, x.channelId, r.channelFlux]) + "
-                              "collect(distinct [x.channelId, z.channelId, t.channelFlux]) + "
-                              "collect(distinct [z.channelId, y.channelId, u.channelFlux]) as links ",
-                              {"channelId": channel_id})
-    result = results.single()
-    driver.close()
-
-    output = {
-        "artists": result['artists'],
-        "links": result['links'],
-    }
-    return JsonResponse(output)
 
 @csrf_exempt
 def get_artist_incoming_outgoing(request):
@@ -367,7 +209,6 @@ def get_genre_top_artists(request):
                                   auth=("neo4j", NEO4J_PASS))
 
     genre = request.GET['genre']
-    print("get_genre_top_artists", genre)
     with driver.session() as session:
         results = session.run("MATCH (g:G {genre:{genre}}) "
                               "OPTIONAL MATCH (a:A)--()--(g) "
@@ -447,7 +288,6 @@ def get_top_50_videos(request):
     result = results.single()
     driver.close()
 
-    print(result)
     print('get_top_50_videos')
     print('num of videos', len(result['videos']))
     print('num of links', len(result['links']))
