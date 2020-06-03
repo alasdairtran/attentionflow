@@ -250,30 +250,6 @@ class BarChart extends Component {
       .text('Videos of ' + thesong.artistName);
 
     const nodeTitles = songsArr.map(video => video[0]);
-    const filteredLinks = [];
-    const loops = links.length;
-    for (let i = 0; i < loops; i++) {
-      let found = false;
-      const checking = links.shift();
-      if (nodeTitles.includes(checking.target)) {
-        for (let j = 0; j < filteredLinks.length; j++) {
-          if (
-            filteredLinks[j].source === checking.target &&
-            filteredLinks[j].target === checking.source
-          ) {
-            found = true;
-            filteredLinks[j].value += checking.value;
-            break;
-          }
-        }
-        if (!found) {
-          filteredLinks.push(checking);
-        }
-      }
-    }
-
-    links = filteredLinks;
-
     const simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -484,6 +460,7 @@ class BarChart extends Component {
     }));
 
     let links = linksArr.map(video => ({
+      id: video[0] + '_' + video[1],
       source: video[0],
       target: video[1],
       value: strokeScale(video[2]),
@@ -507,30 +484,6 @@ class BarChart extends Component {
       .text('Ego network of ' + thesong.title);
 
     const nodeTitles = songsArr.map(video => video[0]);
-    const filteredLinks = [];
-    const loops = links.length;
-    for (let i = 0; i < loops; i++) {
-      let found = false;
-      const checking = links.shift();
-      if (nodeTitles.includes(checking.target)) {
-        for (let j = 0; j < filteredLinks.length; j++) {
-          if (
-            filteredLinks[j].source === checking.target &&
-            filteredLinks[j].target === checking.source
-          ) {
-            found = true;
-            filteredLinks[j].value += checking.value;
-            break;
-          }
-        }
-        if (!found) {
-          filteredLinks.push(checking);
-        }
-      }
-    }
-
-    links = filteredLinks;
-
     const simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -614,6 +567,7 @@ class BarChart extends Component {
       .selectAll('path')
       .data(links)
       .join('path')
+      .attr('id', d => d.id)
       .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')')
       .attr('stroke-width', d => d.value);
 
