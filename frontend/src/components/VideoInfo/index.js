@@ -32,6 +32,7 @@ const drag = simulation => {
 };
 
 const hcolor = '#f78ca0';
+let graphSorting;
 let vis, viewcount, highlighted, infoWidth;
 let xScale, yScale, yAxis, old_max, viewCountPath;
 class BarChart extends Component {
@@ -45,7 +46,8 @@ class BarChart extends Component {
   }
 
   componentDidMount() {
-    const oWidth = document.getElementById('sondInfoCard').offsetWidth;
+    this.div = document.getElementById('sondInfoCard');
+    const oWidth = this.div.offsetWidth;
     this.drawSongExample(oWidth);
   }
 
@@ -60,6 +62,19 @@ class BarChart extends Component {
     infoWidth = 360;
     this.chartWidth = this.canvasWidth - infoWidth - 20;
 
+    graphSorting = document.createElement('SELECT');
+    graphSorting.style.position = 'absolute';
+    graphSorting.style.top = this.chartHeight + 70 + 'px';
+    graphSorting.style.right = '20px';
+    var options = ['ForceDirected', 'TotalView', 'Artist'];
+    for (var o = 0; o < options.length; o++) {
+      var option = document.createElement('option');
+      option.value = o;
+      option.text = options[o];
+      graphSorting.add(option);
+    }
+    this.div.append(graphSorting);
+
     const outer = d3
       .select(this.refs.canvas)
       .append('svg')
@@ -70,7 +85,7 @@ class BarChart extends Component {
 
     this.drawSongInfoCard(thesong);
     this.drawSongViewCount(thesong);
-    this.drawNetwork_sameArtist(thesong);
+    // this.drawNetwork_sameArtist(thesong);
     this.drawNetwork_otherSongs(thesong);
   }
 
@@ -453,13 +468,16 @@ class BarChart extends Component {
       .scaleSequential(d3.interpolatePuBu)
       .domain([minInDegree, maxInDegree + 5]);
 
+    const artistSet = new Set(songsArr.map(video => video[5]));
     const nodes = songsArr.map(video => ({
       id: video[0],
       name: video[1],
       radius: radiusScale(video[2]),
       colour: colourScale(video[3]),
+      totalView: video[2],
       dailyView: video[4],
-      time: new Date(video[5], video[6] - 1, video[7]),
+      artist: video[5],
+      time: new Date(video[6], video[7] - 1, video[8]),
       video: video,
     }));
 
@@ -469,8 +487,8 @@ class BarChart extends Component {
       value: strokeScale(video[2]),
     }));
 
-    const chart_2_height = 200,
-      chart_2_topMargin = this.chartHeight + 80 + chart_2_height;
+    const chart_2_height = 500,
+      chart_2_topMargin = this.chartHeight + 80;
     const chart_2_backgroud = vis
       .append('rect')
       .attr('width', '100%')
@@ -481,8 +499,9 @@ class BarChart extends Component {
     const chart_2 = vis.append('g');
     chart_2
       .append('text')
-      .attr('x', 10)
+      .attr('x', this.canvasWidth - 20)
       .attr('y', chart_2_height + chart_2_topMargin - 10)
+      .attr('text-anchor', 'end')
       .text('Ego network of ' + thesong.title);
 
     const nodeTitles = songsArr.map(video => video[0]);
@@ -552,6 +571,21 @@ class BarChart extends Component {
         'translate(0,' + (chart_2_topMargin + chart_2_height) + ')'
       )
       .call(d3.axisBottom(chart_2_xScale));
+
+    var chart_2_yScale_view = d3
+      .scaleLog()
+      .domain(
+        d3.extent(nodes, function(d) {
+          return d.totalView;
+        })
+      )
+      .range([0, chart_2_height])
+      .nice();
+    var chart_2_yScale_artist = d3
+      .scaleBand()
+      .domain(Array.from(artistSet))
+      .range([0, chart_2_height]);
+    var chart_2_y = chart_2.append('g');
 
     const link = chart_2
       .append('g')
@@ -632,6 +666,23 @@ class BarChart extends Component {
       hideOtherSongViewCount();
     });
 
+    graphSorting.addEventListener('change', function() {
+      if (graphSorting.value == 0) {
+        chart_2_y.attr('display', 'none');
+      } else if (graphSorting.value == 1) {
+        chart_2_y
+          .attr('display', 'block')
+          .attr('transform', 'translate(50,' + chart_2_topMargin + ')')
+          .call(d3.axisLeft(chart_2_yScale_view));
+      } else if (graphSorting.value == 2) {
+        chart_2_y
+          .attr('display', 'block')
+          .attr('transform', 'translate(150,' + chart_2_topMargin + ')')
+          .call(d3.axisLeft(chart_2_yScale_artist));
+      }
+      simulation.restart();
+    });
+
     simulation.on('tick', () => {
       // ## this code makes nodes NOT bounded in the panel
       node
@@ -639,17 +690,37 @@ class BarChart extends Component {
           return infoWidth + xScale(d.time);
         })
         .attr('cy', function(d) {
-          return Math.min(
-            chart_2_topMargin + chart_2_height - 20,
-            Math.max(chart_2_topMargin + 20, d.y)
-          );
+          if (graphSorting.value == 0) {
+            return Math.min(
+              chart_2_topMargin + chart_2_height - 20,
+              Math.max(chart_2_topMargin + 20, d.y)
+            );
+          } else if (graphSorting.value == 1) {
+            return chart_2_topMargin + chart_2_yScale_view(d.totalView);
+          } else if (graphSorting.value == 2) {
+            return (
+              chart_2_topMargin +
+              chart_2_yScale_artist.bandwidth() / 2 +
+              chart_2_yScale_artist(d.artist)
+            );
+          }
         })
         .attr('transform', function(d) {
           var new_x = infoWidth + xScale(d.time);
-          var new_y = Math.min(
-            chart_2_topMargin + chart_2_height - 20,
-            Math.max(chart_2_topMargin + 20, d.y)
-          );
+          var new_y;
+          if (graphSorting.value == 0) {
+            new_y = Math.min(
+              chart_2_topMargin + chart_2_height - 20,
+              Math.max(chart_2_topMargin + 20, d.y)
+            );
+          } else if (graphSorting.value == 1) {
+            new_y = chart_2_topMargin + chart_2_yScale_view(d.totalView);
+          } else if (graphSorting.value == 2) {
+            new_y =
+              chart_2_topMargin +
+              chart_2_yScale_artist.bandwidth() / 2 +
+              chart_2_yScale_artist(d.artist);
+          }
           return `translate(${new_x},${new_y})`;
         });
       link
@@ -657,19 +728,39 @@ class BarChart extends Component {
           return infoWidth + xScale(d.source.time);
         })
         .attr('y1', function(d) {
-          return Math.min(
-            chart_2_topMargin + chart_2_height - 20,
-            Math.max(chart_2_topMargin + 20, d.source.y)
-          );
+          if (graphSorting.value == 0) {
+            return Math.min(
+              chart_2_topMargin + chart_2_height - 20,
+              Math.max(chart_2_topMargin + 20, d.source.y)
+            );
+          } else if (graphSorting.value == 1) {
+            return chart_2_topMargin + chart_2_yScale_view(d.source.totalView);
+          } else if (graphSorting.value == 2) {
+            return (
+              chart_2_topMargin +
+              chart_2_yScale_artist.bandwidth() / 2 +
+              chart_2_yScale_artist(d.source.artist)
+            );
+          }
         })
         .attr('x2', function(d) {
           return infoWidth + xScale(d.target.time);
         })
         .attr('y2', function(d) {
-          return Math.min(
-            chart_2_topMargin + chart_2_height - 20,
-            Math.max(chart_2_topMargin + 20, d.target.y)
-          );
+          if (graphSorting.value == 0) {
+            return Math.min(
+              chart_2_topMargin + chart_2_height - 20,
+              Math.max(chart_2_topMargin + 20, d.target.y)
+            );
+          } else if (graphSorting.value == 1) {
+            return chart_2_topMargin + chart_2_yScale_view(d.target.totalView);
+          } else if (graphSorting.value == 2) {
+            return (
+              chart_2_topMargin +
+              chart_2_yScale_artist.bandwidth() / 2 +
+              chart_2_yScale_artist(d.target.artist)
+            );
+          }
         });
     });
   }
@@ -708,7 +799,7 @@ function hideOtherSongViewCount() {
 }
 
 function showOtherSongViewCount(othersong) {
-  console.log('othersong', othersong);
+  // console.log('othersong', othersong);
   var startDate = new Date(othersong.time);
 
   var data = [];
