@@ -211,10 +211,10 @@ def search_1hop_video_id(video_id):
     with driver.session() as session:
         results = session.run("MATCH (v:V {videoId:{videoId}}) "
                               "OPTIONAL MATCH (v)-[s]-(w:V) "
-                              "OPTIONAL MATCH (w)-[r]-(x:V) "
+                              "OPTIONAL MATCH (w)-[r]-(x:V) WHERE x <> v "
                               "RETURN [[v.videoId, v.title, v.totalView, size((:V)-->(v)), v.dailyView, v.channelArtistName, v.publishedAt.year,v.publishedAt.month,v.publishedAt.day]] + "
                               "collect(distinct [w.videoId, w.title, w.totalView, size((:V)-->(w)), w.dailyView, w.channelArtistName, w.publishedAt.year,w.publishedAt.month,w.publishedAt.day]) AS videos,"
-                              "collect(distinct [w.videoId, x.videoId, r.weight, r.flux]) + collect(distinct [v.videoId, w.videoId, s.weight, s.flux]) AS links ",
+                              "collect(distinct [w.videoId, x.videoId, r.weight, r.flux]) + collect(distinct [startNode(s).videoId, endNode(s).videoId, s.weight, s.flux]) AS links ",
                               {"videoId": video_id})
     result = results.single()
     driver.close()
