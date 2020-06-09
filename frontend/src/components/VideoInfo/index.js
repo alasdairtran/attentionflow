@@ -32,9 +32,10 @@ const drag = simulation => {
 };
 
 const hcolor = '#f78ca0';
+let egoID, egoTime, simulation;
 let graphSorting, chart_2_height, chart_2_topMargin;
 let chart_2_yScale_view, chart_2_yScale_artist;
-let vis, defs, viewcount, highlighted, infoWidth;
+let vis, defs, viewcount, highlighted, oLeft, infoWidth;
 let xScale, yScale, yAxis, old_max, viewCountPath;
 class BarChart extends Component {
   constructor(props) {
@@ -48,8 +49,8 @@ class BarChart extends Component {
 
   componentDidMount() {
     this.div = document.getElementById('sondInfoCard');
-    const oWidth = this.div.offsetWidth;
-    this.drawSongExample(oWidth);
+    oLeft = this.div.getBoundingClientRect().x;
+    this.drawSongExample(this.div.offsetWidth);
   }
 
   drawSongExample(oWidth) {
@@ -87,7 +88,6 @@ class BarChart extends Component {
 
     this.drawSongInfoCard(thesong);
     this.drawSongViewCount(thesong);
-    // this.drawNetwork_sameArtist(thesong);
     this.drawNetwork_otherSongs(thesong);
   }
 
@@ -122,12 +122,20 @@ class BarChart extends Component {
       .attr('x', 40)
       .attr('y', 120)
       .text(thesong.genres.join(','));
+
+    console.log('thesong', thesong);
+    egoID = thesong.id;
   }
 
   drawSongViewCount(thesong) {
     viewcount = vis
       .append('g')
       .attr('transform', 'translate(' + infoWidth + ',20)');
+    viewcount
+      .append('rect')
+      .attr('width', this.chartWidth)
+      .attr('height', this.chartHeight)
+      .attr('fill', 'transparent');
     var startDate = new Date(
       thesong.time_y,
       thesong.time_m - 1,
@@ -182,236 +190,31 @@ class BarChart extends Component {
             return yScale(d.value);
           })
       );
+
+    var time_indicator = viewcount
+      .append('line')
+      .attr('x1', 100)
+      .attr('x2', 100)
+      .attr('y1', 0)
+      .attr('y2', this.chartHeight)
+      .attr('stroke', 'red')
+      .attr('display', 'none');
+    egoTime = Math.floor(xScale.invert(0));
+    viewcount.on('mousemove', function(e) {
+      setMousePosition(e);
+      var m_pos = Math.max(0, mouse.x - oLeft - infoWidth);
+      egoTime = Math.floor(xScale.invert(m_pos));
+      time_indicator
+        .attr('x1', m_pos)
+        .attr('x2', m_pos)
+        .attr('display', 'block');
+      // console.log("moveEgoNodePosition", m_pos, egoTime)
+      simulation.restart();
+    });
+    viewcount.on('mouseout', function(e) {
+      time_indicator.attr('display', 'none');
+    });
     highlighted = viewcount.append('g');
-  }
-
-  drawNetwork_sameArtist(thesong) {
-    const songsArr = thesong.videos_1;
-    const linksArr = thesong.links_1;
-
-    const strokeList = linksArr.map(link => link[2]);
-    const minStroke = 0.5;
-    const maxStroke = 5;
-    const minWeight = d3.min(strokeList);
-    const maxWeight = d3.max(strokeList);
-    const strokeScale = d3
-      .scaleLinear()
-      .domain([minWeight, maxWeight])
-      .range([minStroke, maxStroke]);
-
-    const viewsList = songsArr.map(d => d[2]);
-    const maxRadius = 10;
-    const minRadius = 2;
-    const minViews = d3.min(viewsList);
-    const maxViews = d3.max(viewsList);
-    const radiusScale = d3
-      .scaleLinear()
-      .domain([minViews, maxViews])
-      .range([minRadius, maxRadius]);
-
-    const nodeScale = 3;
-    const inDegreeList = songsArr.map(d => d[3]);
-    const minInDegree = d3.min(inDegreeList);
-    const maxInDegree = d3.max(inDegreeList);
-    const colourScale = d3
-      .scaleSequential(d3.interpolatePuBu)
-      .domain([minInDegree, maxInDegree + 5]);
-
-    const nodes = songsArr.map(video => ({
-      id: video[0],
-      name: video[1],
-      radius: radiusScale(video[2]),
-      colour: colourScale(video[3]),
-      dailyView: video[4],
-      time: new Date(video[5], video[6] - 1, video[7]),
-      video: video,
-    }));
-
-    let links = linksArr.map(video => ({
-      source: video[0],
-      target: video[1],
-      value: strokeScale(video[2]),
-    }));
-
-    const chart_1_height = 200,
-      chart_1_topMargin = this.chartHeight + 50;
-    const chart_1_backgroud = vis
-      .append('rect')
-      .attr('width', '100%')
-      .attr('height', chart_1_height)
-      .style('fill', '#FFF')
-      // .style('stroke', '#ddd')
-      .attr('transform', 'translate(0,' + chart_1_topMargin + ')');
-    const chart_1 = vis.append('g');
-    chart_1
-      .append('text')
-      .attr('x', 10)
-      .attr('y', chart_1_height + chart_1_topMargin - 10)
-      .text('Videos of ' + thesong.artistName);
-
-    const nodeTitles = songsArr.map(video => video[0]);
-    const simulation = d3
-      .forceSimulation(nodes)
-      .force(
-        'link',
-        d3
-          .forceLink(links)
-          .id(d => d.id)
-          .strength(0.05)
-      )
-      .force(
-        'collide',
-        d3
-          .forceCollide()
-          .radius(function(d) {
-            return nodeScale * d.radius + 10;
-          })
-          .iterations(2)
-      )
-      .force('charge', d3.forceManyBody().strength(10))
-      .force(
-        'center',
-        d3.forceCenter(
-          this.canvasWidth / 2,
-          chart_1_topMargin + chart_1_height / 2
-        )
-      );
-
-    var newDomain = [
-      xScale.invert(-infoWidth),
-      xScale.invert(this.canvasWidth - infoWidth),
-    ];
-    var chart_1_xScale = d3
-      .scaleTime()
-      .domain(newDomain)
-      .range([0, this.canvasWidth]);
-    chart_1
-      .append('g')
-      .attr(
-        'transform',
-        'translate(0,' + (chart_1_topMargin + chart_1_height) + ')'
-      )
-      .call(d3.axisBottom(chart_1_xScale));
-
-    const link = chart_1
-      .append('g')
-      .attr('stroke', '#999')
-      .attr('stroke-opacity', 0.6)
-      .selectAll('line')
-      .data(links)
-      .join('line')
-      .attr('stroke-width', d => d.value);
-
-    const node = chart_1
-      .append('g')
-      .selectAll('g')
-      .data(nodes)
-      .enter()
-      .append('g');
-
-    node
-      .append('circle')
-      .call(drag(simulation))
-      .attr('r', d => nodeScale * d.radius)
-      .attr('fill', function(d) {
-        if (d.id == thesong.id) return 'red';
-        else return d.colour;
-      })
-      .attr('stroke', '#ccc')
-      .attr('stroke-width', 3)
-      .style('cursor', 'pointer');
-
-    node.append('title').text(d => d.id);
-
-    nodes.sort((a, b) => a.radius - b.radius);
-    const radiusLimit = 5;
-    node
-      .append('text')
-      .call(drag(simulation))
-      .text(function(d) {
-        return d.name.split('-')[1];
-      })
-      .attr('x', function(d) {
-        return -2.5 * (1 + !d.name ? 0 : d.name.length);
-      })
-      .attr('y', 3)
-      .style('cursor', 'pointer')
-      .style('font-size', '12px')
-      .style('visibility', function(d) {
-        if (d.id == thesong.id) return 'visible';
-        else return d.radius > radiusLimit ? 'visible' : 'hidden';
-      });
-
-    node.on('mouseover', function(d) {
-      d3.select(this)
-        .raise()
-        .select('circle')
-        .style('fill', hcolor);
-      d3.select(this)
-        .raise()
-        .select('text')
-        .style('visibility', 'visible');
-      showOtherSongViewCount(d);
-    });
-
-    node.on('mouseleave', function() {
-      d3.select(this)
-        .raise()
-        .select('circle')
-        .style('fill', function(d) {
-          if (d.id == thesong.id) return 'red';
-          else return d.colour;
-        });
-      d3.select(this)
-        .raise()
-        .select('text')
-        .style('visibility', function(d) {
-          if (d.id == thesong.id) return 'visible';
-          else return d.radius > radiusLimit ? 'visible' : 'hidden';
-        });
-      hideOtherSongViewCount();
-    });
-
-    simulation.on('tick', () => {
-      // ## this code makes nodes NOT bounded in the panel
-      node
-        .attr('cx', function(d) {
-          return infoWidth + xScale(d.time);
-        })
-        .attr('cy', function(d) {
-          return Math.min(
-            chart_1_topMargin + chart_1_height - 20,
-            Math.max(chart_1_topMargin + 20, d.y)
-          );
-        })
-        .attr('transform', function(d) {
-          var new_x = infoWidth + xScale(d.time);
-          var new_y = Math.min(
-            chart_1_topMargin + chart_1_height - 20,
-            Math.max(chart_1_topMargin + 20, d.y)
-          );
-          return `translate(${new_x},${new_y})`;
-        });
-      link
-        .attr('x1', function(d) {
-          return infoWidth + xScale(d.source.time);
-        })
-        .attr('y1', function(d) {
-          return Math.min(
-            chart_1_topMargin + chart_1_height - 20,
-            Math.max(chart_1_topMargin + 20, d.source.y)
-          );
-        })
-        .attr('x2', function(d) {
-          return infoWidth + xScale(d.target.time);
-        })
-        .attr('y2', function(d) {
-          return Math.min(
-            chart_1_topMargin + chart_1_height - 20,
-            Math.max(chart_1_topMargin + 20, d.target.y)
-          );
-        });
-    });
   }
 
   drawNetwork_otherSongs(thesong) {
@@ -484,7 +287,7 @@ class BarChart extends Component {
       .text('Ego network of ' + thesong.title);
 
     const nodeTitles = songsArr.map(video => video[0]);
-    const simulation = d3
+    simulation = d3
       .forceSimulation(nodes)
       .force(
         'link',
@@ -581,6 +384,7 @@ class BarChart extends Component {
     node
       .append('circle')
       .call(drag(simulation))
+      .attr('id', d => d.id)
       .attr('r', d => nodeScale * d.radius)
       .attr('fill', function(d) {
         if (d.id == thesong.id) return 'red';
@@ -661,10 +465,16 @@ class BarChart extends Component {
     simulation.on('tick', () => {
       // ## this code makes nodes NOT bounded in the panel
       node
+        .attr('display', function(d) {
+          if (d.time.getTime() <= egoTime) return 'block';
+          else return 'none';
+        })
         .attr('cx', function(d) {
+          if (d.id == egoID) return infoWidth + xScale(egoTime);
           return infoWidth + xScale(d.time);
         })
         .attr('cy', function(d) {
+          if (d.id == egoID) return chart_2_topMargin;
           if (graphSorting.value == 0) {
             return Math.min(
               chart_2_topMargin + chart_2_height - 20,
@@ -696,47 +506,20 @@ class BarChart extends Component {
               chart_2_yScale_artist.bandwidth() / 2 +
               chart_2_yScale_artist(d.artist);
           }
+          if (d.id == egoID) {
+            new_x = infoWidth + xScale(egoTime);
+            new_y = chart_2_topMargin;
+          }
           return `translate(${new_x},${new_y})`;
         });
-      link.attr('d', linkArc);
-      // .attr('x1', function(d) {
-      //   return infoWidth + xScale(d.source.time);
-      // })
-      // .attr('y1', function(d) {
-      //   if (graphSorting.value == 0) {
-      //     return Math.min(
-      //       chart_2_topMargin + chart_2_height - 20,
-      //       Math.max(chart_2_topMargin + 20, d.source.y)
-      //     );
-      //   } else if (graphSorting.value == 1) {
-      //     return chart_2_topMargin + chart_2_yScale_view(d.source.totalView);
-      //   } else if (graphSorting.value == 2) {
-      //     return (
-      //       chart_2_topMargin +
-      //       chart_2_yScale_artist.bandwidth() / 2 +
-      //       chart_2_yScale_artist(d.source.artist)
-      //     );
-      //   }
-      // })
-      // .attr('x2', function(d) {
-      //   return infoWidth + xScale(d.target.time);
-      // })
-      // .attr('y2', function(d) {
-      //   if (graphSorting.value == 0) {
-      //     return Math.min(
-      //       chart_2_topMargin + chart_2_height - 20,
-      //       Math.max(chart_2_topMargin + 20, d.target.y)
-      //     );
-      //   } else if (graphSorting.value == 1) {
-      //     return chart_2_topMargin + chart_2_yScale_view(d.target.totalView);
-      //   } else if (graphSorting.value == 2) {
-      //     return (
-      //       chart_2_topMargin +
-      //       chart_2_yScale_artist.bandwidth() / 2 +
-      //       chart_2_yScale_artist(d.target.artist)
-      //     );
-      //   }
-      // });
+      link.attr('d', linkArc).attr('display', function(d) {
+        if (
+          d.source.time.getTime() <= egoTime &&
+          d.target.time.getTime() <= egoTime
+        )
+          return 'block';
+        else return 'none';
+      });
     });
   }
 
@@ -781,6 +564,15 @@ function linkArc(d) {
       chart_2_topMargin +
       chart_2_yScale_artist.bandwidth() / 2 +
       chart_2_yScale_artist(d.target.artist);
+  }
+
+  if (d.source.id == egoID) {
+    px1 = infoWidth + xScale(egoTime);
+    py1 = chart_2_topMargin;
+  }
+  if (d.target.id == egoID) {
+    px2 = infoWidth + xScale(egoTime);
+    py2 = chart_2_topMargin;
   }
 
   var dx = px2 - px1,
@@ -864,3 +656,23 @@ function showOtherSongViewCount(othersong) {
 }
 
 export default BarChart;
+
+var mouse = {
+  x: 0,
+  y: 0,
+  startX: 0,
+  startY: 0,
+};
+function setMousePosition(e) {
+  var ev = e || window.event; //Moz || IE
+  if (ev.pageX) {
+    //Moz
+    mouse.x = ev.pageX + window.pageXOffset;
+    mouse.y = ev.pageY + window.pageYOffset;
+  } else if (ev.clientX) {
+    //IE
+    mouse.x = ev.clientX + document.body.scrollLeft;
+    mouse.y = ev.clientY + document.body.scrollTop;
+  }
+  // console.log(mouse)
+}
