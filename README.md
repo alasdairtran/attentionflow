@@ -92,17 +92,17 @@ cd /mnt/vevoviz_dev && sudo docker-compose up -d
 cd /mnt/vevoviz_prod
 
 # Shut down database
-sudo docker-compose stop neo4j
+docker-compose stop neo4j
 
 # Back up
-sudo docker run \
+docker run \
 --name neo4j-dump \
 --mount type=bind,source=/mnt/vevoviz_prod/neo4j/data,target=/data \
 neo4j:3.5.12 bin/neo4j-admin dump --database=graph.db --to=/data/backups/graph.db.dump
 
 # Restart database
-sudo docker-compose start neo4j
+docker-compose start neo4j
 
 # Delete the backup container
-sudo docker rm neo4j-dump
+docker rm neo4j-dump
 ```

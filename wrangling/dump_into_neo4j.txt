@@ -12,8 +12,11 @@ SET v.videoId = value.vid,
     v.dailyView = value.daily_view,
     v.totalView = toInteger(value.total_view),
     v.avgWatch = value.avg_watch,
+    v.channelArtistName = value.channel_artist_name,
+    v.genres = value.genres,
     v.artistName = value.artist_name,
-    v.genres = value.genres
+    v.collaboration = value.collaboration,
+    v.startDate = value.start_date
 ', {batchSize:100})
 
 // update index
@@ -29,9 +32,15 @@ SET r.weight = toFloat(e.Weight)
 SET r.flux = toFloat(e.Flux)
 RETURN r
 
-//create artist nodes
-LOAD CSV WITH HEADERS FROM 'file:///artist_nodes.csv' AS n
-CREATE (a: A{channelId: n.ChannelId, artistName: n.ArtistName, numVideos: toInteger(n.NumVideos), numViews: toFloat(n.NumViews)})
+// create artist nodes from local json file
+CALL apoc.periodic.iterate('
+CALL apoc.load.json("file:///artist_nodes.json") YIELD value
+','
+CREATE (a: A{channelId: value.channel_id})
+SET a.numVideos = toInteger(value.num_videos),
+    a.numViews = toFloat(value.num_views),
+    a.artistName = value.artist_name
+', {batchSize:100})
 
 // update index
 CREATE INDEX ON :A(channelId)
