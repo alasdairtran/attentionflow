@@ -32,7 +32,9 @@ const drag = simulation => {
 };
 
 const hcolor = '#f78ca0';
-let egoID, egoTime, simulation;
+let radiusScale,
+  nodeScale = 3;
+let egoID, egoTime, simulation, nodes;
 let graphSorting, chart_2_height, chart_2_topMargin;
 let chart_2_yScale_view, chart_2_yScale_artist;
 let vis, defs, viewcount, highlighted, oLeft, infoWidth;
@@ -212,6 +214,7 @@ class BarChart extends Component {
         .attr('x2', m_pos)
         .attr('display', 'block');
       // console.log("moveEgoNodePosition", m_pos, egoTime)
+      changeNodeSize();
       simulation.restart();
     });
     viewcount.on('mouseout', function(e) {
@@ -239,12 +242,11 @@ class BarChart extends Component {
     const minRadius = 2;
     const minViews = d3.min(viewsList);
     const maxViews = d3.max(viewsList);
-    const radiusScale = d3
+    radiusScale = d3
       .scaleLinear()
       .domain([minViews, maxViews])
       .range([minRadius, maxRadius]);
 
-    const nodeScale = 3;
     const inDegreeList = songsArr.map(d => d[3]);
     const minInDegree = d3.min(inDegreeList);
     const maxInDegree = d3.max(inDegreeList);
@@ -253,7 +255,7 @@ class BarChart extends Component {
       .domain([minInDegree, maxInDegree + 5]);
 
     const artistSet = new Set(songsArr.map(video => video[5]));
-    const nodes = songsArr.map(video => ({
+    nodes = songsArr.map(video => ({
       id: video[0],
       name: video[1],
       radius: radiusScale(video[2]),
@@ -366,7 +368,7 @@ class BarChart extends Component {
       .attr('d', 'M0,-6L12,0L0,6')
       .style('fill', '#aaa');
 
-    const link = chart_2
+    var link = chart_2
       .append('g')
       .attr('stroke', '#aaa')
       .attr('stroke-opacity', 0.6)
@@ -378,7 +380,7 @@ class BarChart extends Component {
       .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')')
       .attr('stroke-width', d => d.value);
 
-    const node = chart_2
+    var node = chart_2
       .append('g')
       .selectAll('g')
       .data(nodes)
@@ -389,7 +391,9 @@ class BarChart extends Component {
       .append('circle')
       .call(drag(simulation))
       .attr('id', d => d.id)
-      .attr('r', d => nodeScale * d.radius)
+      .attr('r', function(d) {
+        return nodeScale * radiusScale(nodeSize(d));
+      })
       .attr('fill', function(d) {
         if (d.id == thesong.id) return 'red';
         else return d.colour;
@@ -541,6 +545,32 @@ class BarChart extends Component {
     }
     return <div ref="canvas" />;
   }
+}
+
+function changeNodeSize() {
+  for (var i = 0; i < nodes.length; i++) {
+    var n = document.getElementById(nodes[i].id);
+    n.style.r = nodeScale * radiusScale(nodeSize(nodes[i]));
+  }
+}
+
+function nodeSize(d) {
+  if (egoTime == undefined) return d.totalView;
+
+  // console.log("nodesize", egoTime, d);
+  var startDate = new Date(d.startDate);
+  var viewSum = [];
+  for (var i = 0; i < d.dailyView.length; i++) {
+    var date = new Date(startDate.getTime() + 3600 * 1000 * 24 * i);
+    if (date.getTime() <= egoTime) viewSum.push(d.dailyView[i]);
+    else break;
+  }
+  if (viewSum.length == 0) return 0;
+  return viewSum.reduce(arraysum);
+}
+
+function arraysum(total, num) {
+  return total + num;
 }
 
 function linkArc(d) {
