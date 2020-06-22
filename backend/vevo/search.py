@@ -158,6 +158,7 @@ def search_video_basicinfo(video_id):
                               "v.genres as genres,"
                               "v.totalView as totalView,"
                               "v.publishedAt as publishedAt,"
+                              "v.startDate as startDate,"
                               "v.channelId as channelId,"
                               "v.duration as duration,"
                               "v.dailyView as dailyView",
@@ -174,6 +175,7 @@ def search_video_basicinfo(video_id):
         "time_y": result['publishedAt'].year,
         "time_m": result['publishedAt'].month,
         "time_d": result['publishedAt'].day,
+        "startDate": result['startDate'],
         "channelId": result['channelId'],
         "duration": result['duration'],
         "dailyView": result['dailyView'],
@@ -212,7 +214,7 @@ def search_1hop_video_id(video_id):
         results = session.run("MATCH (v:V {videoId:{videoId}}) "
                               "OPTIONAL MATCH (v)-[s]-(w:V) WITH v+collect(distinct w) AS W "
                               "OPTIONAL MATCH (v1:V)-[r]-(v2:V) WHERE v1 in W and v2 in W "
-                              "RETURN collect(DISTINCT [v1.videoId, v1.title, v1.totalView, size((:V)-->(v1)), v1.dailyView, v1.channelArtistName, v1.publishedAt.year, v1.publishedAt.month, v1.publishedAt.day]) AS videos, "
+                              "RETURN collect(DISTINCT [v1.videoId, v1.title, v1.totalView, size((:V)-->(v1)), v1.dailyView, v1.channelArtistName, v1.startDate, v1.publishedAt.year, v1.publishedAt.month, v1.publishedAt.day]) AS videos, "
                               "collect(DISTINCT [startNode(r).videoId, endNode(r).videoId, r.weight, r.flux] ) AS links ",
                               {"videoId": video_id})
     result = results.single()

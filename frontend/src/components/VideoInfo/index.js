@@ -136,11 +136,14 @@ class BarChart extends Component {
       .attr('width', this.chartWidth)
       .attr('height', this.chartHeight)
       .attr('fill', 'transparent');
-    var startDate = new Date(
+
+    var publishedDate = new Date(
       thesong.time_y,
       thesong.time_m - 1,
       thesong.time_d
     );
+    var startDate = new Date(thesong.startDate);
+    console.log('startDate', thesong.startDate, startDate);
     console.log('drawSongViewCount', startDate, thesong.dailyView.length);
 
     var data = [];
@@ -258,7 +261,8 @@ class BarChart extends Component {
       totalView: video[2],
       dailyView: video[4],
       artist: video[5],
-      time: new Date(video[6], video[7] - 1, video[8]),
+      startDate: new Date(video[6]),
+      time: new Date(video[7], video[8] - 1, video[9]),
       video: video,
     }));
 
@@ -603,7 +607,7 @@ function hideOtherSongViewCount() {
 
 function showOtherSongViewCount(othersong) {
   // console.log('othersong', othersong);
-  var startDate = new Date(othersong.time);
+  var startDate = new Date(othersong.startDate);
 
   var data = [];
   for (var i = 0; i < othersong.dailyView.length; i++) {
