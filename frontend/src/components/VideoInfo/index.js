@@ -32,9 +32,10 @@ const drag = simulation => {
 };
 
 const hcolor = '#f78ca0';
-let radiusScale;
+let radiusScale, strokeScale;
 let nodeScale = 3;
-let egoID, egoTime, simulation, nodes;
+let chart_2_yScale_minimum = 100000;
+let egoID, egoTime, simulation, nodes, links;
 let graphSorting, chart_2_height, chart_2_topMargin;
 let chart_2_yScale_view, chart_2_yScale_artist;
 let vis, defs, viewcount, highlighted, oLeft, infoWidth;
@@ -215,7 +216,7 @@ class BarChart extends Component {
         .attr('x2', m_pos)
         .attr('display', 'block');
       // console.log("moveEgoNodePosition", m_pos, egoTime)
-      changeNodeSize();
+      calculateViewCount();
       simulation.restart();
     });
     viewcount.on('mouseout', function(e) {
@@ -233,16 +234,19 @@ class BarChart extends Component {
     const maxStroke = 5;
     const minWeight = d3.min(strokeList);
     const maxWeight = d3.max(strokeList);
-    const strokeScale = d3
-      .scaleLinear()
-      .domain([minWeight, maxWeight])
-      .range([minStroke, maxStroke]);
 
     const viewsList = songsArr.map(d => d[2]);
     const maxRadius = 10;
     const minRadius = 2;
     const minViews = d3.min(viewsList);
     const maxViews = d3.max(viewsList);
+
+    console.log('strokeScale', [minViews * minWeight, maxViews * maxWeight]);
+    strokeScale = d3
+      .scaleLinear()
+      .domain([minViews * minWeight, maxViews * maxWeight])
+      .range([minStroke, maxStroke]);
+
     radiusScale = d3
       .scaleLinear()
       .domain([minViews, maxViews])
@@ -269,11 +273,12 @@ class BarChart extends Component {
       video: video,
     }));
 
-    let links = linksArr.map(video => ({
+    links = linksArr.map(video => ({
       id: video[0] + '_' + video[1],
       source: video[0],
       target: video[1],
-      value: strokeScale(video[2]),
+      weight: video[2],
+      value: strokeScale(video[3]),
     }));
 
     chart_2_height = 500;
@@ -340,7 +345,7 @@ class BarChart extends Component {
     chart_2_yScale_view = d3
       .scaleLog()
       .domain([
-        100000,
+        chart_2_yScale_minimum,
         d3.max(nodes, function(d) {
           return d.totalView;
         }),
@@ -379,8 +384,7 @@ class BarChart extends Component {
       .data(links)
       .join('path')
       .attr('id', d => d.id)
-      .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')')
-      .attr('stroke-width', d => d.value);
+      .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')');
 
     var node = chart_2
       .append('g')
@@ -491,7 +495,10 @@ class BarChart extends Component {
               Math.max(chart_2_topMargin + 20, d.y)
             );
           } else if (graphSorting.value == 1) {
-            return chart_2_topMargin + chart_2_yScale_view(d.viewSum);
+            return (
+              chart_2_topMargin +
+              chart_2_yScale_view(Math.max(chart_2_yScale_minimum, d.viewSum))
+            );
           } else if (graphSorting.value == 2) {
             return (
               chart_2_topMargin +
@@ -509,7 +516,9 @@ class BarChart extends Component {
               Math.max(chart_2_topMargin + 20, d.y)
             );
           } else if (graphSorting.value == 1) {
-            new_y = chart_2_topMargin + chart_2_yScale_view(d.viewSum);
+            new_y =
+              chart_2_topMargin +
+              chart_2_yScale_view(Math.max(chart_2_yScale_minimum, d.viewSum));
           } else if (graphSorting.value == 2) {
             new_y =
               chart_2_topMargin +
@@ -522,14 +531,17 @@ class BarChart extends Component {
           }
           return `translate(${new_x},${new_y})`;
         });
-      link.attr('d', linkArc).attr('display', function(d) {
-        if (
-          d.source.time.getTime() <= egoTime &&
-          d.target.time.getTime() <= egoTime
-        )
-          return 'block';
-        else return 'none';
-      });
+      link
+        .attr('d', linkArc)
+        .attr('stroke-width', d => d.value)
+        .attr('display', function(d) {
+          if (
+            d.source.time.getTime() <= egoTime &&
+            d.target.time.getTime() <= egoTime
+          )
+            return 'block';
+          else return 'none';
+        });
     });
   }
 
@@ -549,7 +561,7 @@ class BarChart extends Component {
   }
 }
 
-function changeNodeSize() {
+function calculateViewCount() {
   for (var i = 0; i < nodes.length; i++) {
     var n = document.getElementById(nodes[i].id);
     var viewSum = nodeSize(nodes[i]);
@@ -557,6 +569,9 @@ function changeNodeSize() {
     nodes[i]['viewSum'] = viewSum;
     nodes[i]['radius'] = radius;
     n.style.r = nodeScale * radius;
+  }
+  for (var i = 0; i < links.length; i++) {
+    links[i].value = strokeScale(links[i].source.viewSum * links[i].weight);
   }
 }
 
@@ -593,10 +608,14 @@ function linkArc(d) {
       Math.max(chart_2_topMargin + 20, d.target.y)
     );
   } else if (graphSorting.value == 1) {
-    var ypos1 = chart_2_yScale_view(d.source.viewSum);
-    var ypos2 = chart_2_yScale_view(d.target.viewSum);
-    py1 = ypos1 ? chart_2_topMargin + ypos1 : 0;
-    py2 = ypos2 ? chart_2_topMargin + ypos2 : 0;
+    var ypos1 = chart_2_yScale_view(
+      Math.max(chart_2_yScale_minimum, d.source.viewSum)
+    );
+    var ypos2 = chart_2_yScale_view(
+      Math.max(chart_2_yScale_minimum, d.target.viewSum)
+    );
+    py1 = chart_2_topMargin + ypos1;
+    py2 = chart_2_topMargin + ypos2;
   } else if (graphSorting.value == 2) {
     py1 =
       chart_2_topMargin +
