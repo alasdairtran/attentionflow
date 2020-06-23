@@ -32,8 +32,8 @@ const drag = simulation => {
 };
 
 const hcolor = '#f78ca0';
-let radiusScale,
-  nodeScale = 3;
+let radiusScale;
+let nodeScale = 3;
 let egoID, egoTime, simulation, nodes;
 let graphSorting, chart_2_height, chart_2_topMargin;
 let chart_2_yScale_view, chart_2_yScale_artist;
@@ -157,11 +157,12 @@ class BarChart extends Component {
     }
     xScale = d3
       .scaleTime()
-      .domain(
-        d3.extent(data, function(d) {
+      .domain([
+        new Date('2011-01-01'),
+        d3.max(data, function(d) {
           return d.date;
-        })
-      )
+        }),
+      ])
       .range([0, this.chartWidth]);
     yScale = d3
       .scaleLinear()
@@ -338,12 +339,13 @@ class BarChart extends Component {
 
     chart_2_yScale_view = d3
       .scaleLog()
-      .domain(
-        d3.extent(nodes, function(d) {
+      .domain([
+        100000,
+        d3.max(nodes, function(d) {
           return d.totalView;
-        })
-      )
-      .range([0, chart_2_height])
+        }),
+      ])
+      .range([chart_2_height, 0])
       .nice();
     chart_2_yScale_artist = d3
       .scaleBand()
@@ -489,7 +491,7 @@ class BarChart extends Component {
               Math.max(chart_2_topMargin + 20, d.y)
             );
           } else if (graphSorting.value == 1) {
-            return chart_2_topMargin + chart_2_yScale_view(d.totalView);
+            return chart_2_topMargin + chart_2_yScale_view(d.viewSum);
           } else if (graphSorting.value == 2) {
             return (
               chart_2_topMargin +
@@ -507,7 +509,7 @@ class BarChart extends Component {
               Math.max(chart_2_topMargin + 20, d.y)
             );
           } else if (graphSorting.value == 1) {
-            new_y = chart_2_topMargin + chart_2_yScale_view(d.totalView);
+            new_y = chart_2_topMargin + chart_2_yScale_view(d.viewSum);
           } else if (graphSorting.value == 2) {
             new_y =
               chart_2_topMargin +
@@ -550,7 +552,11 @@ class BarChart extends Component {
 function changeNodeSize() {
   for (var i = 0; i < nodes.length; i++) {
     var n = document.getElementById(nodes[i].id);
-    n.style.r = nodeScale * radiusScale(nodeSize(nodes[i]));
+    var viewSum = nodeSize(nodes[i]);
+    var radius = radiusScale(viewSum);
+    nodes[i]['viewSum'] = viewSum;
+    nodes[i]['radius'] = radius;
+    n.style.r = nodeScale * radius;
   }
 }
 
@@ -587,8 +593,10 @@ function linkArc(d) {
       Math.max(chart_2_topMargin + 20, d.target.y)
     );
   } else if (graphSorting.value == 1) {
-    py1 = chart_2_topMargin + chart_2_yScale_view(d.source.totalView);
-    py2 = chart_2_topMargin + chart_2_yScale_view(d.target.totalView);
+    var ypos1 = chart_2_yScale_view(d.source.viewSum);
+    var ypos2 = chart_2_yScale_view(d.target.viewSum);
+    py1 = ypos1 ? chart_2_topMargin + ypos1 : 0;
+    py2 = ypos2 ? chart_2_topMargin + ypos2 : 0;
   } else if (graphSorting.value == 2) {
     py1 =
       chart_2_topMargin +

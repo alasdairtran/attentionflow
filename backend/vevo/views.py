@@ -69,12 +69,13 @@ def get_suggestions(request):
 
 @csrf_exempt
 def get_video_info(request):
-    video_id = "rYEDA3JcQqw" # rolling in the deep
+    # video_id = "rYEDA3JcQqw" # rolling in the deep
     # video_id = "hLQl3WQQoQ0" # someone like you
     # video_id = "YQHsXMglC9A" # hello
     # video_id = "hT_nvWreIhg" # counting starss
     # video_id = "KUmZp8pR1uc" # rehab
     # video_id = "yXQViqx6GMY" # all i want for christmas is you
+    video_id = "nfWlot6h_JM" # shake it off
     output = search_video_basicinfo(video_id)
     sameartist = search_videos_by_artist(video_id, output["channelId"])
     otherartist = search_1hop_video_id(video_id)
