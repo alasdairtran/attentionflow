@@ -488,7 +488,7 @@ class BarChart extends Component {
           return infoWidth + xScale(d.time);
         })
         .attr('cy', function(d) {
-          if (d.id == egoID) return chart_2_topMargin;
+          // if (d.id == egoID) return chart_2_topMargin;
           if (graphSorting.value == 0) {
             return Math.min(
               chart_2_topMargin + chart_2_height - 20,
@@ -527,7 +527,7 @@ class BarChart extends Component {
           }
           if (d.id == egoID) {
             new_x = infoWidth + xScale(egoTime);
-            new_y = chart_2_topMargin;
+            // new_y = chart_2_topMargin;
           }
           return `translate(${new_x},${new_y})`;
         });
@@ -629,11 +629,11 @@ function linkArc(d) {
 
   if (d.source.id == egoID) {
     px1 = infoWidth + xScale(egoTime);
-    py1 = chart_2_topMargin;
+    // py1 = chart_2_topMargin;
   }
   if (d.target.id == egoID) {
     px2 = infoWidth + xScale(egoTime);
-    py2 = chart_2_topMargin;
+    // py2 = chart_2_topMargin;
   }
 
   var dx = px2 - px1,
