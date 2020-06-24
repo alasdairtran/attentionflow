@@ -7,6 +7,7 @@ urlpatterns = [
     path('video_incoming_outgoing/', views.get_video_incoming_outgoing),
     path('suggestions/', views.get_suggestions),
     path('video_info/', views.get_video_info),
+    path('artist_info/', views.get_artist_info),
     path('genre/', views.get_genre),
     path('genre_incoming_outgoing/', views.get_genre_incoming_outgoing),
     path('egonet_artist/', views.get_artist),

@@ -35,7 +35,8 @@ const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let nodeScale = 3;
 let chart_2_yScale_minimum = 100000;
-let egoID, egoTime, simulation, nodes, links;
+let chart_xScale_minimum = new Date('2011-01-01');
+let egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, chart_2_height, chart_2_topMargin;
 let chart_2_yScale_view, chart_2_yScale_artist;
 let vis, defs, viewcount, highlighted, oLeft, infoWidth;
@@ -53,12 +54,14 @@ class BarChart extends Component {
   componentDidMount() {
     this.div = document.getElementById('sondInfoCard');
     oLeft = this.div.getBoundingClientRect().x;
-    this.drawSongExample(this.div.offsetWidth);
+    this.drawTimePanel(this.div.offsetWidth);
   }
 
-  drawSongExample(oWidth) {
-    console.log('drawSongExample', this.props);
-    const thesong = this.props.videoInfo;
+  drawTimePanel(oWidth) {
+    // console.log('drawTimePanel', this.props);
+    const theEgo = this.props.egoInfo;
+    console.log('theEgo', theEgo, this.props.egoType);
+    egoType = this.props.egoType;
 
     this.canvasHeight = oWidth;
     this.canvasWidth = oWidth;
@@ -89,12 +92,12 @@ class BarChart extends Component {
     vis = outer.append('g');
     defs = outer.append('defs');
 
-    this.drawSongInfoCard(thesong);
-    this.drawSongViewCount(thesong);
-    this.drawNetwork_otherSongs(thesong);
+    this.drawEgoInfoCard(theEgo);
+    this.drawEgoViewCount(theEgo);
+    this.drawEgoNetwork(theEgo);
   }
 
-  drawSongInfoCard(thesong) {
+  drawEgoInfoCard(theEgo) {
     vis
       .append('rect')
       .attr('x', 10)
@@ -106,15 +109,13 @@ class BarChart extends Component {
       .attr('x', 40)
       .attr('y', 40)
       .style('font-weight', 'bold')
-      .text(thesong.title);
+      .text(theEgo.title);
     vis
       .append('text')
       .attr('x', 40)
       .attr('y', 80)
-      .text(thesong.artistName);
-    var published = [thesong.time_y, thesong.time_m - 1, thesong.time_d].join(
-      '/'
-    );
+      .text(theEgo.artistName);
+    var published = [theEgo.time_y, theEgo.time_m - 1, theEgo.time_d].join('/');
     vis
       .append('text')
       .attr('x', 40)
@@ -124,13 +125,13 @@ class BarChart extends Component {
       .append('text')
       .attr('x', 40)
       .attr('y', 120)
-      .text(thesong.genres.join(','));
+      .text(theEgo.genres.join(','));
 
-    console.log('thesong', thesong);
-    egoID = thesong.id;
+    console.log('theEgo', theEgo);
+    egoID = theEgo.id;
   }
 
-  drawSongViewCount(thesong) {
+  drawEgoViewCount(theEgo) {
     viewcount = vis
       .append('g')
       .attr('transform', 'translate(' + infoWidth + ',20)');
@@ -141,25 +142,30 @@ class BarChart extends Component {
       .attr('fill', 'transparent');
 
     var publishedDate = new Date(
-      thesong.time_y,
-      thesong.time_m - 1,
-      thesong.time_d
+      theEgo.time_y,
+      theEgo.time_m - 1,
+      theEgo.time_d
     );
-    var startDate = new Date(thesong.startDate);
-    console.log('startDate', thesong.startDate, startDate);
-    console.log('drawSongViewCount', startDate, thesong.dailyView.length);
+    var startDate = new Date(theEgo.startDate);
+    console.log('startDate', theEgo.startDate, startDate);
+    console.log('drawEgoViewCount', startDate, theEgo.dailyView.length);
 
     var data = [];
-    for (var i = 0; i < thesong.dailyView.length; i++) {
+    for (var i = 0; i < theEgo.dailyView.length; i++) {
       data.push({
         date: new Date(startDate.getTime() + 3600 * 1000 * 24 * i),
-        value: thesong.dailyView[i],
+        value: theEgo.dailyView[i],
       });
     }
     xScale = d3
       .scaleTime()
       .domain([
-        new Date('2011-01-01'),
+        Math.min(
+          chart_xScale_minimum,
+          d3.min(data, function(d) {
+            return d.date;
+          })
+        ),
         d3.max(data, function(d) {
           return d.date;
         }),
@@ -225,9 +231,9 @@ class BarChart extends Component {
     highlighted = viewcount.append('g');
   }
 
-  drawNetwork_otherSongs(thesong) {
-    const songsArr = thesong.videos_2;
-    const linksArr = thesong.links_2;
+  drawEgoNetwork(theEgo) {
+    const songsArr = theEgo.nodes;
+    const linksArr = theEgo.links;
 
     const strokeList = linksArr.map(link => link[2]);
     const minStroke = 0.5;
@@ -241,11 +247,17 @@ class BarChart extends Component {
     const minViews = d3.min(viewsList);
     const maxViews = d3.max(viewsList);
 
-    console.log('strokeScale', [minViews * minWeight, maxViews * maxWeight]);
-    strokeScale = d3
-      .scaleLinear()
-      .domain([minViews * minWeight, maxViews * maxWeight])
-      .range([minStroke, maxStroke]);
+    if (egoType == 'V') {
+      strokeScale = d3
+        .scaleLinear()
+        .domain([minViews * minWeight, maxViews * maxWeight])
+        .range([minStroke, maxStroke]);
+    } else if (egoType == 'A') {
+      strokeScale = d3
+        .scaleLinear()
+        .domain([minWeight, maxWeight])
+        .range([minStroke, maxStroke]);
+    }
 
     radiusScale = d3
       .scaleLinear()
@@ -260,18 +272,31 @@ class BarChart extends Component {
       .domain([minInDegree, maxInDegree + 5]);
 
     const artistSet = new Set(songsArr.map(video => video[5]));
-    nodes = songsArr.map(video => ({
-      id: video[0],
-      name: video[1],
-      radius: radiusScale(video[2]),
-      colour: colourScale(video[3]),
-      totalView: video[2],
-      dailyView: video[4],
-      artist: video[5],
-      startDate: new Date(video[6]),
-      time: new Date(video[7], video[8] - 1, video[9]),
-      video: video,
-    }));
+    if (egoType == 'V') {
+      nodes = songsArr.map(video => ({
+        id: video[0],
+        name: video[1],
+        radius: radiusScale(video[2]),
+        colour: colourScale(video[3]),
+        totalView: video[2],
+        dailyView: video[4],
+        artist: video[5],
+        startDate: new Date(video[6]),
+        time: new Date(video[7], video[8] - 1, video[9]),
+      }));
+    } else if (egoType == 'A') {
+      nodes = songsArr.map(video => ({
+        id: video[0],
+        name: video[1],
+        radius: radiusScale(video[2]),
+        colour: colourScale(video[3]),
+        totalView: video[2],
+        dailyView: video[4],
+        artist: video[5],
+        startDate: new Date(video[6]),
+        time: new Date(video[6]),
+      }));
+    }
 
     links = linksArr.map(video => ({
       id: video[0] + '_' + video[1],
@@ -280,6 +305,8 @@ class BarChart extends Component {
       weight: video[2],
       value: strokeScale(video[3]),
     }));
+
+    console.log(nodes);
 
     chart_2_height = 500;
     chart_2_topMargin = this.chartHeight + 80;
@@ -296,7 +323,7 @@ class BarChart extends Component {
       .attr('x', this.canvasWidth - 20)
       .attr('y', chart_2_height + chart_2_topMargin - 10)
       .attr('text-anchor', 'end')
-      .text('Ego network of ' + thesong.title);
+      .text('Ego network of ' + theEgo.title);
 
     const nodeTitles = songsArr.map(video => video[0]);
     simulation = d3
@@ -401,7 +428,7 @@ class BarChart extends Component {
         return nodeScale * radiusScale(nodeSize(d));
       })
       .attr('fill', function(d) {
-        if (d.id == thesong.id) return 'red';
+        if (d.id == theEgo.id) return 'red';
         else return d.colour;
       })
       .attr('stroke', '#ccc')
@@ -425,7 +452,7 @@ class BarChart extends Component {
       .style('cursor', 'pointer')
       .style('font-size', '12px')
       .style('visibility', function(d) {
-        if (d.id == thesong.id) return 'visible';
+        if (d.id == theEgo.id) return 'visible';
         else return d.radius > radiusLimit ? 'visible' : 'hidden';
       });
 
@@ -446,14 +473,14 @@ class BarChart extends Component {
         .raise()
         .select('circle')
         .style('fill', function(d) {
-          if (d.id == thesong.id) return 'red';
+          if (d.id == theEgo.id) return 'red';
           else return d.colour;
         });
       d3.select(this)
         .raise()
         .select('text')
         .style('visibility', function(d) {
-          if (d.id == thesong.id) return 'visible';
+          if (d.id == theEgo.id) return 'visible';
           else return d.radius > radiusLimit ? 'visible' : 'hidden';
         });
       hideOtherSongViewCount();
@@ -571,7 +598,9 @@ function calculateViewCount() {
     n.style.r = nodeScale * radius;
   }
   for (var i = 0; i < links.length; i++) {
-    links[i].value = strokeScale(links[i].source.viewSum * links[i].weight);
+    if (egoType == 'V')
+      links[i].value = strokeScale(links[i].source.viewSum * links[i].weight);
+    if (egoType == 'A') links[i].value = strokeScale(links[i].weight);
   }
 }
 

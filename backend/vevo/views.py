@@ -68,21 +68,28 @@ def get_suggestions(request):
     return JsonResponse(output)
 
 @csrf_exempt
+def get_artist_info(request):
+    channel_id = "UComP_epzeKzvBX156r6pm1Q" # adele
+    video_id = "rYEDA3JcQqw" # rolling in the deep
+    output = search_artist_basicinfo(channel_id)
+    artists = search_1hop_artists(channel_id)
+    output["nodes"] = artists["artists"]
+    output["links"] = artists["links"]
+    return JsonResponse(output)
+
+@csrf_exempt
 def get_video_info(request):
-    # video_id = "rYEDA3JcQqw" # rolling in the deep
+    video_id = "rYEDA3JcQqw" # rolling in the deep
     # video_id = "hLQl3WQQoQ0" # someone like you
     # video_id = "YQHsXMglC9A" # hello
     # video_id = "hT_nvWreIhg" # counting starss
     # video_id = "KUmZp8pR1uc" # rehab
     # video_id = "yXQViqx6GMY" # all i want for christmas is you
-    video_id = "nfWlot6h_JM" # shake it off
+    # video_id = "nfWlot6h_JM" # shake it off
     output = search_video_basicinfo(video_id)
-    sameartist = search_videos_by_artist(video_id, output["channelId"])
-    otherartist = search_1hop_video_id(video_id)
-    output["videos_1"] = sameartist["videos"]
-    output["links_1"] = sameartist["links"]
-    output["videos_2"] = otherartist["videos"]
-    output["links_2"] = otherartist["links"]
+    videos = search_1hop_videos(video_id)
+    output["nodes"] = videos["videos"]
+    output["links"] = videos["links"]
     return JsonResponse(output)
 
 @csrf_exempt

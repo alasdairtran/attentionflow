@@ -147,6 +147,38 @@ def search_3hop_artist(channel_id):
     }
     return output
 
+def search_artist_basicinfo(channel_id):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+    with driver.session() as session:
+        results = session.run("MATCH (a:A {channelId:{channelId}}) "
+                              "RETURN a.artistName as artistName,"
+                              "a.numViews as totalView,"
+                              "a.startDate as publishedAt,"
+                              "a.startDate as startDate,"
+                              "a.channelId as channelId,"
+                              "a.dailyView as dailyView",
+                              {"channelId": channel_id})
+    result = results.single()
+    driver.close()
+
+    published_date = result['startDate'].split('-')
+    output = {
+        "id": channel_id,
+        "title": result['artistName'],
+        "artistName": result['artistName'],
+        "totalView": result['totalView'],
+        "genres": [""],
+        "time_y": int(published_date[0]),
+        "time_m": int(published_date[1]),
+        "time_d": int(published_date[2]),
+        "startDate": result['startDate'],
+        "channelId": result['channelId'],
+        "duration": "",
+        "dailyView": result['dailyView'],
+    }
+    return output
+
 
 def search_video_basicinfo(video_id):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
@@ -182,7 +214,7 @@ def search_video_basicinfo(video_id):
     }
     return output
 
-def search_videos_by_artist(video_id, channel_id):
+def search_videos_by_artist(channel_id):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
     with driver.session() as session:
@@ -207,7 +239,26 @@ def search_videos_by_artist(video_id, channel_id):
     }
     return output
 
-def search_1hop_video_id(video_id):
+def search_1hop_artists(channel_id):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+    with driver.session() as session:
+        results = session.run("MATCH (v:A {channelId:{channelId}}) "
+                              "OPTIONAL MATCH (v)-[s]-(w:A) WITH v+collect(distinct w) AS W "
+                              "OPTIONAL MATCH (v1:A)-[r]-(v2:A) WHERE v1 in W and v2 in W "
+                              "RETURN collect(DISTINCT [v1.channelId, v1.artistName, v1.numViews, size((:V)-->(v1)), v1.dailyView, v1.artistName, v1.startDate]) AS artists, "
+                              "collect(DISTINCT [startNode(r).channelId, endNode(r).channelId, r.channelFlux, r.channelFlux] ) AS links ",
+                              {"channelId": channel_id})
+    result = results.single()
+    driver.close()
+
+    output = {
+        "artists": result['artists'],
+        "links": result['links'],
+    }
+    return output
+
+def search_1hop_videos(video_id):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS))
     with driver.session() as session:

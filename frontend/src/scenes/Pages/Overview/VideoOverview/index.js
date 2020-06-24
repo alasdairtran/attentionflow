@@ -41,7 +41,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as d3 from 'd3';
 import { getIncomingOutgoing } from '../../../../components/VideoEgo/incomingOutgoing';
 import PageTitle from '../../../Layout/AppMain/PageTitle';
-import VideoInfo from '../../../../components/VideoInfo';
+import Timeseries from '../../../../components/Timeseries';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -189,7 +189,7 @@ export default class AnalyticsDashboard1 extends Component {
                         }}
                       />
                     ) : (
-                      <VideoInfo videoInfo={this.state.videoInfo} />
+                      <Timeseries egoType="V" egoInfo={this.state.videoInfo} />
                     )}
                   </div>
                 </Card>
