@@ -87,7 +87,7 @@ def get_video_info(request):
     # video_id = "yXQViqx6GMY" # all i want for christmas is you
     # video_id = "nfWlot6h_JM" # shake it off
     output = search_video_basicinfo(video_id)
-    videos = search_1hop_videos(video_id)
+    videos = search_2hop_videos(video_id)
     output["nodes"] = videos["videos"]
     output["links"] = videos["links"]
     return JsonResponse(output)

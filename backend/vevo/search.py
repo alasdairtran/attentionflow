@@ -276,3 +276,22 @@ def search_1hop_videos(video_id):
         "links": result['links'],
     }
     return output
+
+def search_2hop_videos(video_id):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS))
+    with driver.session() as session:
+        results = session.run("MATCH (v:V {videoId:{videoId}}) "
+                              "OPTIONAL MATCH (v)-[s]-(w:V)-[ss]-(ww:V) WITH v+collect(distinct w)+collect(distinct ww) AS W "
+                              "OPTIONAL MATCH (v1:V)-[r]-(v2:V) WHERE v1 in W and v2 in W "
+                              "RETURN collect(DISTINCT [v1.videoId, v1.title, v1.totalView, size((:V)-->(v1)), v1.dailyView, v1.channelArtistName, v1.startDate, v1.publishedAt.year, v1.publishedAt.month, v1.publishedAt.day]) AS videos, "
+                              "collect(DISTINCT [startNode(r).videoId, endNode(r).videoId, r.weight, r.flux] ) AS links ",
+                              {"videoId": video_id})
+    result = results.single()
+    driver.close()
+
+    output = {
+        "videos": result['videos'],
+        "links": result['links'],
+    }
+    return output
