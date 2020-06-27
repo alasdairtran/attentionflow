@@ -34,12 +34,13 @@ const drag = simulation => {
 const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let nodeScale = 3;
-let chart_2_yScale_minimum = 100000;
-let chart_xScale_minimum = new Date('2011-01-01');
+let padding_x = 20;
+let chart_yScale_minimum = 100000;
+let chart_xScale_minimum = new Date('2009-11-01');
 let egoID, egoType, egoTime, simulation, nodes, links;
-let graphSorting, chart_2_height, chart_2_topMargin;
-let chart_2_yScale_view, chart_2_yScale_artist;
-let vis, defs, viewcount, highlighted, oLeft, infoWidth;
+let graphSorting, chart_height, chart_topMargin;
+let chart_yScale_view, chart_yScale_artist, startPos;
+let vis, defs, viewcount, highlighted, oLeft;
 let xScale, yScale, yAxis, old_max, viewCountPath;
 class BarChart extends Component {
   constructor(props) {
@@ -62,17 +63,17 @@ class BarChart extends Component {
     const theEgo = this.props.egoInfo;
     console.log('theEgo', theEgo, this.props.egoType);
     egoType = this.props.egoType;
-
-    this.canvasHeight = oWidth;
+    egoID = theEgo.id;
     this.canvasWidth = oWidth;
+    this.infoHeight = 160;
+    this.chartHeight = 120;
+    this.chartWidth = this.canvasWidth - padding_x * 2;
 
-    this.infoHeight = this.chartHeight = 130;
-    infoWidth = 360;
-    this.chartWidth = this.canvasWidth - infoWidth - 20;
+    this.canvasHeight = this.infoHeight + this.chartHeight + 560;
 
     graphSorting = document.createElement('SELECT');
     graphSorting.style.position = 'absolute';
-    graphSorting.style.top = this.chartHeight + 70 + 'px';
+    graphSorting.style.top = this.infoHeight + this.chartHeight + 50 + 'px';
     graphSorting.style.right = '20px';
     var options = ['ForceDirected', 'TotalView', 'Artist'];
     for (var o = 0; o < options.length; o++) {
@@ -98,54 +99,41 @@ class BarChart extends Component {
   }
 
   drawEgoInfoCard(theEgo) {
-    vis
-      .append('rect')
-      .attr('x', 10)
-      .attr('width', 10)
-      .attr('height', this.infoHeight + 20)
-      .style('fill', hcolor);
-    vis
-      .append('text')
-      .attr('x', 40)
-      .attr('y', 40)
-      .style('font-weight', 'bold')
-      .text(theEgo.title);
-    vis
-      .append('text')
-      .attr('x', 40)
-      .attr('y', 80)
-      .text(theEgo.artistName);
-    var published = [theEgo.time_y, theEgo.time_m - 1, theEgo.time_d].join('/');
-    vis
-      .append('text')
-      .attr('x', 40)
-      .attr('y', 100)
-      .text(published);
-    vis
-      .append('text')
-      .attr('x', 40)
-      .attr('y', 120)
-      .text(theEgo.genres.join(','));
+    var infocard = document.createElement('div');
+    infocard.style.position = 'absolute';
+    infocard.style.width = 'auto';
+    infocard.style.height = this.infoHeight + 10 + 'px';
+    infocard.style.margin = '0 20px 10px 20px';
+    infocard.style.padding = '20px';
+    infocard.style.borderLeft = '10px solid ' + hcolor;
 
-    console.log('theEgo', theEgo);
-    egoID = theEgo.id;
+    var published = new Date(theEgo.publishedAt);
+    var infocardtext = document.createElement('div');
+
+    var egoInfoText = '<h5><b>' + theEgo.title + '</b></h5><br/>';
+    egoInfoText += 'Artist: ' + theEgo.artistName + '<br/>';
+    egoInfoText += 'Published: ' + published.toDateString() + '<br/>';
+    egoInfoText += 'Genres: ' + theEgo.genres.join(',');
+
+    infocardtext.innerHTML = egoInfoText;
+    infocard.append(infocardtext);
+    this.div.append(infocard);
   }
 
   drawEgoViewCount(theEgo) {
     viewcount = vis
       .append('g')
-      .attr('transform', 'translate(' + infoWidth + ',20)');
+      .attr(
+        'transform',
+        'translate(' + padding_x + ',' + (this.infoHeight + 20) + ')'
+      );
     viewcount
       .append('rect')
       .attr('width', this.chartWidth)
       .attr('height', this.chartHeight)
       .attr('fill', 'transparent');
 
-    var publishedDate = new Date(
-      theEgo.time_y,
-      theEgo.time_m - 1,
-      theEgo.time_d
-    );
+    var publishedDate = new Date(theEgo.publishedAt);
     var startDate = new Date(theEgo.startDate);
     console.log('startDate', theEgo.startDate, startDate);
     console.log('drawEgoViewCount', startDate, theEgo.dailyView.length);
@@ -181,11 +169,19 @@ class BarChart extends Component {
       ])
       .range([this.chartHeight, 0]);
     old_max = yScale.domain()[1];
+    startPos = xScale(
+      d3.min(data, function(d) {
+        return d.date;
+      })
+    );
     viewcount
       .append('g')
       .attr('transform', 'translate(0,' + this.chartHeight + ')')
       .call(d3.axisBottom(xScale));
-    yAxis = viewcount.append('g').call(d3.axisLeft(yScale));
+    yAxis = viewcount
+      .append('g')
+      .attr('transform', 'translate(' + startPos + ',0)')
+      .call(d3.axisLeft(yScale));
     viewCountPath = viewcount
       .append('path')
       .datum(data)
@@ -204,24 +200,39 @@ class BarChart extends Component {
           })
       );
 
+    var embvideo_id;
+    var embvideo = document.createElement('iframe');
+    if (egoType == 'V') {
+      embvideo_id = theEgo.id;
+    } else if (egoType == 'A') {
+      embvideo_id = theEgo.topvideos[0][0][0];
+    }
+    embvideo.width = 300;
+    embvideo.height = this.infoHeight;
+    embvideo.style.position = 'absolute';
+    embvideo.style.right = '0px';
+    embvideo.style.margin = '10px 20px';
+    embvideo.style.border = 'none';
+    embvideo.src = 'https://www.youtube.com/embed/' + embvideo_id;
+    this.div.append(embvideo);
+
     var time_indicator = viewcount
       .append('line')
       .attr('x1', 100)
       .attr('x2', 100)
       .attr('y1', 0)
       .attr('y2', this.chartHeight)
-      .attr('stroke', 'red')
+      .attr('stroke', hcolor)
       .attr('display', 'none');
     egoTime = Math.floor(xScale.invert(0));
     viewcount.on('mousemove', function(e) {
       setMousePosition(e);
-      var m_pos = Math.max(0, mouse.x - oLeft - infoWidth);
+      var m_pos = Math.max(0, mouse.x - oLeft);
       egoTime = Math.floor(xScale.invert(m_pos));
       time_indicator
         .attr('x1', m_pos)
         .attr('x2', m_pos)
         .attr('display', 'block');
-      // console.log("moveEgoNodePosition", m_pos, egoTime)
       calculateViewCount();
       simulation.restart();
     });
@@ -268,7 +279,7 @@ class BarChart extends Component {
     const minInDegree = d3.min(inDegreeList);
     const maxInDegree = d3.max(inDegreeList);
     const colourScale = d3
-      .scaleSequential(d3.interpolatePuBu)
+      .scaleSequential(d3.interpolateRdPu)
       .domain([minInDegree, maxInDegree + 5]);
 
     const artistSet = new Set(songsArr.map(video => video[5]));
@@ -282,7 +293,7 @@ class BarChart extends Component {
         dailyView: video[4],
         artist: video[5],
         startDate: new Date(video[6]),
-        time: new Date(video[7], video[8] - 1, video[9]),
+        time: new Date(video[7]),
       }));
     } else if (egoType == 'A') {
       nodes = songsArr.map(video => ({
@@ -306,24 +317,23 @@ class BarChart extends Component {
       value: strokeScale(video[3]),
     }));
 
-    console.log(nodes);
+    // console.log(nodes);
 
-    chart_2_height = 500;
-    chart_2_topMargin = this.chartHeight + 80;
-    const chart_2_backgroud = vis
+    chart_height = 500;
+    chart_topMargin = this.infoHeight + this.chartHeight + 45;
+    const chart_backgroud = vis
       .append('rect')
-      .attr('width', '100%')
-      .attr('height', chart_2_height)
-      .style('fill', '#FFF')
-      // .style('stroke', '#ddd')
-      .attr('transform', 'translate(0,' + chart_2_topMargin + ')');
-    const chart_2 = vis.append('g');
-    chart_2
-      .append('text')
-      .attr('x', this.canvasWidth - 20)
-      .attr('y', chart_2_height + chart_2_topMargin - 10)
-      .attr('text-anchor', 'end')
-      .text('Ego network of ' + theEgo.title);
+      .attr('width', this.canvasWidth - 40)
+      .attr('height', chart_height)
+      .style('fill', '#f0f0f0')
+      .attr('transform', 'translate(20,' + chart_topMargin + ')');
+    const chart = vis.append('g');
+    // chart
+    //   .append('text')
+    //   .attr('x', this.canvasWidth - 40)
+    //   .attr('y', chart_height + chart_topMargin - 10)
+    //   .attr('text-anchor', 'end')
+    //   .text('Ego network of ' + theEgo.title);
 
     const nodeTitles = songsArr.map(video => video[0]);
     simulation = d3
@@ -347,43 +357,31 @@ class BarChart extends Component {
       .force('charge', d3.forceManyBody().strength(10))
       .force(
         'center',
-        d3.forceCenter(
-          this.canvasWidth / 2,
-          chart_2_topMargin + chart_2_height / 2
-        )
+        d3.forceCenter(this.canvasWidth / 2, chart_topMargin + chart_height / 2)
       );
 
-    var newDomain = [
-      xScale.invert(-infoWidth),
-      xScale.invert(this.canvasWidth - infoWidth),
-    ];
-    var chart_2_xScale = d3
-      .scaleTime()
-      .domain(newDomain)
-      .range([0, this.canvasWidth]);
-    chart_2
+    var newDomain = [xScale.invert(0), xScale.invert(this.canvasWidth)];
+    chart
       .append('g')
-      .attr(
-        'transform',
-        'translate(0,' + (chart_2_topMargin + chart_2_height) + ')'
-      )
-      .call(d3.axisBottom(chart_2_xScale));
+      .attr('transform', 'translate(' + padding_x + ',' + chart_topMargin + ')')
+      .call(d3.axisTop(xScale).tickFormat(''));
 
-    chart_2_yScale_view = d3
+    chart_yScale_view = d3
       .scaleLog()
       .domain([
-        chart_2_yScale_minimum,
-        d3.max(nodes, function(d) {
-          return d.totalView;
-        }),
+        chart_yScale_minimum,
+        2 *
+          d3.max(nodes, function(d) {
+            return d.totalView;
+          }),
       ])
-      .range([chart_2_height, 0])
+      .range([chart_height, 0])
       .nice();
-    chart_2_yScale_artist = d3
+    chart_yScale_artist = d3
       .scaleBand()
-      .domain(Array.from(artistSet))
-      .range([0, chart_2_height]);
-    var chart_2_y = chart_2.append('g');
+      .domain([''].concat(Array.from(artistSet)))
+      .range([0, chart_height]);
+    var chart_y = chart.append('g');
 
     defs
       .selectAll('marker')
@@ -402,10 +400,10 @@ class BarChart extends Component {
       .attr('d', 'M0,-6L12,0L0,6')
       .style('fill', '#aaa');
 
-    var link = chart_2
+    var link = chart
       .append('g')
       .attr('stroke', '#aaa')
-      .attr('stroke-opacity', 0.6)
+      .attr('stroke-opacity', 0.5)
       .attr('fill', 'none')
       .selectAll('path')
       .data(links)
@@ -413,7 +411,7 @@ class BarChart extends Component {
       .attr('id', d => d.id)
       .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')');
 
-    var node = chart_2
+    var node = chart
       .append('g')
       .selectAll('g')
       .data(nodes)
@@ -428,11 +426,11 @@ class BarChart extends Component {
         return nodeScale * radiusScale(nodeSize(d));
       })
       .attr('fill', function(d) {
-        if (d.id == theEgo.id) return 'red';
+        if (d.id == theEgo.id) return 'steelblue';
         else return d.colour;
       })
-      .attr('stroke', '#ccc')
-      .attr('stroke-width', 3)
+      .attr('stroke', '#aaa')
+      .attr('stroke-width', 0.5)
       .style('cursor', 'pointer');
 
     node.append('title').text(d => d.id);
@@ -443,7 +441,8 @@ class BarChart extends Component {
       .append('text')
       .call(drag(simulation))
       .text(function(d) {
-        return d.name.split('-')[1];
+        if (egoType == 'V') return d.name.split('-')[1];
+        if (egoType == 'A') return d.name;
       })
       .attr('x', function(d) {
         return -2.5 * (1 + !d.name ? 0 : d.name.length);
@@ -473,7 +472,7 @@ class BarChart extends Component {
         .raise()
         .select('circle')
         .style('fill', function(d) {
-          if (d.id == theEgo.id) return 'red';
+          if (d.id == theEgo.id) return 'steelblue';
           else return d.colour;
         });
       d3.select(this)
@@ -488,17 +487,23 @@ class BarChart extends Component {
 
     graphSorting.addEventListener('change', function() {
       if (graphSorting.value == 0) {
-        chart_2_y.attr('display', 'none');
+        chart_y.attr('display', 'none');
       } else if (graphSorting.value == 1) {
-        chart_2_y
+        chart_y
           .attr('display', 'block')
-          .attr('transform', 'translate(50,' + chart_2_topMargin + ')')
-          .call(d3.axisLeft(chart_2_yScale_view));
+          .attr(
+            'transform',
+            'translate(' + (startPos + padding_x) + ',' + chart_topMargin + ')'
+          )
+          .call(d3.axisLeft(chart_yScale_view));
       } else if (graphSorting.value == 2) {
-        chart_2_y
+        chart_y
           .attr('display', 'block')
-          .attr('transform', 'translate(150,' + chart_2_topMargin + ')')
-          .call(d3.axisLeft(chart_2_yScale_artist));
+          .attr(
+            'transform',
+            'translate(' + (startPos + padding_x) + ',' + chart_topMargin + ')'
+          )
+          .call(d3.axisLeft(chart_yScale_artist));
       }
       simulation.restart();
     });
@@ -507,54 +512,54 @@ class BarChart extends Component {
       // ## this code makes nodes NOT bounded in the panel
       node
         .attr('display', function(d) {
-          if (d.time.getTime() <= egoTime) return 'block';
+          if (d.startDate.getTime() <= egoTime) return 'block';
           else return 'none';
         })
         .attr('cx', function(d) {
-          if (d.id == egoID) return infoWidth + xScale(egoTime);
-          return infoWidth + xScale(d.time);
+          if (d.id == egoID) return padding_x + xScale(egoTime);
+          return padding_x + xScale(d.startDate);
         })
         .attr('cy', function(d) {
-          // if (d.id == egoID) return chart_2_topMargin;
+          // if (d.id == egoID) return chart_topMargin;
           if (graphSorting.value == 0) {
             return Math.min(
-              chart_2_topMargin + chart_2_height - 20,
-              Math.max(chart_2_topMargin + 20, d.y)
+              chart_topMargin + chart_height - 20,
+              Math.max(chart_topMargin + 20, d.y)
             );
           } else if (graphSorting.value == 1) {
             return (
-              chart_2_topMargin +
-              chart_2_yScale_view(Math.max(chart_2_yScale_minimum, d.viewSum))
+              chart_topMargin +
+              chart_yScale_view(Math.max(chart_yScale_minimum, d.viewSum))
             );
           } else if (graphSorting.value == 2) {
             return (
-              chart_2_topMargin +
-              chart_2_yScale_artist.bandwidth() / 2 +
-              chart_2_yScale_artist(d.artist)
+              chart_topMargin +
+              chart_yScale_artist.bandwidth() / 2 +
+              chart_yScale_artist(d.artist)
             );
           }
         })
         .attr('transform', function(d) {
-          var new_x = infoWidth + xScale(d.time);
+          var new_x = padding_x + xScale(d.startDate);
           var new_y;
           if (graphSorting.value == 0) {
             new_y = Math.min(
-              chart_2_topMargin + chart_2_height - 20,
-              Math.max(chart_2_topMargin + 20, d.y)
+              chart_topMargin + chart_height - 20,
+              Math.max(chart_topMargin + 20, d.y)
             );
           } else if (graphSorting.value == 1) {
             new_y =
-              chart_2_topMargin +
-              chart_2_yScale_view(Math.max(chart_2_yScale_minimum, d.viewSum));
+              chart_topMargin +
+              chart_yScale_view(Math.max(chart_yScale_minimum, d.viewSum));
           } else if (graphSorting.value == 2) {
             new_y =
-              chart_2_topMargin +
-              chart_2_yScale_artist.bandwidth() / 2 +
-              chart_2_yScale_artist(d.artist);
+              chart_topMargin +
+              chart_yScale_artist.bandwidth() / 2 +
+              chart_yScale_artist(d.artist);
           }
           if (d.id == egoID) {
-            new_x = infoWidth + xScale(egoTime);
-            // new_y = chart_2_topMargin;
+            new_x = padding_x + xScale(egoTime);
+            // new_y = chart_topMargin;
           }
           return `translate(${new_x},${new_y})`;
         });
@@ -563,8 +568,8 @@ class BarChart extends Component {
         .attr('stroke-width', d => d.value)
         .attr('display', function(d) {
           if (
-            d.source.time.getTime() <= egoTime &&
-            d.target.time.getTime() <= egoTime
+            d.source.startDate.getTime() <= egoTime &&
+            d.target.startDate.getTime() <= egoTime
           )
             return 'block';
           else return 'none';
@@ -624,45 +629,45 @@ function arraysum(total, num) {
 }
 
 function linkArc(d) {
-  var px1 = infoWidth + xScale(d.source.time),
-    px2 = infoWidth + xScale(d.target.time);
+  var px1 = padding_x + xScale(d.source.startDate);
+  var px2 = padding_x + xScale(d.target.startDate);
   var py1, py2;
   if (graphSorting.value == 0) {
     py1 = Math.min(
-      chart_2_topMargin + chart_2_height - 20,
-      Math.max(chart_2_topMargin + 20, d.source.y)
+      chart_topMargin + chart_height - 20,
+      Math.max(chart_topMargin + 20, d.source.y)
     );
     py2 = Math.min(
-      chart_2_topMargin + chart_2_height - 20,
-      Math.max(chart_2_topMargin + 20, d.target.y)
+      chart_topMargin + chart_height - 20,
+      Math.max(chart_topMargin + 20, d.target.y)
     );
   } else if (graphSorting.value == 1) {
-    var ypos1 = chart_2_yScale_view(
-      Math.max(chart_2_yScale_minimum, d.source.viewSum)
+    var ypos1 = chart_yScale_view(
+      Math.max(chart_yScale_minimum, d.source.viewSum)
     );
-    var ypos2 = chart_2_yScale_view(
-      Math.max(chart_2_yScale_minimum, d.target.viewSum)
+    var ypos2 = chart_yScale_view(
+      Math.max(chart_yScale_minimum, d.target.viewSum)
     );
-    py1 = chart_2_topMargin + ypos1;
-    py2 = chart_2_topMargin + ypos2;
+    py1 = chart_topMargin + ypos1;
+    py2 = chart_topMargin + ypos2;
   } else if (graphSorting.value == 2) {
     py1 =
-      chart_2_topMargin +
-      chart_2_yScale_artist.bandwidth() / 2 +
-      chart_2_yScale_artist(d.source.artist);
+      chart_topMargin +
+      chart_yScale_artist.bandwidth() / 2 +
+      chart_yScale_artist(d.source.artist);
     py2 =
-      chart_2_topMargin +
-      chart_2_yScale_artist.bandwidth() / 2 +
-      chart_2_yScale_artist(d.target.artist);
+      chart_topMargin +
+      chart_yScale_artist.bandwidth() / 2 +
+      chart_yScale_artist(d.target.artist);
   }
 
   if (d.source.id == egoID) {
-    px1 = infoWidth + xScale(egoTime);
-    // py1 = chart_2_topMargin;
+    px1 = padding_x + xScale(egoTime);
+    // py1 = chart_topMargin;
   }
   if (d.target.id == egoID) {
-    px2 = infoWidth + xScale(egoTime);
-    // py2 = chart_2_topMargin;
+    px2 = padding_x + xScale(egoTime);
+    // py2 = chart_topMargin;
   }
 
   var dx = px2 - px1,
@@ -764,5 +769,6 @@ function setMousePosition(e) {
     mouse.x = ev.clientX + document.body.scrollLeft;
     mouse.y = ev.clientY + document.body.scrollTop;
   }
+  mouse.x -= padding_x;
   // console.log(mouse)
 }
