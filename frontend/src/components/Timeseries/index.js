@@ -31,6 +31,40 @@ const drag = simulation => {
     .on('end', dragended);
 };
 
+Date.prototype.toShortFormat = function() {
+  let monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  let day = this.getDate();
+  let monthIndex = this.getMonth();
+  let monthName = monthNames[monthIndex];
+  let year = this.getFullYear();
+  return monthName + ' ' + day + ', ' + year;
+};
+
+function numFormatter(num) {
+  var newNum = '';
+  if (Math.abs(num) > 999999999)
+    newNum = Math.sign(num) * (Math.abs(num) / 1000000000).toFixed(1) + 'B';
+  else if (Math.abs(num) > 999999)
+    newNum = Math.sign(num) * (Math.abs(num) / 1000000).toFixed(1) + 'M';
+  else if (Math.abs(num) > 999)
+    newNum = Math.sign(num) * (Math.abs(num) / 1000).toFixed(1) + 'K';
+  else newNum = Math.sign(num) * Math.abs(num);
+  return newNum == 0 ? '' : newNum;
+}
+
 const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let nodeScale = 3;
@@ -39,7 +73,7 @@ let chart_yScale_minimum = 100000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, chart_height, chart_topMargin;
-let chart_yScale_view, chart_yScale_artist, startPos;
+let chart_yScale_view, chart_yScale_artist, startPos, topvideo_data;
 let vis, defs, viewcount, highlighted, oLeft;
 let xScale, yScale, yAxis, old_max, viewCountPath;
 class BarChart extends Component {
@@ -94,6 +128,7 @@ class BarChart extends Component {
     defs = outer.append('defs');
 
     this.drawEgoInfoCard(theEgo);
+    this.drawEgoMoreInfo(theEgo);
     this.drawEgoViewCount(theEgo);
     this.drawEgoNetwork(theEgo);
   }
@@ -112,7 +147,7 @@ class BarChart extends Component {
 
     var egoInfoText = '<h5><b>' + theEgo.title + '</b></h5><br/>';
     egoInfoText += 'Artist: ' + theEgo.artistName + '<br/>';
-    egoInfoText += 'Published: ' + published.toDateString() + '<br/>';
+    egoInfoText += 'Published: ' + published.toShortFormat() + '<br/>';
     egoInfoText += 'Genres: ' + theEgo.genres.join(',');
 
     infocardtext.innerHTML = egoInfoText;
@@ -181,7 +216,7 @@ class BarChart extends Component {
     yAxis = viewcount
       .append('g')
       .attr('transform', 'translate(' + startPos + ',0)')
-      .call(d3.axisLeft(yScale));
+      .call(d3.axisLeft(yScale).tickFormat(numFormatter));
     viewCountPath = viewcount
       .append('path')
       .datum(data)
@@ -199,22 +234,6 @@ class BarChart extends Component {
             return yScale(d.value);
           })
       );
-
-    var embvideo_id;
-    var embvideo = document.createElement('iframe');
-    if (egoType == 'V') {
-      embvideo_id = theEgo.id;
-    } else if (egoType == 'A') {
-      embvideo_id = theEgo.topvideos[0][0][0];
-    }
-    embvideo.width = 300;
-    embvideo.height = this.infoHeight;
-    embvideo.style.position = 'absolute';
-    embvideo.style.right = '0px';
-    embvideo.style.margin = '10px 20px';
-    embvideo.style.border = 'none';
-    embvideo.src = 'https://www.youtube.com/embed/' + embvideo_id;
-    this.div.append(embvideo);
 
     var time_indicator = viewcount
       .append('line')
@@ -240,6 +259,60 @@ class BarChart extends Component {
       time_indicator.attr('display', 'none');
     });
     highlighted = viewcount.append('g');
+  }
+
+  drawEgoMoreInfo(theEgo) {
+    var embvideo_id;
+    var embvideo = document.createElement('iframe');
+    if (egoType == 'V') {
+      embvideo_id = theEgo.id;
+    } else if (egoType == 'A') {
+      embvideo_id = theEgo.topvideos[0][0][0];
+    }
+    embvideo.width = 300;
+    embvideo.height = this.infoHeight;
+    embvideo.style.position = 'absolute';
+    embvideo.style.right = '0px';
+    embvideo.style.margin = '10px 20px';
+    embvideo.style.border = 'none';
+    embvideo.src = 'https://www.youtube.com/embed/' + embvideo_id;
+    this.div.append(embvideo);
+
+    if (egoType == 'A') {
+      topvideo_data = {};
+      var topvideos = document.createElement('div');
+      topvideos.width = 300;
+      topvideos.style.position = 'absolute';
+      topvideos.style.right = '320px';
+      topvideos.style.padding = '15px 20px';
+      for (var i = 0, j = 0; i < theEgo.topvideos[0].length, j < 7; i++, j++) {
+        var videodiv = document.createElement('div');
+        var video = theEgo.topvideos[0][i];
+        var vtitle = video[1].split('-')[1];
+        var vtitle_str =
+          vtitle.length > 20 ? vtitle.slice(0, 20) + '...' : vtitle;
+        topvideo_data[video[0]] = {
+          title: vtitle,
+          startDate: video[3],
+          dailyView: video[5],
+        };
+        videodiv.id = video[0];
+        videodiv.innerHTML += '<b>' + vtitle_str + '</a> ';
+        videodiv.innerHTML +=
+          numFormatter(video[4]) +
+          ' views • ' +
+          new Date(video[2]).toShortFormat() +
+          '<br/>';
+        videodiv.addEventListener('mouseover', function(e) {
+          showOtherSongViewCount(topvideo_data[this.id]);
+        });
+        videodiv.addEventListener('mouseout', function(e) {
+          hideOtherSongViewCount();
+        });
+        topvideos.append(videodiv);
+      }
+      this.div.append(topvideos);
+    }
   }
 
   drawEgoNetwork(theEgo) {
@@ -495,7 +568,12 @@ class BarChart extends Component {
             'transform',
             'translate(' + (startPos + padding_x) + ',' + chart_topMargin + ')'
           )
-          .call(d3.axisLeft(chart_yScale_view));
+          .call(
+            d3
+              .axisLeft(chart_yScale_view)
+              .ticks(5)
+              .tickFormat(numFormatter)
+          );
       } else if (graphSorting.value == 2) {
         chart_y
           .attr('display', 'block')
@@ -681,7 +759,7 @@ function linkArc(d) {
 
 function hideOtherSongViewCount() {
   yScale.domain([0, old_max]);
-  yAxis.call(d3.axisLeft(yScale));
+  yAxis.call(d3.axisLeft(yScale).tickFormat(numFormatter));
   viewCountPath.attr(
     'd',
     d3
@@ -714,7 +792,7 @@ function showOtherSongViewCount(othersong) {
   if (yScale.domain()[1] < new_max) {
     yScale.domain([0, new_max]);
   }
-  yAxis.call(d3.axisLeft(yScale));
+  yAxis.call(d3.axisLeft(yScale).tickFormat(numFormatter));
   viewCountPath.attr(
     'd',
     d3

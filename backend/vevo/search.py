@@ -10,7 +10,7 @@ def search_artist_topvideos(channel_id):
     with driver.session() as session:
         results = session.run("MATCH (v:V {channelId:{channelId}}) "
                               "WITH v ORDER BY v.totalView DESC "
-                              "RETURN collect([v.videoId, v.title, v.publishedAt.epochMillis, v.totalView])",
+                              "RETURN collect([v.videoId, v.title, v.publishedAt.epochMillis, v.startDate.epochMillis, v.totalView, v.dailyView])",
                               {"channelId": channel_id})
     result = results.single()
     driver.close()
