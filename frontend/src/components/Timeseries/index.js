@@ -322,30 +322,19 @@ class BarChart extends Component {
     const strokeList = linksArr.map(link => link[2]);
     const minStroke = 0.5;
     const maxStroke = 5;
-    const minWeight = d3.min(strokeList);
-    const maxWeight = d3.max(strokeList);
 
     const viewsList = songsArr.map(d => d[2]);
     const maxRadius = 10;
     const minRadius = 2;
-    const minViews = d3.min(viewsList);
-    const maxViews = d3.max(viewsList);
 
-    if (egoType == 'V') {
-      strokeScale = d3
-        .scaleLinear()
-        .domain([minViews * minWeight, maxViews * maxWeight])
-        .range([minStroke, maxStroke]);
-    } else if (egoType == 'A') {
-      strokeScale = d3
-        .scaleLinear()
-        .domain([minWeight, maxWeight])
-        .range([minStroke, maxStroke]);
-    }
+    strokeScale = d3
+      .scaleLinear()
+      .domain(d3.extent(strokeList))
+      .range([minStroke, maxStroke]);
 
     radiusScale = d3
       .scaleLinear()
-      .domain([minViews, maxViews])
+      .domain(d3.extent(viewsList))
       .range([minRadius, maxRadius]);
 
     const inDegreeList = songsArr.map(d => d[3]);
@@ -356,38 +345,25 @@ class BarChart extends Component {
       .domain([minInDegree, maxInDegree + 5]);
 
     const artistSet = new Set(songsArr.map(video => video[5]));
-    if (egoType == 'V') {
-      nodes = songsArr.map(video => ({
-        id: video[0],
-        name: video[1],
-        radius: radiusScale(video[2]),
-        colour: colourScale(video[3]),
-        totalView: video[2],
-        dailyView: video[4],
-        artist: video[5],
-        startDate: new Date(video[6]),
-        time: new Date(video[7]),
-      }));
-    } else if (egoType == 'A') {
-      nodes = songsArr.map(video => ({
-        id: video[0],
-        name: video[1],
-        radius: radiusScale(video[2]),
-        colour: colourScale(video[3]),
-        totalView: video[2],
-        dailyView: video[4],
-        artist: video[5],
-        startDate: new Date(video[6]),
-        time: new Date(video[6]),
-      }));
-    }
+    nodes = songsArr.map(video => ({
+      id: video[0],
+      name: video[1],
+      radius: radiusScale(video[2]),
+      colour: colourScale(video[3]),
+      totalView: video[2],
+      dailyView: video[4],
+      artist: video[5],
+      startDate: new Date(video[6]),
+      time: new Date(video[7]),
+    }));
 
     links = linksArr.map(video => ({
       id: video[0] + '_' + video[1],
       source: video[0],
       target: video[1],
-      weight: video[2],
-      value: strokeScale(video[3]),
+      flux: video[2],
+      startDate: new Date(video[3]),
+      dailyFlux: video[4],
     }));
 
     // console.log(nodes);
@@ -401,12 +377,6 @@ class BarChart extends Component {
       .style('fill', '#f0f0f0')
       .attr('transform', 'translate(20,' + chart_topMargin + ')');
     const chart = vis.append('g');
-    // chart
-    //   .append('text')
-    //   .attr('x', this.canvasWidth - 40)
-    //   .attr('y', chart_height + chart_topMargin - 10)
-    //   .attr('text-anchor', 'end')
-    //   .text('Ego network of ' + theEgo.title);
 
     const nodeTitles = songsArr.map(video => video[0]);
     simulation = d3
@@ -681,25 +651,33 @@ function calculateViewCount() {
     n.style.r = nodeScale * radius;
   }
   for (var i = 0; i < links.length; i++) {
-    if (egoType == 'V')
-      links[i].value = strokeScale(links[i].source.viewSum * links[i].weight);
-    if (egoType == 'A') links[i].value = strokeScale(links[i].weight);
+    var fluxSum = linkWeight(links[i]);
+    links[i].value = strokeScale(fluxSum);
   }
 }
 
 function nodeSize(d) {
   if (egoTime == undefined) return d.totalView;
-
   // console.log("nodesize", egoTime, d);
-  var startDate = new Date(d.startDate);
-  var viewSum = [];
+  var viewSum = 0;
   for (var i = 0; i < d.dailyView.length; i++) {
-    var date = new Date(startDate.getTime() + 3600 * 1000 * 24 * i);
-    if (date.getTime() <= egoTime) viewSum.push(d.dailyView[i]);
+    var date = new Date(d.startDate + 3600 * 1000 * 24 * i);
+    if (date.getTime() <= egoTime) viewSum += d.dailyView[i];
     else break;
   }
-  if (viewSum.length == 0) return 0;
-  return viewSum.reduce(arraysum);
+  return viewSum;
+}
+
+function linkWeight(d) {
+  if (egoTime == undefined) return d.flux;
+
+  var fluxSum = 0;
+  for (var i = 0; i < d.dailyFlux.length; i++) {
+    var date = new Date(d.startDate + 3600 * 1000 * 24 * i);
+    if (date.getTime() <= egoTime) fluxSum += d.dailyFlux[i];
+    else break;
+  }
+  return fluxSum;
 }
 
 function arraysum(total, num) {

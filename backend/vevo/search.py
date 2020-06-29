@@ -109,8 +109,8 @@ def search_1hop_artists(channel_id):
         results = session.run("MATCH (v:A {channelId:{channelId}}) "
                               "OPTIONAL MATCH (v)-[s]-(w:A) WITH v+collect(distinct w) AS W "
                               "OPTIONAL MATCH (v1:A)-[r]-(v2:A) WHERE v1 in W and v2 in W "
-                              "RETURN collect(DISTINCT [v1.channelId, v1.artistName, reduce(total=0, number in v1.dailyView | total + number), size((:V)-->(v1)), v1.dailyView, v1.artistName, v1.startDate.epochMillis]) AS artists, "
-                              "collect(DISTINCT [startNode(r).channelId, endNode(r).channelId, r.channelFlux, r.channelFlux] ) AS links ",
+                              "RETURN collect(DISTINCT [v1.channelId, v1.artistName, reduce(total=0, number in v1.dailyView | total + number), size((:V)-->(v1)), v1.dailyView, v1.artistName, v1.startDate.epochMillis, v1.startDate.epochMillis]) AS artists, "
+                              "collect(DISTINCT [startNode(r).channelId, endNode(r).channelId, reduce(total=0, number in r.temporalChannelFlux | total + number), r.startDate.epochMillis, r.temporalChannelFlux] ) AS links ",
                               {"channelId": channel_id})
     result = results.single()
     driver.close()
@@ -129,7 +129,7 @@ def search_1hop_videos(video_id):
                               "OPTIONAL MATCH (v)-[s]-(w:V) WITH v+collect(distinct w) AS W "
                               "OPTIONAL MATCH (v1:V)-[r]-(v2:V) WHERE v1 in W and v2 in W "
                               "RETURN collect(DISTINCT [v1.videoId, v1.title, v1.totalView, size((:V)-->(v1)), v1.dailyView, v1.channelArtistName, v1.startDate.epochMillis, v1.publishedAt.epochMillis]) AS videos, "
-                              "collect(DISTINCT [startNode(r).videoId, endNode(r).videoId, r.weight, r.flux] ) AS links ",
+                              "collect(DISTINCT [startNode(r).videoId, endNode(r).videoId, reduce(total=0, number in r.temporalFlux | total + number), r.startDate.epochMillis, r.temporalFlux] ) AS links ",
                               {"videoId": video_id})
     result = results.single()
     driver.close()
@@ -148,7 +148,7 @@ def search_2hop_videos(video_id):
                               "OPTIONAL MATCH (v)-[s]-(w:V)-[ss]-(ww:V) WITH v+collect(distinct w)+collect(distinct ww) AS W "
                               "OPTIONAL MATCH (v1:V)-[r]-(v2:V) WHERE v1 in W and v2 in W "
                               "RETURN collect(DISTINCT [v1.videoId, v1.title, v1.totalView, size((:V)-->(v1)), v1.dailyView, v1.channelArtistName, v1.startDate.epochMillis, v1.publishedAt.epochMillis]) AS videos, "
-                              "collect(DISTINCT [startNode(r).videoId, endNode(r).videoId, r.weight, r.flux] ) AS links ",
+                              "collect(DISTINCT [startNode(r).videoId, endNode(r).videoId, reduce(total=0, number in r.temporalFlux | total + number), r.startDate.epochMillis, r.temporalFlux] ) AS links ",
                               {"videoId": video_id})
     result = results.single()
     driver.close()
