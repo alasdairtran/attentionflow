@@ -355,6 +355,7 @@ class BarChart extends Component {
       artist: video[5],
       startDate: new Date(video[6]),
       time: new Date(video[7]),
+      startInfluence: new Date(video[6] + 3600 * 1000 * 24 * video[4].length),
     }));
 
     links = linksArr.map(video => ({
@@ -451,8 +452,8 @@ class BarChart extends Component {
       .selectAll('path')
       .data(links)
       .join('path')
-      .attr('id', d => d.id)
-      .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')');
+      .attr('id', d => d.id);
+    // .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')');
 
     var node = chart
       .append('g')
@@ -560,12 +561,20 @@ class BarChart extends Component {
       // ## this code makes nodes NOT bounded in the panel
       node
         .attr('display', function(d) {
-          if (d.startDate.getTime() <= egoTime) return 'block';
+          if (d.id == egoID) return 'block';
+          if (egoType == 'V' && d.startDate.getTime() <= egoTime)
+            return 'block';
+          if (egoType == 'A' && d.startInfluence.getTime() <= egoTime)
+            return 'block';
           else return 'none';
         })
         .attr('cx', function(d) {
           if (d.id == egoID) return padding_x + xScale(egoTime);
-          return padding_x + xScale(d.startDate);
+          if (egoType == 'A' && d.startInfluence.getTime() <= egoTime) {
+            return padding_x + xScale(d.startInfluence);
+          } else {
+            return padding_x + xScale(d.startDate);
+          }
         })
         .attr('cy', function(d) {
           // if (d.id == egoID) return chart_topMargin;
@@ -588,7 +597,16 @@ class BarChart extends Component {
           }
         })
         .attr('transform', function(d) {
-          var new_x = padding_x + xScale(d.startDate);
+          var new_x;
+          if (
+            egoType == 'A' &&
+            d.startInfluence &&
+            d.startInfluence.getTime() <= egoTime
+          ) {
+            new_x = padding_x + xScale(d.startInfluence);
+          } else {
+            new_x = padding_x + xScale(d.startDate);
+          }
           var new_y;
           if (graphSorting.value == 0) {
             new_y = Math.min(
@@ -615,12 +633,25 @@ class BarChart extends Component {
         .attr('d', linkArc)
         .attr('stroke-width', d => d.value)
         .attr('display', function(d) {
-          if (
-            d.source.startDate.getTime() <= egoTime &&
-            d.target.startDate.getTime() <= egoTime
-          )
-            return 'block';
-          else return 'none';
+          if (egoType == 'V') {
+            if (
+              d.source.startDate.getTime() <= egoTime &&
+              d.target.startDate.getTime() <= egoTime
+            )
+              return 'block';
+            else return 'none';
+          } else if (egoType == 'A') {
+            if (
+              (d.source.startInfluence.getTime() <= egoTime &&
+                d.target.startInfluence.getTime() <= egoTime) ||
+              (d.source.startInfluence.getTime() <= egoTime &&
+                d.target.id == egoID) ||
+              (d.target.startInfluence.getTime() <= egoTime &&
+                d.source.id == egoID)
+            )
+              return 'block';
+            else return 'none';
+          }
         });
     });
   }
@@ -642,6 +673,7 @@ class BarChart extends Component {
 }
 
 function calculateViewCount() {
+  var egoViewSum;
   for (var i = 0; i < nodes.length; i++) {
     var n = document.getElementById(nodes[i].id);
     var viewSum = nodeSize(nodes[i]);
@@ -649,9 +681,10 @@ function calculateViewCount() {
     nodes[i]['viewSum'] = viewSum;
     nodes[i]['radius'] = radius;
     n.style.r = nodeScale * radius;
+    if (nodes[i].id == egoID) egoViewSum = viewSum;
   }
   for (var i = 0; i < links.length; i++) {
-    var fluxSum = linkWeight(links[i]);
+    var fluxSum = linkWeight(links[i], egoViewSum);
     links[i].value = strokeScale(fluxSum);
   }
 }
@@ -668,12 +701,15 @@ function nodeSize(d) {
   return viewSum;
 }
 
-function linkWeight(d) {
+function linkWeight(d, egoViewSum) {
   if (egoTime == undefined) return d.flux;
 
   var fluxSum = 0;
   for (var i = 0; i < d.dailyFlux.length; i++) {
     var date = new Date(d.startDate.getTime() + 3600 * 1000 * 24 * i);
+    if (d.target.id == egoID && fluxSum > 0.1 * egoViewSum) {
+      d.source.startInfluence = date;
+    }
     if (date.getTime() <= egoTime) fluxSum += d.dailyFlux[i];
     else break;
   }
@@ -687,6 +723,10 @@ function arraysum(total, num) {
 function linkArc(d) {
   var px1 = padding_x + xScale(d.source.startDate);
   var px2 = padding_x + xScale(d.target.startDate);
+  if (egoType == 'A') {
+    px1 = padding_x + xScale(d.source.startInfluence);
+    px2 = padding_x + xScale(d.target.startInfluence);
+  }
   var py1, py2;
   if (graphSorting.value == 0) {
     py1 = Math.min(
