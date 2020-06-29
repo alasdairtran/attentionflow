@@ -661,7 +661,7 @@ function nodeSize(d) {
   // console.log("nodesize", egoTime, d);
   var viewSum = 0;
   for (var i = 0; i < d.dailyView.length; i++) {
-    var date = new Date(d.startDate + 3600 * 1000 * 24 * i);
+    var date = new Date(d.startDate.getTime() + 3600 * 1000 * 24 * i);
     if (date.getTime() <= egoTime) viewSum += d.dailyView[i];
     else break;
   }
@@ -673,7 +673,7 @@ function linkWeight(d) {
 
   var fluxSum = 0;
   for (var i = 0; i < d.dailyFlux.length; i++) {
-    var date = new Date(d.startDate + 3600 * 1000 * 24 * i);
+    var date = new Date(d.startDate.getTime() + 3600 * 1000 * 24 * i);
     if (date.getTime() <= egoTime) fluxSum += d.dailyFlux[i];
     else break;
   }
