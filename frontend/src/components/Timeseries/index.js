@@ -50,7 +50,8 @@ Date.prototype.toShortFormat = function() {
   let monthIndex = this.getMonth();
   let monthName = monthNames[monthIndex];
   let year = this.getFullYear();
-  return monthName + ' ' + day + ', ' + year;
+  // return monthName + ' ' + day + ', ' + year;
+  return [year, monthIndex + 1, day].join('/');
 };
 
 function numFormatter(num) {
@@ -72,7 +73,7 @@ let padding_x = 20;
 let chart_yScale_minimum = 100000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let egoID, egoType, egoTime, simulation, nodes, links;
-let graphSorting, chart_height, chart_topMargin;
+let graphSorting, chart_width, chart_height, chart_topMargin;
 let chart_yScale_view, chart_yScale_artist, startPos, topvideo_data;
 let vis, defs, viewcount, highlighted, oLeft;
 let xScale, yScale, yAxis, old_max, viewCountPath;
@@ -101,7 +102,7 @@ class BarChart extends Component {
     this.canvasWidth = oWidth;
     this.infoHeight = 160;
     this.chartHeight = 120;
-    this.chartWidth = this.canvasWidth - padding_x * 2;
+    chart_width = this.canvasWidth - padding_x * 2;
 
     this.canvasHeight = this.infoHeight + this.chartHeight + 560;
 
@@ -164,7 +165,7 @@ class BarChart extends Component {
       );
     viewcount
       .append('rect')
-      .attr('width', this.chartWidth)
+      .attr('width', chart_width)
       .attr('height', this.chartHeight)
       .attr('fill', 'transparent');
 
@@ -193,7 +194,7 @@ class BarChart extends Component {
           return d.date;
         }),
       ])
-      .range([0, this.chartWidth]);
+      .range([0, chart_width]);
     yScale = d3
       .scaleLinear()
       .domain([
@@ -237,13 +238,40 @@ class BarChart extends Component {
 
     var time_indicator = viewcount
       .append('line')
-      .attr('x1', 100)
-      .attr('x2', 100)
       .attr('y1', 0)
-      .attr('y2', this.chartHeight)
-      .attr('stroke', hcolor)
+      .attr('y2', this.chartHeight + 525)
+      .attr('stroke', '#495057')
+      .attr('stroke-width', 2)
       .attr('display', 'none');
+    var other_indicator = viewcount
+      .append('line')
+      .attr('id', 'other_indicator')
+      .attr('y1', 0)
+      .attr('y2', this.chartHeight + 525)
+      .attr('stroke', hcolor)
+      .attr('stroke-width', 1)
+      .attr('display', 'none');
+    var time_cover = viewcount
+      .append('rect')
+      .attr('y', 0)
+      .attr('width', 0)
+      .attr('height', this.chartHeight)
+      .style('fill', '#aaaaaa33');
+    var time_cover_n = vis
+      .append('rect')
+      .attr('y', this.infoHeight + this.chartHeight + 45)
+      .attr('width', 0)
+      .attr('height', 500)
+      .style('fill', '#aaaaaa33');
+
     egoTime = Math.floor(xScale.invert(0));
+    var egoInfoBox = vis.append('text').style('font-size', '12px');
+    var otherInfoBox = vis
+      .append('text')
+      .attr('id', 'other_infobox')
+      .style('font-size', '12px')
+      .attr('display', 'none');
+
     viewcount.on('mousemove', function(e) {
       setMousePosition(e);
       var m_pos = Math.max(0, mouse.x - oLeft);
@@ -252,12 +280,34 @@ class BarChart extends Component {
         .attr('x1', m_pos)
         .attr('x2', m_pos)
         .attr('display', 'block');
+      time_cover.attr('x', m_pos + 1).attr('width', chart_width - m_pos);
+      time_cover_n
+        .attr('x', padding_x + m_pos + 1)
+        .attr('width', chart_width - m_pos);
+
+      var egoCircle = d3.select('circle#' + egoID);
+      var pos_y =
+        30 + parseFloat(d3.select(egoCircle.node().parentNode).attr('cy'));
+      var viewSum = egoCircle.data()[0].viewSum;
+      egoInfoBox
+        .attr('y', pos_y)
+        .html(
+          '<tspan x="' +
+            (padding_x + m_pos + 15) +
+            '" dy="0">' +
+            numFormatter(viewSum) +
+            ' views</tspan>' +
+            '<tspan x="' +
+            (padding_x + m_pos + 15) +
+            '" dy="15">' +
+            new Date(egoTime).toShortFormat() +
+            '</tspan>'
+        );
+
       calculateViewCount();
       simulation.restart();
     });
-    viewcount.on('mouseout', function(e) {
-      time_indicator.attr('display', 'none');
-    });
+
     highlighted = viewcount.append('g');
   }
 
@@ -371,14 +421,7 @@ class BarChart extends Component {
 
     chart_height = 500;
     chart_topMargin = this.infoHeight + this.chartHeight + 45;
-    const chart_backgroud = vis
-      .append('rect')
-      .attr('width', this.canvasWidth - 40)
-      .attr('height', chart_height)
-      .style('fill', '#f0f0f0')
-      .attr('transform', 'translate(20,' + chart_topMargin + ')');
     const chart = vis.append('g');
-
     const nodeTitles = songsArr.map(video => video[0]);
     simulation = d3
       .forceSimulation(nodes)
@@ -499,6 +542,10 @@ class BarChart extends Component {
         else return d.radius > radiusLimit ? 'visible' : 'hidden';
       });
 
+    node.on('click', function(d) {
+      // redirect to the node page
+    });
+
     node.on('mouseover', function(d) {
       d3.select(this)
         .raise()
@@ -526,6 +573,7 @@ class BarChart extends Component {
           if (d.id == theEgo.id) return 'visible';
           else return d.radius > radiusLimit ? 'visible' : 'hidden';
         });
+
       hideOtherSongViewCount();
     });
 
@@ -776,6 +824,9 @@ function linkArc(d) {
 }
 
 function hideOtherSongViewCount() {
+  viewcount.select('line#other_indicator').attr('display', 'none');
+  vis.select('text#other_infobox').attr('display', 'none');
+
   yScale.domain([0, old_max]);
   yAxis.call(d3.axisLeft(yScale).tickFormat(numFormatter));
   viewCountPath.attr(
@@ -793,8 +844,39 @@ function hideOtherSongViewCount() {
 }
 
 function showOtherSongViewCount(othersong) {
-  // console.log('othersong', othersong);
+  console.log('othersong', othersong.id);
   var startDate = new Date(othersong.startDate);
+
+  var otherNode = d3.select('circle#' + othersong.id).node();
+  var xpos = xScale(startDate);
+  var xpos_infoText = padding_x + xpos + 15;
+  var ypos = -60 + parseFloat(d3.select(otherNode.parentNode).attr('cy'));
+  viewcount
+    .select('line#other_indicator')
+    .attr('x1', xpos)
+    .attr('x2', xpos)
+    .attr('display', 'block');
+  vis
+    .select('text#other_infobox')
+    .attr('y', ypos)
+    .attr('display', 'block')
+    .html(
+      '<tspan x="' +
+        xpos_infoText +
+        '" dy="0">' +
+        numFormatter(othersong.viewSum) +
+        ' views (' +
+        startDate.toShortFormat() +
+        ' ~ ' +
+        new Date(egoTime).toShortFormat() +
+        ')</tspan>' +
+        '<tspan x="' +
+        xpos_infoText +
+        '" dy="15">Contribute ####### views</tspan>' +
+        '<tspan x="' +
+        xpos_infoText +
+        '" dy="15">Receive ####### views</tspan>'
+    );
 
   var data = [];
   for (var i = 0; i < othersong.dailyView.length; i++) {
