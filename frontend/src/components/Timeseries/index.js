@@ -277,7 +277,7 @@ class BarChart extends Component {
     visinfo
       .append('rect')
       .attr('id', 'other_infobox')
-      .attr('fill', '#ffffffdd')
+      .attr('fill', '#ffffffaa')
       .style('stroke', hcolor)
       .style('stroke-width', 1.5);
     visinfo
@@ -371,7 +371,7 @@ class BarChart extends Component {
           showOtherSongViewCount(topVideos[this.id]);
         });
         videodiv.addEventListener('mouseout', function(e) {
-          hideOtherSongViewCount();
+          hideOtherSongViewCount(topVideos[this.id]);
         });
         topvideos.append(videodiv);
       }
@@ -503,12 +503,12 @@ class BarChart extends Component {
 
     var link = chart
       .append('g')
-      .attr('stroke', '#aaa')
-      .attr('stroke-opacity', 0.5)
-      .attr('fill', 'none')
       .selectAll('path')
       .data(links)
       .join('path')
+      .attr('fill', 'none')
+      .attr('stroke', '#aaa')
+      .attr('stroke-opacity', 0.5)
       .attr('id', d => d.id);
     // .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')');
 
@@ -571,7 +571,7 @@ class BarChart extends Component {
       showOtherSongViewCount(d);
     });
 
-    node.on('mouseleave', function() {
+    node.on('mouseleave', function(d) {
       d3.select(this)
         .raise()
         .select('circle')
@@ -586,8 +586,7 @@ class BarChart extends Component {
           if (d.id == egoID) return 'visible';
           else return d.radius > radiusLimit ? 'visible' : 'hidden';
         });
-
-      hideOtherSongViewCount();
+      hideOtherSongViewCount(d);
     });
 
     graphSorting.addEventListener('change', function() {
@@ -746,6 +745,7 @@ function calculateViewCount() {
   }
   for (var i = 0; i < links.length; i++) {
     var fluxSum = linkWeight(links[i], egoViewSum);
+    links[i]['fluxSum'] = fluxSum;
     links[i].value = strokeScale(fluxSum);
   }
 }
@@ -836,10 +836,18 @@ function linkArc(d) {
   );
 }
 
-function hideOtherSongViewCount() {
+function hideOtherSongViewCount(othersong) {
   viewcount.select('line#other_indicator').attr('display', 'none');
   visinfo.select('rect#other_infobox').attr('display', 'none');
   visinfo.select('text#other_infobox').attr('display', 'none');
+  var incoming = d3.select('path#' + othersong.id + egoID);
+  if (incoming) {
+    incoming.attr('stroke', '#aaa').attr('stroke-opacity', 0.5);
+  }
+  var outgoing = d3.select('path#' + egoID + othersong.id);
+  if (outgoing) {
+    outgoing.attr('stroke', '#aaa').attr('stroke-opacity', 0.5);
+  }
 
   yScale.domain([0, old_max]);
   yAxis.call(d3.axisLeft(yScale).tickFormat(numFormatter));
@@ -860,10 +868,23 @@ function hideOtherSongViewCount() {
 function showOtherSongViewCount(othersong) {
   var startDate = new Date(othersong.startDate);
 
+  var edgeToEgo = d3.select('path#' + othersong.id + egoID);
+  var viewToEgo = 0;
+  if (edgeToEgo.data()[0]) {
+    edgeToEgo.attr('stroke', 'blue').attr('stroke-opacity', 1);
+    viewToEgo = parseInt(edgeToEgo.data()[0].fluxSum).toLocaleString();
+  }
+  var edgeFromEgo = d3.select('path#' + egoID + othersong.id);
+  var viewFromEgo = 0;
+  if (edgeFromEgo.data()[0]) {
+    edgeFromEgo.attr('stroke', 'red').attr('stroke-opacity', 1);
+    viewFromEgo = parseInt(edgeFromEgo.data()[0].fluxSum).toLocaleString();
+  }
+
   var otherNode = d3.select('circle#' + othersong.id).node();
   var xpos = xScale(startDate);
   var xpos_infoText = padding_x + xpos + 15;
-  var ypos = -75 + parseFloat(d3.select(otherNode.parentNode).attr('cy'));
+  var ypos = -100 + parseFloat(d3.select(otherNode.parentNode).attr('cy'));
   viewcount
     .select('line#other_indicator')
     .attr('x1', xpos)
@@ -878,8 +899,7 @@ function showOtherSongViewCount(othersong) {
         xpos_infoText +
         '" dy="0" font-weight="bold">' +
         othersong.name +
-        '</tspan>' +
-        '<tspan x="' +
+        '</tspan><tspan x="' +
         xpos_infoText +
         '" dy="15">' +
         numFormatter(othersong.viewSum) +
@@ -887,13 +907,15 @@ function showOtherSongViewCount(othersong) {
         startDate.toShortFormat() +
         ' ~ ' +
         new Date(egoTime).toShortFormat() +
-        ')</tspan>' +
-        '<tspan x="' +
+        ')</tspan><tspan x="' +
         xpos_infoText +
-        '" dy="15">Contribute ####### views</tspan>' +
-        '<tspan x="' +
+        '" dy="15">Contribute <tspan style="fill:blue">' +
+        viewToEgo +
+        '</tspan> views</tspan><tspan x="' +
         xpos_infoText +
-        '" dy="15">Receive ####### views</tspan>'
+        '" dy="15">Receive <tspan style="fill:red">' +
+        viewFromEgo +
+        '</tspan> views</tspan>'
     );
 
   var textWidth = infotext.node().getBBox().width;
