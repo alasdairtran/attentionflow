@@ -534,8 +534,6 @@ class BarChart extends Component {
       .attr('stroke-width', 0.5)
       .style('cursor', 'pointer');
 
-    node.append('title').text(d => d.id);
-
     nodes.sort((a, b) => a.radius - b.radius);
     const radiusLimit = 5;
     node
