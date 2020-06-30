@@ -66,6 +66,10 @@ function numFormatter(num) {
   return newNum == 0 ? '' : newNum;
 }
 
+function stringfy(id) {
+  return '_' + id;
+}
+
 const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let nodeScale = 3;
@@ -74,9 +78,10 @@ let chart_yScale_minimum = 100000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, chart_width, chart_height, chart_topMargin;
-let chart_yScale_view, chart_yScale_artist, startPos, topvideo_data;
-let vis, defs, viewcount, highlighted, oLeft;
+let chart_yScale_view, chart_yScale_artist, startPos, topVideos;
+let vis, visinfo, defs, viewcount, highlighted, oLeft;
 let xScale, yScale, yAxis, old_max, viewCountPath;
+
 class BarChart extends Component {
   constructor(props) {
     super(props);
@@ -97,8 +102,10 @@ class BarChart extends Component {
     // console.log('drawTimePanel', this.props);
     const theEgo = this.props.egoInfo;
     console.log('theEgo', theEgo, this.props.egoType);
+
     egoType = this.props.egoType;
-    egoID = theEgo.id;
+    egoID = stringfy(theEgo.id);
+
     this.canvasWidth = oWidth;
     this.infoHeight = 160;
     this.chartHeight = 120;
@@ -126,6 +133,7 @@ class BarChart extends Component {
       .attr('height', this.canvasHeight)
       .attr('pointer-events', 'all');
     vis = outer.append('g');
+    visinfo = outer.append('g');
     defs = outer.append('defs');
 
     this.drawEgoInfoCard(theEgo);
@@ -265,8 +273,14 @@ class BarChart extends Component {
       .style('fill', '#aaaaaa33');
 
     egoTime = Math.floor(xScale.invert(0));
-    var egoInfoBox = vis.append('text').style('font-size', '12px');
-    var otherInfoBox = vis
+    var egoInfoBox = visinfo.append('text').style('font-size', '12px');
+    visinfo
+      .append('rect')
+      .attr('id', 'other_infobox')
+      .attr('fill', '#ffffffdd')
+      .style('stroke', hcolor)
+      .style('stroke-width', 1.5);
+    visinfo
       .append('text')
       .attr('id', 'other_infobox')
       .style('font-size', '12px')
@@ -317,7 +331,7 @@ class BarChart extends Component {
     if (egoType == 'V') {
       embvideo_id = theEgo.id;
     } else if (egoType == 'A') {
-      embvideo_id = theEgo.topvideos[0][0][0];
+      embvideo_id = stringfy(theEgo.topvideos[0][0][0]);
     }
     embvideo.width = 300;
     embvideo.height = this.infoHeight;
@@ -329,7 +343,7 @@ class BarChart extends Component {
     this.div.append(embvideo);
 
     if (egoType == 'A') {
-      topvideo_data = {};
+      topVideos = {};
       var topvideos = document.createElement('div');
       topvideos.width = 300;
       topvideos.style.position = 'absolute';
@@ -341,12 +355,12 @@ class BarChart extends Component {
         var vtitle = video[1].split('-')[1];
         var vtitle_str =
           vtitle.length > 20 ? vtitle.slice(0, 20) + '...' : vtitle;
-        topvideo_data[video[0]] = {
+        topVideos[video[0]] = {
           title: vtitle,
           startDate: video[3],
           dailyView: video[5],
         };
-        videodiv.id = video[0];
+        videodiv.id = stringfy(video[0]);
         videodiv.innerHTML += '<b>' + vtitle_str + '</a> ';
         videodiv.innerHTML +=
           numFormatter(video[4]) +
@@ -354,7 +368,7 @@ class BarChart extends Component {
           new Date(video[2]).toShortFormat() +
           '<br/>';
         videodiv.addEventListener('mouseover', function(e) {
-          showOtherSongViewCount(topvideo_data[this.id]);
+          showOtherSongViewCount(topVideos[this.id]);
         });
         videodiv.addEventListener('mouseout', function(e) {
           hideOtherSongViewCount();
@@ -396,7 +410,7 @@ class BarChart extends Component {
 
     const artistSet = new Set(songsArr.map(video => video[5]));
     nodes = songsArr.map(video => ({
-      id: video[0],
+      id: stringfy(video[0]),
       name: video[1],
       radius: radiusScale(video[2]),
       colour: colourScale(video[3]),
@@ -409,9 +423,9 @@ class BarChart extends Component {
     }));
 
     links = linksArr.map(video => ({
-      id: video[0] + '_' + video[1],
-      source: video[0],
-      target: video[1],
+      id: stringfy(video[0] + '_' + video[1]),
+      source: stringfy(video[0]),
+      target: stringfy(video[1]),
       flux: video[2],
       startDate: new Date(video[3]),
       dailyFlux: video[4],
@@ -513,7 +527,7 @@ class BarChart extends Component {
         return nodeScale * radiusScale(nodeSize(d));
       })
       .attr('fill', function(d) {
-        if (d.id == theEgo.id) return 'steelblue';
+        if (d.id == egoID) return 'steelblue';
         else return d.colour;
       })
       .attr('stroke', '#aaa')
@@ -538,7 +552,7 @@ class BarChart extends Component {
       .style('cursor', 'pointer')
       .style('font-size', '12px')
       .style('visibility', function(d) {
-        if (d.id == theEgo.id) return 'visible';
+        if (d.id == egoID) return 'visible';
         else return d.radius > radiusLimit ? 'visible' : 'hidden';
       });
 
@@ -547,6 +561,7 @@ class BarChart extends Component {
     });
 
     node.on('mouseover', function(d) {
+      if (d.id == egoID) return;
       d3.select(this)
         .raise()
         .select('circle')
@@ -563,14 +578,14 @@ class BarChart extends Component {
         .raise()
         .select('circle')
         .style('fill', function(d) {
-          if (d.id == theEgo.id) return 'steelblue';
+          if (d.id == egoID) return 'steelblue';
           else return d.colour;
         });
       d3.select(this)
         .raise()
         .select('text')
         .style('visibility', function(d) {
-          if (d.id == theEgo.id) return 'visible';
+          if (d.id == egoID) return 'visible';
           else return d.radius > radiusLimit ? 'visible' : 'hidden';
         });
 
@@ -825,7 +840,8 @@ function linkArc(d) {
 
 function hideOtherSongViewCount() {
   viewcount.select('line#other_indicator').attr('display', 'none');
-  vis.select('text#other_infobox').attr('display', 'none');
+  visinfo.select('rect#other_infobox').attr('display', 'none');
+  visinfo.select('text#other_infobox').attr('display', 'none');
 
   yScale.domain([0, old_max]);
   yAxis.call(d3.axisLeft(yScale).tickFormat(numFormatter));
@@ -844,26 +860,30 @@ function hideOtherSongViewCount() {
 }
 
 function showOtherSongViewCount(othersong) {
-  console.log('othersong', othersong.id);
   var startDate = new Date(othersong.startDate);
 
   var otherNode = d3.select('circle#' + othersong.id).node();
   var xpos = xScale(startDate);
   var xpos_infoText = padding_x + xpos + 15;
-  var ypos = -60 + parseFloat(d3.select(otherNode.parentNode).attr('cy'));
+  var ypos = -75 + parseFloat(d3.select(otherNode.parentNode).attr('cy'));
   viewcount
     .select('line#other_indicator')
     .attr('x1', xpos)
     .attr('x2', xpos)
     .attr('display', 'block');
-  vis
+  var infotext = visinfo
     .select('text#other_infobox')
     .attr('y', ypos)
     .attr('display', 'block')
     .html(
       '<tspan x="' +
         xpos_infoText +
-        '" dy="0">' +
+        '" dy="0" font-weight="bold">' +
+        othersong.name +
+        '</tspan>' +
+        '<tspan x="' +
+        xpos_infoText +
+        '" dy="15">' +
         numFormatter(othersong.viewSum) +
         ' views (' +
         startDate.toShortFormat() +
@@ -877,6 +897,15 @@ function showOtherSongViewCount(othersong) {
         xpos_infoText +
         '" dy="15">Receive ####### views</tspan>'
     );
+
+  var textWidth = infotext.node().getBBox().width;
+  visinfo
+    .select('rect#other_infobox')
+    .attr('x', xpos_infoText - 10)
+    .attr('y', ypos - 15)
+    .attr('width', textWidth + 20)
+    .attr('height', 70)
+    .attr('display', 'block');
 
   var data = [];
   for (var i = 0; i < othersong.dailyView.length; i++) {
