@@ -12,7 +12,7 @@ def search_artist_topvideos(channel_id):
                               "WITH v ORDER BY v.totalView DESC "
                               "RETURN collect([v.videoId, v.title, v.publishedAt.epochMillis, v.startDate.epochMillis, v.totalView, v.dailyView])",
                               {"channelId": channel_id})
-    result = results.single()
+        result = results.single()
     driver.close()
     return result
 
@@ -27,7 +27,7 @@ def search_artist_basicinfo(channel_id):
                               "a.channelId as channelId,"
                               "a.dailyView as dailyView",
                               {"channelId": channel_id})
-    result = results.single()
+        result = results.single()
     driver.close()
 
     output = {
@@ -60,7 +60,7 @@ def search_video_basicinfo(video_id):
                               "v.duration as duration,"
                               "v.dailyView as dailyView",
                               {"videoId": video_id})
-    result = results.single()
+        result = results.single()
     driver.close()
 
     output = {
@@ -89,7 +89,7 @@ def search_videos_by_artist(channel_id):
                               "RETURN collect(DISTINCT [v.videoId, v.title, v.totalView, size((:V)-->(v)), v.dailyView, v.publishedAt.epochMillis]) AS videos,"
                               "collect([v.videoId, w.videoId, rv.weight, rv.flux]) AS links ",
                               {"channelId": channel_id})
-    result = results.single()
+        result = results.single()
     driver.close()
 
     # print('get_videos_by_artist')
@@ -112,7 +112,7 @@ def search_1hop_artists(channel_id):
                               "RETURN collect(DISTINCT [v1.channelId, v1.artistName, reduce(total=0, number in v1.dailyView | total + number), size((:V)-->(v1)), v1.dailyView, v1.artistName, v1.startDate.epochMillis, v1.startDate.epochMillis]) AS artists, "
                               "collect(DISTINCT [startNode(r).channelId, endNode(r).channelId, reduce(total=0, number in r.temporalChannelFlux | total + number), r.startDate.epochMillis, r.temporalChannelFlux] ) AS links ",
                               {"channelId": channel_id})
-    result = results.single()
+        result = results.single()
     driver.close()
 
     output = {
@@ -131,7 +131,7 @@ def search_1hop_videos(video_id):
                               "RETURN collect(DISTINCT [v1.videoId, v1.title, v1.totalView, size((:V)-->(v1)), v1.dailyView, v1.channelArtistName, v1.startDate.epochMillis, v1.publishedAt.epochMillis]) AS videos, "
                               "collect(DISTINCT [startNode(r).videoId, endNode(r).videoId, reduce(total=0, number in r.temporalFlux | total + number), r.startDate.epochMillis, r.temporalFlux] ) AS links ",
                               {"videoId": video_id})
-    result = results.single()
+        result = results.single()
     driver.close()
 
     output = {
@@ -150,7 +150,7 @@ def search_2hop_videos(video_id):
                               "RETURN collect(DISTINCT [v1.videoId, v1.title, v1.totalView, size((:V)-->(v1)), v1.dailyView, v1.channelArtistName, v1.startDate.epochMillis, v1.publishedAt.epochMillis]) AS videos, "
                               "collect(DISTINCT [startNode(r).videoId, endNode(r).videoId, reduce(total=0, number in r.temporalFlux | total + number), r.startDate.epochMillis, r.temporalFlux] ) AS links ",
                               {"videoId": video_id})
-    result = results.single()
+        result = results.single()
     driver.close()
 
     output = {
