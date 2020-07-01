@@ -126,6 +126,9 @@ class BarChart extends Component {
     }
     this.div.append(graphSorting);
 
+    d3.select(this.refs.canvas)
+      .selectAll('svg')
+      .remove();
     const outer = d3
       .select(this.refs.canvas)
       .append('svg')
@@ -143,7 +146,12 @@ class BarChart extends Component {
   }
 
   drawEgoInfoCard(theEgo) {
+    const oldInfoCard = document.getElementById('egoInfoCard');
+    if (oldInfoCard) {
+      oldInfoCard.remove();
+    }
     var infocard = document.createElement('div');
+    infocard.setAttribute('id', 'egoInfoCard');
     infocard.style.position = 'absolute';
     infocard.style.width = 'auto';
     infocard.style.height = this.infoHeight + 10 + 'px';
