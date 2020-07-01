@@ -32,8 +32,8 @@ const Overview = ({ match }) => (
             component={ArtistOverview}
           />
           <Route path={`${match.url}/artist/:id`} component={ArtistEgo} />
-          <Route exact path={`${match.url}/video`} component={VideoOverview} />
-          <Route path={`${match.url}/video/:id`} component={VideoEgo} />
+          <Route path={`${match.url}/video/:id?`} component={VideoOverview} />
+          {/* <Route path={`${match.url}/video/:id`} component={VideoEgo} /> */}
         </div>
         <AppFooter />
       </div>

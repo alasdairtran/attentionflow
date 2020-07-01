@@ -50,7 +50,7 @@ export default class AnalyticsDashboard1 extends Component {
     this.state = {
       clickedOnSong: false,
       title: null,
-      songId: props.match.params.id,
+      videoID: props.match.params.id,
       dropdownOpen: false,
       activeTab1: '11',
       isLoaded: false,
@@ -67,12 +67,21 @@ export default class AnalyticsDashboard1 extends Component {
   componentWillReceiveProps(newProps) {
     this.setState({
       clickedOnSong: false,
+      videoID: newProps.match.params.id,
     });
   }
 
   componentDidMount() {
     document.body.classList.add('bg-light');
-    this.fetchExample();
+    if (this.state.videoID) {
+      this.fetchExample();
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.videoID !== this.state.videoID) {
+      this.fetchExample();
+    }
   }
 
   toggle() {
@@ -91,7 +100,7 @@ export default class AnalyticsDashboard1 extends Component {
 
   fetchExample = e => {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
-    const options = { params: { videoID: 'rYEDA3JcQqw' } };
+    const options = { params: { videoID: this.state.videoID } };
     axios
       .get('/vevo/video_info/', options)
       .then(res => {
@@ -124,9 +133,9 @@ export default class AnalyticsDashboard1 extends Component {
   };
 
   render() {
-    if (this.state.clickedOnSong === true) {
+    if (!this.state.videoID) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/video/${this.state.videoId}`} />;
+      return <Redirect push to={`/overview/video/rYEDA3JcQqw`} />;
     }
     return (
       <>
