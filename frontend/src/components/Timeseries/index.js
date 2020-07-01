@@ -88,7 +88,7 @@ class BarChart extends Component {
 
     this.state = {
       clickedOnSong: false,
-      title: null,
+      clickedVideoID: null,
     };
   }
 
@@ -562,8 +562,12 @@ class BarChart extends Component {
         else return d.radius > radiusLimit ? 'visible' : 'hidden';
       });
 
-    node.on('click', function(d) {
-      // redirect to the node page
+    node.on('click', d => {
+      console.log(d);
+      this.setState({
+        clickedOnSong: true,
+        clickedVideoID: d.id.substr(1),
+      });
     });
 
     node.on('mouseover', function(d) {
@@ -734,7 +738,9 @@ class BarChart extends Component {
     if (this.state.clickedOnSong === true) {
       console.log('redirecting');
       console.log(this.state);
-      return <Redirect push to={`/overview/video/${this.state.videoId}`} />;
+      return (
+        <Redirect push to={`/overview/video/${this.state.clickedVideoID}`} />
+      );
     }
     return <div ref="canvas" />;
   }
