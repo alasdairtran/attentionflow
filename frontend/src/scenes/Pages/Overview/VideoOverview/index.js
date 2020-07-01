@@ -91,7 +91,7 @@ export default class AnalyticsDashboard1 extends Component {
 
   fetchExample = e => {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
-    const options = {};
+    const options = { params: { videoID: 'rYEDA3JcQqw' } };
     axios
       .get('/vevo/video_info/', options)
       .then(res => {

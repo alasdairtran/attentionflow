@@ -81,7 +81,8 @@ def get_artist_info(request):
 
 @csrf_exempt
 def get_video_info(request):
-    video_id = "rYEDA3JcQqw" # rolling in the deep
+    video_id = request.GET['videoID']
+    # video_id = "rYEDA3JcQqw" # rolling in the deep
     # video_id = "hLQl3WQQoQ0" # someone like you
     # video_id = "YQHsXMglC9A" # hello
     # video_id = "hT_nvWreIhg" # counting starss
