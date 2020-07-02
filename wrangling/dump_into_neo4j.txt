@@ -1,8 +1,6 @@
 // create video nodes from local json file
-CALL apoc.periodic.iterate('
-CALL apoc.load.json("file:///video_nodes.json") YIELD value
-','
-CREATE (v: V{embed: toInteger(value.embed)})
+CALL apoc.periodic.iterate('CALL apoc.load.json("file:///video_nodes.json") YIELD value',
+'CREATE (v: V{embed: toInteger(value.embed)})
 SET v.videoId = value.vid,
     v.publishedAt = datetime(value.published_at),
     v.channelId = value.channel_id,
@@ -14,23 +12,27 @@ SET v.videoId = value.vid,
     v.avgWatch = value.avg_watch,
     v.channelArtistName = value.channel_artist_name,
     v.genres = value.genres,
+    v.genreReach = value.genre_reach,
     v.artistName = value.artist_name,
     v.collaboration = value.collaboration,
-    v.startDate = value.start_date
-', {batchSize:100})
+    v.startDate = value.start_date',
+{batchSize:100})
 
 // update index
 CREATE INDEX ON :V(embed)
 
-// create edges
-LOAD CSV WITH HEADERS FROM 'file:///video_edges.csv' AS e
-MATCH (a:V)
+// create video->video edges from local json file
+CALL apoc.periodic.iterate('CALL apoc.load.json("file:///video_edges.json") YIELD value',
+'MATCH (a:V)
 MATCH (b:V)
-WHERE a.embed = toInteger(e.Source) AND b.embed = toInteger(e.Target)
+WHERE a.embed = toInteger(value.src_embed) AND b.embed = toInteger(value.tar_embed)
 CREATE (a)-[r:RV]->(b)
-SET r.weight = toFloat(e.Weight)
-SET r.flux = toFloat(e.Flux)
-RETURN r
+SET r.weight = toFloat(value.weight),
+    r.flux = toFloat(value.flux),
+    r.startDate = datetime(value.start_date),
+    r.temporalFlux = value.temporal_flux
+RETURN r',
+{batchSize:100})
 
 // create artist nodes from local json file
 CALL apoc.periodic.iterate('
@@ -39,20 +41,25 @@ CALL apoc.load.json("file:///artist_nodes.json") YIELD value
 CREATE (a: A{channelId: value.channel_id})
 SET a.numVideos = toInteger(value.num_videos),
     a.numViews = toFloat(value.num_views),
-    a.artistName = value.artist_name
+    a.artistName = value.artist_name,
+    a.dailyView = value.daily_view,
+    a.startDate = value.start_date
 ', {batchSize:100})
 
 // update index
 CREATE INDEX ON :A(channelId)
 
-//create artist->artist edges
-LOAD CSV WITH HEADERS FROM 'file:///artist_edges.csv' AS e
-MATCH (a:A)
+// create artist->artist edges from local json file
+CALL apoc.periodic.iterate('CALL apoc.load.json("file:///artist_edges.json") YIELD value',
+'MATCH (a:A)
 MATCH (b:A)
-WHERE a.channelId = e.SourceChannel AND b.channelId = e.TargetChannel
+WHERE a.channelId = value.src_channel AND b.channelId = value.tar_channel
 CREATE (a)-[r:RA]->(b)
-SET r.channelFlux = toFloat(e.ChannelFlux)
-RETURN r
+SET r.channelFlux = toFloat(value.channel_flux),
+    r.startDate = datetime(value.start_date),
+    r.temporalChannelFlux = value.temporal_channel_flux
+RETURN r',
+{batchSize:100})
 
 //create genre nodes
 LOAD CSV WITH HEADERS FROM 'file:///genre_nodes.csv' AS n
