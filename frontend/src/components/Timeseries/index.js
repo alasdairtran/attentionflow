@@ -72,7 +72,7 @@ function stringfy(id) {
 
 const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
-let nodeScale = 3;
+let nodeScale = 5;
 let padding_x = 20;
 let chart_yScale_minimum = 100000;
 let chart_xScale_minimum = new Date('2009-11-01');
@@ -527,6 +527,42 @@ class BarChart extends Component {
       .enter()
       .append('g');
 
+    // Add gradient circles
+    var grads = chart
+      .append('defs')
+      .selectAll('radialGradient')
+      .data(nodes)
+      .enter()
+      .append('radialGradient')
+      .attr('gradientUnits', 'objectBoundingBox')
+      .attr('cx', '50%')
+      .attr('cy', '50%')
+      .attr('r', '100%')
+      .attr('id', d => 'grad' + d.id);
+
+    const gradColour = (d, offset) => {
+      if (offset === 0) {
+        return 'white';
+      }
+      const nPoints = d.dailyView.length;
+      const end = Math.round((nPoints * offset) / 100);
+      const nViews = d.dailyView.slice(0, end).reduce((a, b) => a + b, 0);
+      const totalViews = d.dailyView.reduce((a, b) => a + b, 0);
+      const viewColourScale = d3
+        .scaleSequential(d3.interpolateBuPu)
+        .domain([0, totalViews]);
+      return viewColourScale(nViews);
+    };
+
+    const offsets = [0, 20, 40, 60, 80, 100];
+
+    offsets.forEach(offset => {
+      grads
+        .append('stop')
+        .attr('offset', `${offset}%`)
+        .style('stop-color', d => gradColour(d, offset));
+    });
+
     node
       .append('circle')
       .call(drag(simulation))
@@ -535,8 +571,9 @@ class BarChart extends Component {
         return nodeScale * radiusScale(nodeSize(d));
       })
       .attr('fill', function(d) {
-        if (d.id == egoID) return 'steelblue';
-        else return d.colour;
+        // 'steelblue';
+        if (d.id == egoID) return `url(#grad${d.id})`;
+        else return `url(#grad${d.id})`;
       })
       .attr('stroke', '#aaa')
       .attr('stroke-width', 0.5)
@@ -588,8 +625,9 @@ class BarChart extends Component {
         .raise()
         .select('circle')
         .style('fill', function(d) {
-          if (d.id == egoID) return 'steelblue';
-          else return d.colour;
+          // 'steelblue'
+          if (d.id == egoID) return `url(#grad${d.id})`;
+          else return `url(#grad${d.id})`;
         });
       d3.select(this)
         .raise()
