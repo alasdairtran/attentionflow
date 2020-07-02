@@ -15,7 +15,7 @@ SET v.videoId = value.vid,
     v.genreReach = value.genre_reach,
     v.artistName = value.artist_name,
     v.collaboration = value.collaboration,
-    v.startDate = value.start_date',
+    v.startDate = datetime(value.start_date)',
 {batchSize:100})
 
 // update index
@@ -43,8 +43,8 @@ SET a.numVideos = toInteger(value.num_videos),
     a.numViews = toFloat(value.num_views),
     a.artistName = value.artist_name,
     a.dailyView = value.daily_view,
-    a.startDate = value.start_date
-', {batchSize:100})
+    a.startDate = datetime(value.start_date)',
+{batchSize:100})
 
 // update index
 CREATE INDEX ON :A(channelId)
