@@ -549,7 +549,9 @@ class BarChart extends Component {
       const nViews = d.dailyView.slice(0, end).reduce((a, b) => a + b, 0);
       const totalViews = d.dailyView.reduce((a, b) => a + b, 0);
       const viewColourScale = d3
-        .scaleSequential(d3.interpolateBuPu)
+        .scaleSequential(
+          d.id === egoID ? d3.interpolatePuBu : d3.interpolateBuPu
+        )
         .domain([0, totalViews]);
       return viewColourScale(nViews);
     };
@@ -570,11 +572,7 @@ class BarChart extends Component {
       .attr('r', function(d) {
         return nodeScale * radiusScale(nodeSize(d));
       })
-      .attr('fill', function(d) {
-        // 'steelblue';
-        if (d.id == egoID) return `url(#grad${d.id})`;
-        else return `url(#grad${d.id})`;
-      })
+      .attr('fill', d => `url(#grad${d.id})`)
       .attr('stroke', '#aaa')
       .attr('stroke-width', 0.5)
       .style('cursor', 'pointer');
@@ -624,11 +622,7 @@ class BarChart extends Component {
       d3.select(this)
         .raise()
         .select('circle')
-        .style('fill', function(d) {
-          // 'steelblue'
-          if (d.id == egoID) return `url(#grad${d.id})`;
-          else return `url(#grad${d.id})`;
-        });
+        .style('fill', d => `url(#grad${d.id})`);
       d3.select(this)
         .raise()
         .select('text')
