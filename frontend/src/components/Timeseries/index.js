@@ -3,6 +3,9 @@ import * as d3 from 'd3';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 
+import noUiSlider from 'nouislider';
+import 'nouislider/distribute/nouislider.css';
+
 import { getVideoInfo } from '../VideoEgo/popout';
 import { getIncomingOutgoing } from '../VideoEgo/incomingOutgoing';
 
@@ -79,7 +82,7 @@ let chart_xScale_minimum = new Date('2009-11-01');
 let egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, chart_width, chart_height, chart_topMargin;
 let chart_yScale_view, chart_yScale_artist, startPos, topVideos;
-let vis, visinfo, defs, viewcount, highlighted, oLeft;
+let vis, visinfo, defs, viewcount, highlighted;
 let xScale, yScale, yAxis, old_max, viewCountPath;
 
 class BarChart extends Component {
@@ -94,11 +97,10 @@ class BarChart extends Component {
 
   componentDidMount() {
     this.div = document.getElementById('sondInfoCard');
-    oLeft = this.div.getBoundingClientRect().x;
-    this.drawTimePanel(this.div.offsetWidth);
+    this.drawTimePanel();
   }
 
-  drawTimePanel(oWidth) {
+  drawTimePanel() {
     // console.log('drawTimePanel', this.props);
     const theEgo = this.props.egoInfo;
     console.log('theEgo', theEgo, this.props.egoType);
@@ -106,7 +108,7 @@ class BarChart extends Component {
     egoType = this.props.egoType;
     egoID = stringfy(theEgo.id);
 
-    this.canvasWidth = oWidth;
+    this.canvasWidth = this.div.offsetWidth;
     this.infoHeight = 50;
     this.chartHeight = 120;
     chart_width = this.canvasWidth - padding_x * 2;
@@ -115,7 +117,7 @@ class BarChart extends Component {
 
     graphSorting = document.createElement('SELECT');
     graphSorting.style.position = 'absolute';
-    graphSorting.style.top = this.infoHeight + this.chartHeight + 50 + 'px';
+    graphSorting.style.top = this.infoHeight + this.chartHeight + 100 + 'px';
     graphSorting.style.right = '20px';
     var options = ['ForceDirected', 'TotalView', 'Artist'];
     for (var o = 0; o < options.length; o++) {
@@ -140,9 +142,33 @@ class BarChart extends Component {
     defs = outer.append('defs');
 
     this.drawEgoInfoCard(theEgo);
-    // this.drawEgoMoreInfo(theEgo);
     this.drawEgoViewCount(theEgo);
+    this.drawTimeSelector(theEgo);
     this.drawEgoNetwork(theEgo);
+  }
+
+  drawTimeSelector(theEgo) {
+    var range = document.createElement('div');
+    range.id = 'timeRange';
+    range.style.position = 'absolute';
+    range.style.width = this.canvasWidth - 40 + 'px';
+    range.style.height = '20px';
+    range.style.top = this.infoHeight + this.chartHeight + 45 + 'px';
+    range.style.left = '20px';
+    this.div.append(range);
+
+    var egoStartDate = theEgo.startDate;
+    var minTime = xScale.domain()[0].getTime();
+    var maxTime = xScale.domain()[1].getTime();
+    noUiSlider.create(range, {
+      range: {
+        min: minTime,
+        max: maxTime,
+      },
+      connect: true,
+      step: 3600 * 1000 * 24, // A day
+      start: [egoStartDate, maxTime],
+    });
   }
 
   drawEgoInfoCard(theEgo) {
@@ -295,19 +321,19 @@ class BarChart extends Component {
     var egoInfoBox = visinfo.append('text').style('font-size', '12px');
     visinfo
       .append('rect')
-      .attr('id', 'other_infobox')
+      .attr('id', 'otherInfobox')
       .attr('fill', '#ffffffaa')
       .style('stroke', hcolor)
       .style('stroke-width', 1.5);
     visinfo
       .append('text')
-      .attr('id', 'other_infobox')
+      .attr('id', 'otherInfobox')
       .style('font-size', '12px')
       .attr('display', 'none');
 
     viewcount.on('mousemove', function(e) {
       setMousePosition(e);
-      var m_pos = Math.max(0, mouse.x - oLeft);
+      var m_pos = getTimePositionX();
       egoTime = Math.floor(xScale.invert(m_pos));
       time_indicator
         .attr('x1', m_pos)
@@ -342,60 +368,6 @@ class BarChart extends Component {
     });
 
     highlighted = viewcount.append('g');
-  }
-
-  drawEgoMoreInfo(theEgo) {
-    var embvideo_id;
-    var embvideo = document.createElement('iframe');
-    if (egoType == 'V') {
-      embvideo_id = theEgo.id;
-    } else if (egoType == 'A') {
-      embvideo_id = stringfy(theEgo.topvideos[0][0][0]);
-    }
-    embvideo.width = 300;
-    embvideo.height = this.infoHeight;
-    embvideo.style.position = 'absolute';
-    embvideo.style.right = '0px';
-    embvideo.style.margin = '10px 20px';
-    embvideo.style.border = 'none';
-    embvideo.src = 'https://www.youtube.com/embed/' + embvideo_id;
-    this.div.append(embvideo);
-
-    if (egoType == 'A') {
-      topVideos = {};
-      var topvideos = document.createElement('div');
-      topvideos.width = 300;
-      topvideos.style.position = 'absolute';
-      topvideos.style.right = '320px';
-      topvideos.style.padding = '15px 20px';
-      for (var i = 0, j = 0; i < theEgo.topvideos[0].length, j < 7; i++, j++) {
-        var videodiv = document.createElement('div');
-        var video = theEgo.topvideos[0][i];
-        var vtitle = video[1].split('-')[1];
-        var vtitle_str =
-          vtitle.length > 20 ? vtitle.slice(0, 20) + '...' : vtitle;
-        topVideos[video[0]] = {
-          title: vtitle,
-          startDate: video[3],
-          dailyView: video[5],
-        };
-        videodiv.id = stringfy(video[0]);
-        videodiv.innerHTML += '<b>' + vtitle_str + '</a> ';
-        videodiv.innerHTML +=
-          numFormatter(video[4]) +
-          ' views • ' +
-          new Date(video[2]).toShortFormat() +
-          '<br/>';
-        videodiv.addEventListener('mouseover', function(e) {
-          showOtherSongViewCount(topVideos[this.id]);
-        });
-        videodiv.addEventListener('mouseout', function(e) {
-          hideOtherSongViewCount(topVideos[this.id]);
-        });
-        topvideos.append(videodiv);
-      }
-      this.div.append(topvideos);
-    }
   }
 
   drawEgoNetwork(theEgo) {
@@ -453,7 +425,7 @@ class BarChart extends Component {
     // console.log(nodes);
 
     chart_height = 500;
-    chart_topMargin = this.infoHeight + this.chartHeight + 45;
+    chart_topMargin = this.infoHeight + this.chartHeight + 95;
     const chart = vis.append('g');
     const nodeTitles = songsArr.map(video => video[0]);
     simulation = d3
@@ -484,7 +456,8 @@ class BarChart extends Component {
     chart
       .append('g')
       .attr('transform', 'translate(' + padding_x + ',' + chart_topMargin + ')')
-      .call(d3.axisTop(xScale).tickFormat(''));
+      .call(d3.axisTop(xScale));
+    // .call(d3.axisTop(xScale).tickFormat(''));
 
     chart_yScale_view = d3
       .scaleLog()
@@ -789,6 +762,25 @@ class BarChart extends Component {
   }
 }
 
+function getTimePositionX() {
+  var mouseX = Math.max(0, mouse.x - getWindowLeftMargin());
+  var trange = getTimeSelection();
+  var xMin = xScale(trange[0]);
+  var xMax = xScale(trange[1]);
+  return Math.max(xMin, Math.min(mouseX, xMax));
+}
+
+function getTimeSelection() {
+  var tSlider = document.getElementById('timeRange');
+  var range = tSlider.noUiSlider.get('range');
+  return [new Date(parseInt(range[0])), new Date(parseInt(range[1]))];
+}
+
+function getWindowLeftMargin() {
+  var div = document.getElementById('sondInfoCard');
+  return div.getBoundingClientRect().x;
+}
+
 function calculateViewCount() {
   var egoViewSum;
   for (var i = 0; i < nodes.length; i++) {
@@ -895,8 +887,8 @@ function linkArc(d) {
 
 function hideOtherSongViewCount(othersong) {
   viewcount.select('line#other_indicator').attr('display', 'none');
-  visinfo.select('rect#other_infobox').attr('display', 'none');
-  visinfo.select('text#other_infobox').attr('display', 'none');
+  visinfo.select('rect#otherInfobox').attr('display', 'none');
+  visinfo.select('text#otherInfobox').attr('display', 'none');
   var incoming = d3.select('path#' + othersong.id + egoID);
   if (incoming) {
     incoming.attr('stroke', '#aaa').attr('stroke-opacity', 0.5);
@@ -948,7 +940,7 @@ function showOtherSongViewCount(othersong) {
     .attr('x2', xpos)
     .attr('display', 'block');
   var infotext = visinfo
-    .select('text#other_infobox')
+    .select('text#otherInfobox')
     .attr('y', ypos)
     .attr('display', 'block')
     .html(
@@ -977,7 +969,7 @@ function showOtherSongViewCount(othersong) {
 
   var textWidth = infotext.node().getBBox().width;
   visinfo
-    .select('rect#other_infobox')
+    .select('rect#otherInfobox')
     .attr('x', xpos_infoText - 10)
     .attr('y', ypos - 15)
     .attr('width', textWidth + 20)

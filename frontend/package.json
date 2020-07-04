@@ -19,6 +19,7 @@
     "d3-interpolate": "^1.4.0",
     "d3-scale-chromatic": "^1.5.0",
     "lodash": "^4.17.15",
+    "nouislider": "^14.6.0",
     "pixabay-javascript-autocomplete": "^1.0.4",
     "rambda": "^4.4.0",
     "react": "^16.12.0",
