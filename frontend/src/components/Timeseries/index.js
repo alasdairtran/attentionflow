@@ -107,7 +107,7 @@ class BarChart extends Component {
     egoID = stringfy(theEgo.id);
 
     this.canvasWidth = oWidth;
-    this.infoHeight = 160;
+    this.infoHeight = 50;
     this.chartHeight = 120;
     chart_width = this.canvasWidth - padding_x * 2;
 
@@ -140,7 +140,7 @@ class BarChart extends Component {
     defs = outer.append('defs');
 
     this.drawEgoInfoCard(theEgo);
-    this.drawEgoMoreInfo(theEgo);
+    // this.drawEgoMoreInfo(theEgo);
     this.drawEgoViewCount(theEgo);
     this.drawEgoNetwork(theEgo);
   }
@@ -153,19 +153,30 @@ class BarChart extends Component {
     var infocard = document.createElement('div');
     infocard.setAttribute('id', 'egoInfoCard');
     infocard.style.position = 'absolute';
-    infocard.style.width = 'auto';
+    infocard.style.width = this.canvasWidth - 30 + 'px';
     infocard.style.height = this.infoHeight + 10 + 'px';
     infocard.style.margin = '0 20px 10px 20px';
     infocard.style.padding = '20px';
     infocard.style.borderLeft = '10px solid ' + hcolor;
+    console.log('this.canvasWidth', this.canvasWidth);
 
     var published = new Date(theEgo.publishedAt);
     var infocardtext = document.createElement('div');
 
-    var egoInfoText = '<h5><b>' + theEgo.title + '</b></h5><br/>';
-    egoInfoText += 'Artist: ' + theEgo.artistName + '<br/>';
-    egoInfoText += 'Published: ' + published.toShortFormat() + '<br/>';
-    egoInfoText += 'Genres: ' + theEgo.genres.join(',');
+    var egoInfoText =
+      '<span style="float:left"><h5><b>' + theEgo.title + '</b></h5></span>';
+    if (egoType == 'A') {
+      egoInfoText +=
+        '<span style="float:right">First song published: ' +
+        published.toShortFormat() +
+        '</span>';
+    } else if (egoType == 'T') {
+      egoInfoText +=
+        '<span style="float:right">Published: ' +
+        published.toShortFormat() +
+        ' • ';
+      egoInfoText += 'Genres: ' + theEgo.genres.join(',') + '</span>';
+    }
 
     infocardtext.innerHTML = egoInfoText;
     infocard.append(infocardtext);
