@@ -196,7 +196,7 @@ class BarChart extends Component {
         '<span style="float:right">First song published: ' +
         published.toShortFormat() +
         '</span>';
-    } else if (egoType == 'T') {
+    } else if (egoType == 'V') {
       egoInfoText +=
         '<span style="float:right">Published: ' +
         published.toShortFormat() +
