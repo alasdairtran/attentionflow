@@ -75,7 +75,6 @@ function stringfy(id) {
 
 const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
-let nodeScale = 5;
 let padding_x = 20;
 let chart_yScale_minimum = 100000;
 let chart_xScale_minimum = new Date('2009-11-01');
@@ -148,12 +147,15 @@ class BarChart extends Component {
   }
 
   drawTimeSelector(theEgo) {
+    var old = document.getElementById('timeRange');
+    if (old) old.remove();
+
     var range = document.createElement('div');
     range.id = 'timeRange';
     range.style.position = 'absolute';
     range.style.width = this.canvasWidth - 40 + 'px';
     range.style.height = '20px';
-    range.style.top = this.infoHeight + this.chartHeight + 45 + 'px';
+    range.style.top = this.infoHeight + this.chartHeight + 30 + 'px';
     range.style.left = '20px';
     this.div.append(range);
 
@@ -266,7 +268,7 @@ class BarChart extends Component {
     viewcount
       .append('g')
       .attr('transform', 'translate(0,' + this.chartHeight + ')')
-      .call(d3.axisBottom(xScale));
+      .call(d3.axisBottom(xScale).tickFormat(''));
     yAxis = viewcount
       .append('g')
       .attr('transform', 'translate(' + startPos + ',0)')
@@ -375,12 +377,12 @@ class BarChart extends Component {
     const linksArr = theEgo.links;
 
     const strokeList = linksArr.map(link => link[2]);
-    const minStroke = 0.5;
-    const maxStroke = 5;
+    const minStroke = 1;
+    const maxStroke = 20;
 
     const viewsList = songsArr.map(d => d[2]);
-    const maxRadius = 10;
-    const minRadius = 2;
+    const maxRadius = 50;
+    const minRadius = 10;
 
     strokeScale = d3
       .scaleLinear()
@@ -422,10 +424,8 @@ class BarChart extends Component {
       dailyFlux: video[4],
     }));
 
-    // console.log(nodes);
-
     chart_height = 500;
-    chart_topMargin = this.infoHeight + this.chartHeight + 95;
+    chart_topMargin = this.infoHeight + this.chartHeight + 70;
     const chart = vis.append('g');
     const nodeTitles = songsArr.map(video => video[0]);
     simulation = d3
@@ -442,9 +442,9 @@ class BarChart extends Component {
         d3
           .forceCollide()
           .radius(function(d) {
-            return nodeScale * d.radius + 10;
+            return d.radius + 10;
           })
-          .iterations(2)
+          .iterations(100)
       )
       .force('charge', d3.forceManyBody().strength(10))
       .force(
@@ -457,7 +457,6 @@ class BarChart extends Component {
       .append('g')
       .attr('transform', 'translate(' + padding_x + ',' + chart_topMargin + ')')
       .call(d3.axisTop(xScale));
-    // .call(d3.axisTop(xScale).tickFormat(''));
 
     chart_yScale_view = d3
       .scaleLog()
@@ -486,7 +485,7 @@ class BarChart extends Component {
       .attr('markerHeight', '12')
       .attr('markerUnits', 'userSpaceOnUse')
       .attr('viewBox', '0 -6 12 12')
-      .attr('refX', d => 10 + nodeScale * d.target.radius)
+      .attr('refX', d => 10 + d.target.radius)
       .attr('refY', d => -d.value / 2)
       .attr('orient', 'auto')
       .append('path')
@@ -531,7 +530,7 @@ class BarChart extends Component {
       const nPoints = d.dailyView.length;
       const end = Math.round((nPoints * offset) / 100);
       const nViews = d.dailyView.slice(0, end).reduce((a, b) => a + b, 0);
-      const totalViews = d.dailyView.reduce((a, b) => a + b, 0);
+      const totalViews = d.totalView;
       const viewColourScale = d3
         .scaleSequential(
           d.id === egoID ? d3.interpolatePuBu : d3.interpolateBuPu
@@ -554,7 +553,7 @@ class BarChart extends Component {
       .call(drag(simulation))
       .attr('id', d => d.id)
       .attr('r', function(d) {
-        return nodeScale * radiusScale(nodeSize(d));
+        return radiusScale(nodeSize(d));
       })
       .attr('fill', d => `url(#grad${d.id})`)
       .attr('stroke', '#aaa')
@@ -562,7 +561,7 @@ class BarChart extends Component {
       .style('cursor', 'pointer');
 
     nodes.sort((a, b) => a.radius - b.radius);
-    const radiusLimit = 5;
+    const radiusLimit = minRadius * 2;
     node
       .append('text')
       .call(drag(simulation))
@@ -789,7 +788,7 @@ function calculateViewCount() {
     var radius = radiusScale(viewSum);
     nodes[i]['viewSum'] = viewSum;
     nodes[i]['radius'] = radius;
-    n.style.r = nodeScale * radius;
+    n.style.r = radius;
     if (nodes[i].id == egoID) egoViewSum = viewSum;
   }
   for (var i = 0; i < links.length; i++) {
@@ -869,11 +868,9 @@ function linkArc(d) {
 
   if (d.source.id == egoID) {
     px1 = padding_x + xScale(egoTime);
-    // py1 = chart_topMargin;
   }
   if (d.target.id == egoID) {
     px2 = padding_x + xScale(egoTime);
-    // py2 = chart_topMargin;
   }
 
   var dx = px2 - px1,
@@ -933,7 +930,10 @@ function showOtherSongViewCount(othersong) {
   var otherNode = d3.select('circle#' + othersong.id).node();
   var xpos = xScale(startDate);
   var xpos_infoText = padding_x + xpos + 15;
-  var ypos = -100 + parseFloat(d3.select(otherNode.parentNode).attr('cy'));
+  var ypos = -90 + parseFloat(d3.select(otherNode.parentNode).attr('cy'));
+  if (ypos < chart_topMargin) {
+    ypos += 180;
+  }
   viewcount
     .select('line#other_indicator')
     .attr('x1', xpos)
