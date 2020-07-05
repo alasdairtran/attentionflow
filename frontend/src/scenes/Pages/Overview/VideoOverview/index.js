@@ -154,9 +154,13 @@ export default class AnalyticsDashboard1 extends Component {
                 {this.state.errorMessage}
               </div>
             )}
-            <Row>
-              <Col md="12" lg="12">
-                <Card className="mb-3" id="sondInfoCard">
+            <Card className="mb-3" id="attentionFlow">
+              <Row>
+                <Col md="12" lg="12" id="egoTitle"></Col>
+              </Row>
+              <Row>
+                <Col md="3" lg="3" id="egoInfo"></Col>
+                <Col md="9" lg="9" id="egoTimeline">
                   <div id="graphContainer">
                     {this.state.isLoading ? (
                       <div
@@ -174,9 +178,9 @@ export default class AnalyticsDashboard1 extends Component {
                       <Timeseries egoType="V" egoInfo={this.state.videoInfo} />
                     )}
                   </div>
-                </Card>
-              </Col>
-            </Row>
+                </Col>
+              </Row>
+            </Card>
           </div>
         </ReactCSSTransitionGroup>
       </>

@@ -75,16 +75,25 @@ function stringfy(id) {
 
 const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
-let padding_x = 20;
+let padding_x = 15;
+let rightMargin = 40;
 let chart_yScale_minimum = 100000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let egoID, egoType, egoTime, simulation, nodes, links;
-let graphSorting, chart_width, chart_height, chart_topMargin;
+let graphSorting;
+let graphSortingOpts = [
+  'Force Directed',
+  'Total View',
+  'Contributed',
+  'Received',
+  'Artist Name',
+];
+let chart_height, chart_topMargin;
 let chart_yScale_view, chart_yScale_artist, startPos, topVideos;
 let vis, visinfo, defs, viewcount, highlighted;
 let xScale, yScale, yAxis, old_max, viewCountPath;
 
-class BarChart extends Component {
+class AttentionFlow extends Component {
   constructor(props) {
     super(props);
 
@@ -95,7 +104,9 @@ class BarChart extends Component {
   }
 
   componentDidMount() {
-    this.div = document.getElementById('sondInfoCard');
+    this.divTitle = document.getElementById('egoTitle');
+    this.divInfo = document.getElementById('egoInfo');
+    this.divTimeline = document.getElementById('egoTimeline');
     this.drawTimePanel();
   }
 
@@ -107,25 +118,10 @@ class BarChart extends Component {
     egoType = this.props.egoType;
     egoID = stringfy(theEgo.id);
 
-    this.canvasWidth = this.div.offsetWidth;
-    this.infoHeight = 50;
+    this.canvasWidth = this.divTimeline.offsetWidth - padding_x * 2;
     this.chartHeight = 120;
-    chart_width = this.canvasWidth - padding_x * 2;
-
-    this.canvasHeight = this.infoHeight + this.chartHeight + 560;
-
-    graphSorting = document.createElement('SELECT');
-    graphSorting.style.position = 'absolute';
-    graphSorting.style.top = this.infoHeight + this.chartHeight + 100 + 'px';
-    graphSorting.style.right = '20px';
-    var options = ['ForceDirected', 'TotalView', 'Artist'];
-    for (var o = 0; o < options.length; o++) {
-      var option = document.createElement('option');
-      option.value = o;
-      option.text = options[o];
-      graphSorting.add(option);
-    }
-    this.div.append(graphSorting);
+    this.chartWidth = this.canvasWidth - padding_x * 2 - rightMargin;
+    this.canvasHeight = this.chartHeight + 560;
 
     d3.select(this.refs.canvas)
       .selectAll('svg')
@@ -153,11 +149,11 @@ class BarChart extends Component {
     var range = document.createElement('div');
     range.id = 'timeRange';
     range.style.position = 'absolute';
-    range.style.width = this.canvasWidth - 40 + 'px';
+    range.style.width = this.canvasWidth - padding_x * 2 - rightMargin + 'px';
     range.style.height = '20px';
-    range.style.top = this.infoHeight + this.chartHeight + 30 + 'px';
-    range.style.left = '20px';
-    this.div.append(range);
+    range.style.top = this.chartHeight + 30 + 'px';
+    range.style.left = padding_x * 2 + 'px';
+    this.divTimeline.append(range);
 
     var egoStartDate = theEgo.startDate;
     var minTime = xScale.domain()[0].getTime();
@@ -174,53 +170,82 @@ class BarChart extends Component {
   }
 
   drawEgoInfoCard(theEgo) {
-    const oldInfoCard = document.getElementById('egoInfoCard');
-    if (oldInfoCard) {
-      oldInfoCard.remove();
-    }
+    // Set ego title
+    this.divTitle.style.margin = '0 30px';
+    this.divTitle.style.padding = '15px 10px 5px 20px';
+    this.divTitle.style.borderLeft = '10px solid ' + hcolor;
+    this.divTitle.innerHTML = '<h5><b>' + theEgo.title + '</b></h5>';
+
+    // update ego information
+    this.divInfo.innerHTML = '';
+
     var infocard = document.createElement('div');
     infocard.setAttribute('id', 'egoInfoCard');
-    infocard.style.position = 'absolute';
-    infocard.style.width = this.canvasWidth - 30 + 'px';
-    infocard.style.height = this.infoHeight + 10 + 'px';
-    infocard.style.margin = '0 20px 10px 20px';
-    infocard.style.padding = '20px';
-    infocard.style.borderLeft = '10px solid ' + hcolor;
-    console.log('this.canvasWidth', this.canvasWidth);
+    infocard.style.width = '100%';
+    infocard.style.padding = '20px 0 30px 30px';
 
     var published = new Date(theEgo.publishedAt);
     var infocardtext = document.createElement('div');
 
-    var egoInfoText =
-      '<span style="float:left"><h5><b>' + theEgo.title + '</b></h5></span>';
+    var egoInfoText = '';
     if (egoType == 'A') {
-      egoInfoText +=
-        '<span style="float:right">First song published: ' +
-        published.toShortFormat() +
-        '</span>';
+      egoInfoText += 'First song published: ' + published.toShortFormat();
     } else if (egoType == 'V') {
-      egoInfoText +=
-        '<span style="float:right">Published: ' +
-        published.toShortFormat() +
-        ' • ';
-      egoInfoText += 'Genres: ' + theEgo.genres.join(',') + '</span>';
+      egoInfoText += 'Published: ' + published.toShortFormat() + '</br>';
+      egoInfoText += 'Genres: ' + theEgo.genres.join(',');
     }
+    egoInfoText += '</br>Total views: ' + numFormatter(theEgo.totalView);
 
     infocardtext.innerHTML = egoInfoText;
     infocard.append(infocardtext);
-    this.div.append(infocard);
+    this.divInfo.append(infocard);
+
+    var controlPanel = document.createElement('div');
+    controlPanel.style.paddingLeft = '30px';
+
+    var graphSortingLabel = document.createElement('div');
+    graphSortingLabel.innerHTML = '<b>Y-position</b>';
+
+    graphSorting = document.createElement('SELECT');
+    graphSorting.style.width = '100%';
+    graphSorting.style.margin = '5px 0 20px 0';
+    for (var o = 0; o < graphSortingOpts.length; o++) {
+      var option = document.createElement('option');
+      option.value = o;
+      option.text = graphSortingOpts[o];
+      graphSorting.add(option);
+    }
+
+    var infSliderLabel = document.createElement('div');
+    infSliderLabel.innerHTML = '<b>Influence</b>';
+
+    var infSlider = document.createElement('div');
+    infSlider.style.width = '100%';
+    infSlider.style.margin = '5px 0 20px 0';
+    noUiSlider.create(infSlider, {
+      range: {
+        min: 1,
+        max: 100,
+      },
+      step: 1,
+      start: 10,
+    });
+
+    controlPanel.append(graphSortingLabel);
+    controlPanel.append(graphSorting);
+    controlPanel.append(infSliderLabel);
+    controlPanel.append(infSlider);
+
+    this.divInfo.append(controlPanel);
   }
 
   drawEgoViewCount(theEgo) {
     viewcount = vis
       .append('g')
-      .attr(
-        'transform',
-        'translate(' + padding_x + ',' + (this.infoHeight + 20) + ')'
-      );
+      .attr('transform', 'translate(' + padding_x + ',' + 20 + ')');
     viewcount
       .append('rect')
-      .attr('width', chart_width)
+      .attr('width', this.chartWidth)
       .attr('height', this.chartHeight)
       .attr('fill', 'transparent');
 
@@ -249,7 +274,7 @@ class BarChart extends Component {
           return d.date;
         }),
       ])
-      .range([0, chart_width]);
+      .range([0, this.chartWidth]);
     yScale = d3
       .scaleLinear()
       .domain([
@@ -314,7 +339,7 @@ class BarChart extends Component {
       .style('fill', '#aaaaaa33');
     var time_cover_n = vis
       .append('rect')
-      .attr('y', this.infoHeight + this.chartHeight + 45)
+      .attr('y', this.chartHeight + 45)
       .attr('width', 0)
       .attr('height', 500)
       .style('fill', '#aaaaaa33');
@@ -341,10 +366,10 @@ class BarChart extends Component {
         .attr('x1', m_pos)
         .attr('x2', m_pos)
         .attr('display', 'block');
-      time_cover.attr('x', m_pos + 1).attr('width', chart_width - m_pos);
+      time_cover.attr('x', m_pos + 1).attr('width', this.chartWidth - m_pos);
       time_cover_n
         .attr('x', padding_x + m_pos + 1)
-        .attr('width', chart_width - m_pos);
+        .attr('width', this.chartWidth - m_pos);
 
       var egoCircle = d3.select('circle#' + egoID);
       var pos_y =
@@ -425,7 +450,7 @@ class BarChart extends Component {
     }));
 
     chart_height = 500;
-    chart_topMargin = this.infoHeight + this.chartHeight + 70;
+    chart_topMargin = this.chartHeight + 70;
     const chart = vis.append('g');
     const nodeTitles = songsArr.map(video => video[0]);
     simulation = d3
@@ -617,9 +642,10 @@ class BarChart extends Component {
     });
 
     graphSorting.addEventListener('change', function() {
-      if (graphSorting.value == 0) {
+      var sortingOpt = graphSortingOpts[graphSorting.value];
+      if (sortingOpt == 'Force Directed') {
         chart_y.attr('display', 'none');
-      } else if (graphSorting.value == 1) {
+      } else if (sortingOpt == 'Total View') {
         chart_y
           .attr('display', 'block')
           .attr(
@@ -632,7 +658,7 @@ class BarChart extends Component {
               .ticks(5)
               .tickFormat(numFormatter)
           );
-      } else if (graphSorting.value == 2) {
+      } else if (sortingOpt == 'Artist Name') {
         chart_y
           .attr('display', 'block')
           .attr(
@@ -664,18 +690,18 @@ class BarChart extends Component {
           }
         })
         .attr('cy', function(d) {
-          // if (d.id == egoID) return chart_topMargin;
-          if (graphSorting.value == 0) {
+          var sortingOpt = graphSortingOpts[graphSorting.value];
+          if (sortingOpt == 'Force Directed') {
             return Math.min(
               chart_topMargin + chart_height - 20,
               Math.max(chart_topMargin + 20, d.y)
             );
-          } else if (graphSorting.value == 1) {
+          } else if (sortingOpt == 'Total View') {
             return (
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.viewSum))
             );
-          } else if (graphSorting.value == 2) {
+          } else if (sortingOpt == 'Artist Name') {
             return (
               chart_topMargin +
               chart_yScale_artist.bandwidth() / 2 +
@@ -695,16 +721,17 @@ class BarChart extends Component {
             new_x = padding_x + xScale(d.startDate);
           }
           var new_y;
-          if (graphSorting.value == 0) {
+          var sortingOpt = graphSortingOpts[graphSorting.value];
+          if (sortingOpt == 'Force Directed') {
             new_y = Math.min(
               chart_topMargin + chart_height - 20,
               Math.max(chart_topMargin + 20, d.y)
             );
-          } else if (graphSorting.value == 1) {
+          } else if (sortingOpt == 'Total View') {
             new_y =
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.viewSum));
-          } else if (graphSorting.value == 2) {
+          } else if (sortingOpt == 'Artist Name') {
             new_y =
               chart_topMargin +
               chart_yScale_artist.bandwidth() / 2 +
@@ -776,7 +803,7 @@ function getTimeSelection() {
 }
 
 function getWindowLeftMargin() {
-  var div = document.getElementById('sondInfoCard');
+  var div = document.getElementById('egoTimeline');
   return div.getBoundingClientRect().x;
 }
 
@@ -837,7 +864,8 @@ function linkArc(d) {
     px2 = padding_x + xScale(d.target.startInfluence);
   }
   var py1, py2;
-  if (graphSorting.value == 0) {
+  var sortingOpt = graphSortingOpts[graphSorting.value];
+  if (sortingOpt == 'Force Directed') {
     py1 = Math.min(
       chart_topMargin + chart_height - 20,
       Math.max(chart_topMargin + 20, d.source.y)
@@ -846,7 +874,7 @@ function linkArc(d) {
       chart_topMargin + chart_height - 20,
       Math.max(chart_topMargin + 20, d.target.y)
     );
-  } else if (graphSorting.value == 1) {
+  } else if (sortingOpt == 'Total View') {
     var ypos1 = chart_yScale_view(
       Math.max(chart_yScale_minimum, d.source.viewSum)
     );
@@ -855,7 +883,7 @@ function linkArc(d) {
     );
     py1 = chart_topMargin + ypos1;
     py2 = chart_topMargin + ypos2;
-  } else if (graphSorting.value == 2) {
+  } else if (sortingOpt == 'Artist Name') {
     py1 =
       chart_topMargin +
       chart_yScale_artist.bandwidth() / 2 +
@@ -1026,7 +1054,7 @@ function showOtherSongViewCount(othersong) {
   highlighted.attr('display', 'block');
 }
 
-export default BarChart;
+export default AttentionFlow;
 
 var mouse = {
   x: 0,
@@ -1045,6 +1073,6 @@ function setMousePosition(e) {
     mouse.x = ev.clientX + document.body.scrollLeft;
     mouse.y = ev.clientY + document.body.scrollTop;
   }
-  mouse.x -= padding_x;
+  mouse.x -= padding_x * 2;
   // console.log(mouse)
 }
