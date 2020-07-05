@@ -141,6 +141,9 @@ class AttentionFlow extends Component {
     this.drawEgoViewCount(theEgo);
     this.drawTimeSelector(theEgo);
     this.drawEgoNetwork(theEgo);
+
+    if (egoType == 'V') infSlider.noUiSlider.set(0);
+    else if (egoType == 'A') infSlider.noUiSlider.set(20);
   }
 
   drawTimeSelector(theEgo) {
@@ -163,7 +166,7 @@ class AttentionFlow extends Component {
         max: maxTime,
       },
       connect: true,
-      step: 3600 * 1000 * 24, // A day
+      step: aDay(), // A day
       start: [egoStartDate, maxTime],
     });
   }
@@ -197,6 +200,7 @@ class AttentionFlow extends Component {
     controlPanel.id = 'controlPanel';
 
     var infSliderLabel = document.createElement('div');
+    infSliderLabel.innerHTML = '<b>Influence Filter (%)</b>';
     infSlider = document.createElement('div');
     infSlider.id = 'infSlider';
     noUiSlider.create(infSlider, {
@@ -218,10 +222,9 @@ class AttentionFlow extends Component {
       });
     }
     infSlider.noUiSlider.on('set.one', function() {
-      var infVal = parseInt(infSlider.noUiSlider.get());
-      infSliderLabel.innerHTML = '<b>Influence Filter (' + infVal + '%)</b>';
+      filterNodes();
+      simulation.restart();
     });
-    infSlider.noUiSlider.set();
 
     var graphSortingLabel = document.createElement('div');
     graphSortingLabel.innerHTML = '<b>Y-position</b>';
@@ -261,7 +264,7 @@ class AttentionFlow extends Component {
     var data = [];
     for (var i = 0; i < theEgo.dailyView.length; i++) {
       data.push({
-        date: new Date(startDate.getTime() + 3600 * 1000 * 24 * i),
+        date: new Date(startDate.getTime() + aDay() * i),
         value: theEgo.dailyView[i],
       });
     }
@@ -380,7 +383,7 @@ class AttentionFlow extends Component {
             '</tspan>'
         );
 
-      calculateViewCount();
+      calculateViewCount(egoTime);
       simulation.restart();
     });
   }
@@ -425,7 +428,7 @@ class AttentionFlow extends Component {
       artist: video[5],
       startDate: new Date(video[6]),
       time: new Date(video[7]),
-      startInfluence: new Date(video[6] + 3600 * 1000 * 24 * video[4].length),
+      startInfluence: new Date(video[6] + aDay() * video[4].length),
     }));
 
     links = linksArr.map(video => ({
@@ -658,18 +661,13 @@ class AttentionFlow extends Component {
       node
         .attr('display', function(d) {
           if (d.id == egoID) return 'block';
-          if (egoType == 'V' && d.startDate.getTime() <= egoTime)
-            return 'block';
-          if (egoType == 'A' && d.startInfluence.getTime() <= egoTime)
-            return 'block';
+          if (d.startInfluence.getTime() <= egoTime) return 'block';
           else return 'none';
         })
         .attr('cx', function(d) {
           if (d.id == egoID) return padding_x + xScale(egoTime);
-          if (egoType == 'A' && d.startInfluence.getTime() <= egoTime) {
+          if (d.startInfluence.getTime() <= egoTime) {
             return padding_x + xScale(d.startInfluence);
-          } else {
-            return padding_x + xScale(d.startDate);
           }
         })
         .attr('cy', function(d) {
@@ -693,16 +691,7 @@ class AttentionFlow extends Component {
           }
         })
         .attr('transform', function(d) {
-          var new_x;
-          if (
-            egoType == 'A' &&
-            d.startInfluence &&
-            d.startInfluence.getTime() <= egoTime
-          ) {
-            new_x = padding_x + xScale(d.startInfluence);
-          } else {
-            new_x = padding_x + xScale(d.startDate);
-          }
+          var new_x = padding_x + xScale(d.startInfluence);
           var new_y;
           var sortingOpt = graphSortingOpts[graphSorting.value];
           if (sortingOpt == 'Force Directed') {
@@ -730,25 +719,16 @@ class AttentionFlow extends Component {
         .attr('d', linkArc)
         .attr('stroke-width', d => d.value)
         .attr('display', function(d) {
-          if (egoType == 'V') {
-            if (
-              d.source.startDate.getTime() <= egoTime &&
-              d.target.startDate.getTime() <= egoTime
-            )
-              return 'block';
-            else return 'none';
-          } else if (egoType == 'A') {
-            if (
-              (d.source.startInfluence.getTime() <= egoTime &&
-                d.target.startInfluence.getTime() <= egoTime) ||
-              (d.source.startInfluence.getTime() <= egoTime &&
-                d.target.id == egoID) ||
-              (d.target.startInfluence.getTime() <= egoTime &&
-                d.source.id == egoID)
-            )
-              return 'block';
-            else return 'none';
-          }
+          if (
+            (d.source.startInfluence.getTime() <= egoTime &&
+              d.target.startInfluence.getTime() <= egoTime) ||
+            (d.source.startInfluence.getTime() <= egoTime &&
+              d.target.id == egoID) ||
+            (d.target.startInfluence.getTime() <= egoTime &&
+              d.source.id == egoID)
+          )
+            return 'block';
+          else return 'none';
         });
     });
   }
@@ -782,7 +762,7 @@ function getTimePositionX() {
 function getTimeSelection() {
   var tSlider = document.getElementById('timeRange');
   var range = tSlider.noUiSlider.get('range');
-  return [new Date(parseInt(range[0])), new Date(parseInt(range[1]))];
+  return [new Date(parseInt(range[0])), new Date(parseInt(range[1]) - aDay())];
 }
 
 function getWindowLeftMargin() {
@@ -790,11 +770,11 @@ function getWindowLeftMargin() {
   return div.getBoundingClientRect().x;
 }
 
-function calculateViewCount() {
+function calculateViewCount(curTime) {
   var egoViewSum;
   for (var i = 0; i < nodes.length; i++) {
     var n = document.getElementById(nodes[i].id);
-    var viewSum = nodeSize(nodes[i]);
+    var viewSum = nodeSize(nodes[i], curTime);
     var radius = radiusScale(viewSum);
     nodes[i]['viewSum'] = viewSum;
     nodes[i]['radius'] = radius;
@@ -802,37 +782,59 @@ function calculateViewCount() {
     if (nodes[i].id == egoID) egoViewSum = viewSum;
   }
   for (var i = 0; i < links.length; i++) {
-    var fluxSum = linkWeight(links[i], egoViewSum);
+    var fluxSum = linkWeight(links[i], egoViewSum, curTime);
     links[i]['fluxSum'] = fluxSum;
     links[i].value = strokeScale(fluxSum);
   }
+  return egoViewSum;
 }
 
-function nodeSize(d) {
-  if (egoTime == undefined) return d.totalView;
-  // console.log("nodesize", egoTime, d);
-  var viewSum = 0;
-  for (var i = 0; i < d.dailyView.length; i++) {
-    var date = new Date(d.startDate.getTime() + 3600 * 1000 * 24 * i);
-    if (date.getTime() <= egoTime) viewSum += d.dailyView[i];
-    else break;
+function aDay() {
+  return 3600 * 1000 * 24;
+}
+
+function filterNodes() {
+  // var starttime = Date.now();
+  var minTime = xScale.domain()[0].getTime();
+  var maxTime = xScale.domain()[1].getTime();
+  var infSlider = document.getElementById('infSlider').noUiSlider;
+
+  for (var i = 0; i < nodes.length; i++) {
+    nodes[i].startInfluence = xScale.domain()[1];
   }
-  return viewSum;
-}
-
-function linkWeight(d, egoViewSum) {
-  if (egoTime == undefined) return d.flux;
-
-  var fluxSum = 0;
-  for (var i = 0; i < d.dailyFlux.length; i++) {
-    var date = new Date(d.startDate.getTime() + 3600 * 1000 * 24 * i);
-    if (d.target.id == egoID && fluxSum > 0.1 * egoViewSum) {
-      d.source.startInfluence = date;
+  for (var tick = minTime; tick < maxTime; tick += aDay() * 30) {
+    var egoViewSum = calculateViewCount(tick);
+    for (var i = 0; i < links.length; i++) {
+      var d = links[i];
+      var curTime = new Date(tick);
+      if (
+        d.source.startInfluence > curTime &&
+        d.target.id == egoID &&
+        d.fluxSum > (infSlider.get() / 100.0) * egoViewSum
+      ) {
+        d.source.startInfluence = curTime;
+      }
     }
-    if (date.getTime() <= egoTime) fluxSum += d.dailyFlux[i];
-    else break;
   }
-  return fluxSum;
+  // console.log("filterNodes", Date.now()-starttime);
+}
+
+function nodeSize(d, curTime) {
+  if (curTime == undefined) return d.totalView;
+  for (var i = 0; i < d.dailyView.length; i += 10) {
+    var date = new Date(d.startDate.getTime() + aDay() * i);
+    if (date.getTime() > curTime) break;
+  }
+  return d.dailyView.slice(0, i).reduce((a, b) => a + b, 0);
+}
+
+function linkWeight(d, egoViewSum, curTime) {
+  if (curTime == undefined) return d.flux;
+  for (var i = 0; i < d.dailyFlux.length; i += 10) {
+    var date = new Date(d.startDate.getTime() + aDay() * i);
+    if (date.getTime() > curTime) break;
+  }
+  return d.dailyFlux.slice(0, i).reduce((a, b) => a + b, 0);
 }
 
 function arraysum(total, num) {
@@ -840,12 +842,8 @@ function arraysum(total, num) {
 }
 
 function linkArc(d) {
-  var px1 = padding_x + xScale(d.source.startDate);
-  var px2 = padding_x + xScale(d.target.startDate);
-  if (egoType == 'A') {
-    px1 = padding_x + xScale(d.source.startInfluence);
-    px2 = padding_x + xScale(d.target.startInfluence);
-  }
+  var px1 = padding_x + xScale(d.source.startInfluence);
+  var px2 = padding_x + xScale(d.target.startInfluence);
   var py1, py2;
   var sortingOpt = graphSortingOpts[graphSorting.value];
   if (sortingOpt == 'Force Directed') {
@@ -990,7 +988,7 @@ function showOtherSongViewCount(othersong) {
   var data = [];
   for (var i = 0; i < othersong.dailyView.length; i++) {
     data.push({
-      date: new Date(startDate.getTime() + 3600 * 1000 * 24 * i),
+      date: new Date(startDate.getTime() + aDay() * i),
       value: othersong.dailyView[i],
     });
   }
