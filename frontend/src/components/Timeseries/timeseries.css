@@ -1,0 +1,89 @@
+.noUi-target {
+  box-shadow: none;
+}
+
+#egoTitle {
+  margin: 0 30px;
+  padding: 15px 10px 5px 20px;
+  border-left: 10px solid #f78ca0;
+}
+
+#egoInfoCard {
+  width: 100%;
+  margin: 20px 0 30px 30px;
+}
+
+#controlPanel {
+  margin: 0 20px 0 30px;
+}
+
+#infSlider {
+  width: 100%;
+  margin: 5px 0 60px 0;
+}
+
+#graphSorting {
+  width: 100%;
+  margin: 5px 0 20px 0;
+  background-color: #fafafa;
+  border-radius: 4px;
+  border: 1px solid #d3d3d3;
+}
+
+#egoTimeline {
+}
+
+#timeRange {
+  position: absolute;
+  height: 20px;
+}
+
+#egoIndicator {
+  stroke: #495057;
+  stroke-width: 2;
+}
+
+#otherIndicator {
+  stroke: #f78ca0;
+  stroke-width: 1;
+}
+
+rect#otherInfobox {
+  fill: #ffffffaa;
+  stroke: #f78ca0;
+  stroke-width: 1.5px;
+}
+text#otherInfobox {
+  font-size: 12px;
+}
+
+.timeCover {
+  fill: #f0f0f0aa;
+}
+
+path.viewcount {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+path.viewcount_other {
+  fill: none;
+  stroke: #f78ca0;
+  stroke-width: 1.5px;
+}
+
+path.edge {
+  fill: none;
+  stroke: #aaa;
+  opacity: 0.5;
+}
+
+circle.node {
+  stroke: #aaa;
+  stroke-width: 0.5px;
+  cursor: pointer;
+}
+text.node {
+  cursor: pointer;
+  font-size: 12px;
+}

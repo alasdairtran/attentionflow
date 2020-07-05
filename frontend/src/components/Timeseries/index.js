@@ -5,6 +5,7 @@ import { Redirect } from 'react-router-dom';
 
 import noUiSlider from 'nouislider';
 import 'nouislider/distribute/nouislider.css';
+import './timeseries.css';
 
 import { getVideoInfo } from '../VideoEgo/popout';
 import { getIncomingOutgoing } from '../VideoEgo/incomingOutgoing';
@@ -80,7 +81,7 @@ let rightMargin = 40;
 let chart_yScale_minimum = 100000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let egoID, egoType, egoTime, simulation, nodes, links;
-let graphSorting;
+let graphSorting, infSlider;
 let graphSortingOpts = [
   'Force Directed',
   'Total View',
@@ -91,7 +92,7 @@ let graphSortingOpts = [
 let chart_height, chart_topMargin;
 let chart_yScale_view, chart_yScale_artist, startPos, topVideos;
 let vis, visinfo, defs, viewcount, highlighted;
-let xScale, yScale, yAxis, old_max, viewCountPath;
+let xScale, yScale, yAxis, oldMaxView, viewCountPath;
 
 class AttentionFlow extends Component {
   constructor(props) {
@@ -148,9 +149,7 @@ class AttentionFlow extends Component {
 
     var range = document.createElement('div');
     range.id = 'timeRange';
-    range.style.position = 'absolute';
     range.style.width = this.canvasWidth - padding_x * 2 - rightMargin + 'px';
-    range.style.height = '20px';
     range.style.top = this.chartHeight + 30 + 'px';
     range.style.left = padding_x * 2 + 'px';
     this.divTimeline.append(range);
@@ -171,18 +170,12 @@ class AttentionFlow extends Component {
 
   drawEgoInfoCard(theEgo) {
     // Set ego title
-    this.divTitle.style.margin = '0 30px';
-    this.divTitle.style.padding = '15px 10px 5px 20px';
-    this.divTitle.style.borderLeft = '10px solid ' + hcolor;
     this.divTitle.innerHTML = '<h5><b>' + theEgo.title + '</b></h5>';
 
     // update ego information
     this.divInfo.innerHTML = '';
-
     var infocard = document.createElement('div');
     infocard.setAttribute('id', 'egoInfoCard');
-    infocard.style.width = '100%';
-    infocard.style.padding = '20px 0 30px 30px';
 
     var published = new Date(theEgo.publishedAt);
     var infocardtext = document.createElement('div');
@@ -201,14 +194,40 @@ class AttentionFlow extends Component {
     this.divInfo.append(infocard);
 
     var controlPanel = document.createElement('div');
-    controlPanel.style.paddingLeft = '30px';
+    controlPanel.id = 'controlPanel';
+
+    var infSliderLabel = document.createElement('div');
+    infSlider = document.createElement('div');
+    infSlider.id = 'infSlider';
+    noUiSlider.create(infSlider, {
+      range: {
+        min: 0,
+        max: 50,
+      },
+      step: 1,
+      start: 10,
+      pips: { mode: 'count', values: 6 },
+    });
+
+    var pips = infSlider.querySelectorAll('.noUi-value');
+    for (var i = 0; i < pips.length; i++) {
+      pips[i].style.cursor = 'pointer';
+      pips[i].addEventListener('click', function() {
+        var value = Number(this.getAttribute('data-value'));
+        infSlider.noUiSlider.set(value);
+      });
+    }
+    infSlider.noUiSlider.on('set.one', function() {
+      var infVal = parseInt(infSlider.noUiSlider.get());
+      infSliderLabel.innerHTML = '<b>Influence Filter (' + infVal + '%)</b>';
+    });
+    infSlider.noUiSlider.set();
 
     var graphSortingLabel = document.createElement('div');
     graphSortingLabel.innerHTML = '<b>Y-position</b>';
 
     graphSorting = document.createElement('SELECT');
-    graphSorting.style.width = '100%';
-    graphSorting.style.margin = '5px 0 20px 0';
+    graphSorting.id = 'graphSorting';
     for (var o = 0; o < graphSortingOpts.length; o++) {
       var option = document.createElement('option');
       option.value = o;
@@ -216,25 +235,10 @@ class AttentionFlow extends Component {
       graphSorting.add(option);
     }
 
-    var infSliderLabel = document.createElement('div');
-    infSliderLabel.innerHTML = '<b>Influence</b>';
-
-    var infSlider = document.createElement('div');
-    infSlider.style.width = '100%';
-    infSlider.style.margin = '5px 0 20px 0';
-    noUiSlider.create(infSlider, {
-      range: {
-        min: 1,
-        max: 100,
-      },
-      step: 1,
-      start: 10,
-    });
-
-    controlPanel.append(graphSortingLabel);
-    controlPanel.append(graphSorting);
     controlPanel.append(infSliderLabel);
     controlPanel.append(infSlider);
+    controlPanel.append(graphSortingLabel);
+    controlPanel.append(graphSorting);
 
     this.divInfo.append(controlPanel);
   }
@@ -284,7 +288,7 @@ class AttentionFlow extends Component {
         }),
       ])
       .range([this.chartHeight, 0]);
-    old_max = yScale.domain()[1];
+    oldMaxView = yScale.domain()[1];
     startPos = xScale(
       d3.min(data, function(d) {
         return d.date;
@@ -301,9 +305,7 @@ class AttentionFlow extends Component {
     viewCountPath = viewcount
       .append('path')
       .datum(data)
-      .attr('fill', 'none')
-      .attr('stroke', 'steelblue')
-      .attr('stroke-width', 1.5)
+      .attr('class', 'viewcount')
       .attr(
         'd',
         d3
@@ -318,44 +320,32 @@ class AttentionFlow extends Component {
 
     var time_indicator = viewcount
       .append('line')
+      .attr('id', 'egoIndicator')
       .attr('y1', 0)
       .attr('y2', this.chartHeight + 525)
-      .attr('stroke', '#495057')
-      .attr('stroke-width', 2)
       .attr('display', 'none');
     var other_indicator = viewcount
       .append('line')
-      .attr('id', 'other_indicator')
+      .attr('id', 'otherIndicator')
       .attr('y1', 0)
       .attr('y2', this.chartHeight + 525)
-      .attr('stroke', hcolor)
-      .attr('stroke-width', 1)
       .attr('display', 'none');
+
+    // add highlighted layer under timecover
+    highlighted = viewcount.append('g');
     var time_cover = viewcount
       .append('rect')
+      .attr('class', 'timeCover')
       .attr('y', 0)
       .attr('width', 0)
-      .attr('height', this.chartHeight)
-      .style('fill', '#aaaaaa33');
-    var time_cover_n = vis
-      .append('rect')
-      .attr('y', this.chartHeight + 45)
-      .attr('width', 0)
-      .attr('height', 500)
-      .style('fill', '#aaaaaa33');
+      .attr('height', this.chartHeight + 525);
 
     egoTime = Math.floor(xScale.invert(0));
     var egoInfoBox = visinfo.append('text').style('font-size', '12px');
-    visinfo
-      .append('rect')
-      .attr('id', 'otherInfobox')
-      .attr('fill', '#ffffffaa')
-      .style('stroke', hcolor)
-      .style('stroke-width', 1.5);
+    visinfo.append('rect').attr('id', 'otherInfobox');
     visinfo
       .append('text')
       .attr('id', 'otherInfobox')
-      .style('font-size', '12px')
       .attr('display', 'none');
 
     viewcount.on('mousemove', function(e) {
@@ -366,10 +356,10 @@ class AttentionFlow extends Component {
         .attr('x1', m_pos)
         .attr('x2', m_pos)
         .attr('display', 'block');
-      time_cover.attr('x', m_pos + 1).attr('width', this.chartWidth - m_pos);
-      time_cover_n
-        .attr('x', padding_x + m_pos + 1)
-        .attr('width', this.chartWidth - m_pos);
+      var chartWidth = document
+        .getElementById('timeRange')
+        .getBoundingClientRect().width;
+      time_cover.attr('x', m_pos + 1).attr('width', chartWidth - m_pos);
 
       var egoCircle = d3.select('circle#' + egoID);
       var pos_y =
@@ -393,8 +383,6 @@ class AttentionFlow extends Component {
       calculateViewCount();
       simulation.restart();
     });
-
-    highlighted = viewcount.append('g');
   }
 
   drawEgoNetwork(theEgo) {
@@ -522,9 +510,7 @@ class AttentionFlow extends Component {
       .selectAll('path')
       .data(links)
       .join('path')
-      .attr('fill', 'none')
-      .attr('stroke', '#aaa')
-      .attr('stroke-opacity', 0.5)
+      .attr('class', 'edge')
       .attr('id', d => d.id);
     // .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')');
 
@@ -577,19 +563,18 @@ class AttentionFlow extends Component {
       .append('circle')
       .call(drag(simulation))
       .attr('id', d => d.id)
+      .attr('class', 'node')
       .attr('r', function(d) {
         return radiusScale(nodeSize(d));
       })
-      .attr('fill', d => `url(#grad${d.id})`)
-      .attr('stroke', '#aaa')
-      .attr('stroke-width', 0.5)
-      .style('cursor', 'pointer');
+      .attr('fill', d => `url(#grad${d.id})`);
 
     nodes.sort((a, b) => a.radius - b.radius);
     const radiusLimit = minRadius * 2;
     node
       .append('text')
       .call(drag(simulation))
+      .attr('class', 'node')
       .text(function(d) {
         if (egoType == 'V') return d.name.split('-')[1];
         if (egoType == 'A') return d.name;
@@ -598,8 +583,6 @@ class AttentionFlow extends Component {
         return -2.5 * (1 + !d.name ? 0 : d.name.length);
       })
       .attr('y', 3)
-      .style('cursor', 'pointer')
-      .style('font-size', '12px')
       .style('visibility', function(d) {
         if (d.id == egoID) return 'visible';
         else return d.radius > radiusLimit ? 'visible' : 'hidden';
@@ -911,7 +894,7 @@ function linkArc(d) {
 }
 
 function hideOtherSongViewCount(othersong) {
-  viewcount.select('line#other_indicator').attr('display', 'none');
+  viewcount.select('line#otherIndicator').attr('display', 'none');
   visinfo.select('rect#otherInfobox').attr('display', 'none');
   visinfo.select('text#otherInfobox').attr('display', 'none');
   var incoming = d3.select('path#' + othersong.id + egoID);
@@ -923,7 +906,7 @@ function hideOtherSongViewCount(othersong) {
     outgoing.attr('stroke', '#aaa').attr('stroke-opacity', 0.5);
   }
 
-  yScale.domain([0, old_max]);
+  yScale.domain([0, oldMaxView]);
   yAxis.call(d3.axisLeft(yScale).tickFormat(numFormatter));
   viewCountPath.attr(
     'd',
@@ -963,7 +946,7 @@ function showOtherSongViewCount(othersong) {
     ypos += 180;
   }
   viewcount
-    .select('line#other_indicator')
+    .select('line#otherIndicator')
     .attr('x1', xpos)
     .attr('x2', xpos)
     .attr('display', 'block');
@@ -1037,9 +1020,7 @@ function showOtherSongViewCount(othersong) {
   highlighted
     .append('path')
     .datum(data)
-    .attr('fill', 'none')
-    .attr('stroke', hcolor)
-    .attr('stroke-width', 1.5)
+    .attr('class', 'viewcount_other')
     .attr(
       'd',
       d3
