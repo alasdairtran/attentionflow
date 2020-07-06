@@ -167,6 +167,7 @@ class AttentionFlow extends Component {
       },
       connect: true,
       step: aDay(), // A day
+      padding: [egoStartDate - minTime, aDay()],
       start: [egoStartDate, parseInt(minTime + (maxTime - minTime) * 0.9)],
     });
 
@@ -530,7 +531,7 @@ class AttentionFlow extends Component {
       dailyFlux: video[4],
     }));
 
-    chart_height = 500;
+    chart_height = 475;
     chart_topMargin = this.chartHeight + 70;
     const chart = vis.append('g');
     const nodeTitles = songsArr.map(video => video[0]);
@@ -657,9 +658,6 @@ class AttentionFlow extends Component {
       .call(drag(simulation))
       .attr('id', d => d.id)
       .attr('class', 'node')
-      .attr('r', function(d) {
-        return radiusScale(nodeSize(d));
-      })
       .attr('fill', d => `url(#grad${d.id})`);
 
     nodes.sort((a, b) => a.radius - b.radius);
@@ -908,7 +906,8 @@ function filterNodes() {
         d.target.id == egoID &&
         d.fluxSum > (infSlider.get() / 100.0) * egoViewSum
       ) {
-        d.source.startInfluence = curTime;
+        var infTime = Math.max(d.source.startDate.getTime(), tick);
+        d.source.startInfluence = new Date(infTime);
       }
     }
   }
@@ -921,21 +920,27 @@ function filterNodes() {
 }
 
 function nodeSize(d, curTime) {
-  if (curTime == undefined) return d.totalView;
-  for (var i = 0; i < d.dailyView.length; i += 10) {
+  var trange = getTimeSelection();
+  var ts = d.dailyView.length;
+  var te = 0;
+  for (var i = 0; i < d.dailyView.length; i += 30) {
     var date = new Date(d.startDate.getTime() + aDay() * i);
-    if (date.getTime() > curTime) break;
+    if (ts > i && trange[0] <= date) ts = i;
+    if (te < i && date <= trange[1]) te = i;
   }
-  return d.dailyView.slice(0, i).reduce((a, b) => a + b, 0);
+  return d.dailyView.slice(ts, te).reduce((a, b) => a + b, 0);
 }
 
 function linkWeight(d, curTime) {
-  if (curTime == undefined) return d.flux;
+  var trange = getTimeSelection();
+  var ts = d.dailyFlux.length;
+  var te = 0;
   for (var i = 0; i < d.dailyFlux.length; i += 10) {
     var date = new Date(d.startDate.getTime() + aDay() * i);
-    if (date.getTime() > curTime) break;
+    if (ts > i && trange[0] <= date) ts = i;
+    if (te < i && date <= trange[1]) te = i;
   }
-  var sum = d.dailyFlux.slice(0, i).reduce((a, b) => a + b, 0);
+  var sum = d.dailyFlux.slice(ts, te).reduce((a, b) => a + b, 0);
   d.source.contributed = sum;
   return sum;
 }
