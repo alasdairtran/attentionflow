@@ -77,7 +77,7 @@ function stringfy(id) {
 const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let padding_x = 15;
-let rightMargin = 40;
+let rightMargin = 50;
 let chart_yScale_minimum = 100000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let egoNode, egoID, egoType, egoTime, simulation, nodes, links;
@@ -93,6 +93,10 @@ let chart_height, chart_topMargin;
 let chart_yScale_view, chart_yScale_artist, startPos, topVideos;
 let vis, visinfo, defs, viewcount, highlighted;
 let xScale, yScale, yAxis, oldMaxView, viewCountPath;
+const minStroke = 1;
+const maxStroke = 20;
+const maxRadius = 50;
+const minRadius = 10;
 
 class AttentionFlow extends Component {
   constructor(props) {
@@ -154,7 +158,7 @@ class AttentionFlow extends Component {
     range.id = 'timeRange';
     range.style.width = this.canvasWidth - padding_x * 2 - rightMargin + 'px';
     range.style.top = this.chartHeight + 30 + 'px';
-    range.style.left = padding_x * 2 + 'px';
+    range.style.left = padding_x + maxRadius + 'px';
     this.divTimeline.append(range);
 
     var egoStartDate = egoNode.startDate;
@@ -252,12 +256,12 @@ class AttentionFlow extends Component {
           .attr('y', pos_y)
           .html(
             '<tspan x="' +
-              (padding_x + m_pos + 15) +
+              (maxRadius + m_pos + 15) +
               '" dy="0">' +
               numFormatter(viewSum) +
               ' views</tspan>' +
               '<tspan x="' +
-              (padding_x + m_pos + 15) +
+              (maxRadius + m_pos + 15) +
               '" dy="15">' +
               new Date(egoTime).toShortFormat() +
               '</tspan>'
@@ -406,7 +410,7 @@ class AttentionFlow extends Component {
   drawEgoViewCount() {
     viewcount = vis
       .append('g')
-      .attr('transform', 'translate(' + padding_x + ',' + 20 + ')');
+      .attr('transform', 'translate(' + maxRadius + ',' + 20 + ')');
     viewcount
       .append('rect')
       .attr('width', this.chartWidth)
@@ -484,12 +488,7 @@ class AttentionFlow extends Component {
     const linksArr = egoNode.links;
 
     const strokeList = linksArr.map(link => link[2]);
-    const minStroke = 1;
-    const maxStroke = 20;
-
     const viewsList = songsArr.map(d => d[2]);
-    const maxRadius = 50;
-    const minRadius = 10;
 
     strokeScale = d3
       .scaleLinear()
@@ -562,7 +561,7 @@ class AttentionFlow extends Component {
     var newDomain = [xScale.invert(0), xScale.invert(this.canvasWidth)];
     chart
       .append('g')
-      .attr('transform', 'translate(' + padding_x + ',' + chart_topMargin + ')')
+      .attr('transform', 'translate(' + maxRadius + ',' + chart_topMargin + ')')
       .call(d3.axisTop(xScale));
 
     chart_yScale_view = d3
@@ -724,7 +723,7 @@ class AttentionFlow extends Component {
           .attr('display', 'block')
           .attr(
             'transform',
-            'translate(' + (startPos + padding_x) + ',' + chart_topMargin + ')'
+            'translate(' + (startPos + maxRadius) + ',' + chart_topMargin + ')'
           )
           .call(
             d3
@@ -737,7 +736,7 @@ class AttentionFlow extends Component {
           .attr('display', 'block')
           .attr(
             'transform',
-            'translate(' + (startPos + padding_x) + ',' + chart_topMargin + ')'
+            'translate(' + (startPos + maxRadius) + ',' + chart_topMargin + ')'
           )
           .call(d3.axisLeft(chart_yScale_artist));
       }
@@ -754,9 +753,9 @@ class AttentionFlow extends Component {
           else return 'none';
         })
         .attr('cx', function(d) {
-          if (d.id == egoID) return padding_x + xScale(egoTime);
+          if (d.id == egoID) return maxRadius + xScale(egoTime);
           if (d.startInfluence.getTime() <= egoTime) {
-            return padding_x + xScale(d.startInfluence);
+            return maxRadius + xScale(d.startInfluence);
           }
         })
         .attr('cy', function(d) {
@@ -780,7 +779,7 @@ class AttentionFlow extends Component {
           }
         })
         .attr('transform', function(d) {
-          var new_x = padding_x + xScale(d.startInfluence);
+          var new_x = maxRadius + xScale(d.startInfluence);
           var new_y;
           var sortingOpt = graphSortingOpts[graphSorting.value];
           if (sortingOpt == 'Force Directed') {
@@ -799,7 +798,7 @@ class AttentionFlow extends Component {
               chart_yScale_artist(d.artist);
           }
           if (d.id == egoID) {
-            new_x = padding_x + xScale(egoTime);
+            new_x = maxRadius + xScale(egoTime);
             // new_y = chart_topMargin;
           }
           return `translate(${new_x},${new_y})`;
@@ -921,24 +920,28 @@ function filterNodes() {
 }
 
 function nodeSize(d, minTime, maxTime) {
-  var ts = d.dailyView.length;
-  var te = 0;
-  for (var i = 0; i < d.dailyView.length; i += 10) {
-    var date = new Date(d.startDate.getTime() + aDay() * i);
-    if (ts > i && minTime <= date) ts = i;
-    if (te < i && date <= maxTime) te = i;
-  }
+  var startDate = d.startDate.getTime();
+  var ts = Math.max(
+    0,
+    Math.min(d.dailyView.length, parseInt((minTime - startDate) / aDay()))
+  );
+  var te = Math.max(
+    0,
+    Math.min(d.dailyView.length, parseInt((maxTime - startDate) / aDay()))
+  );
   return d.dailyView.slice(ts, te).reduce((a, b) => a + b, 0);
 }
 
 function linkWeight(d, minTime, maxTime) {
-  var ts = d.dailyFlux.length;
-  var te = 0;
-  for (var i = 0; i < d.dailyFlux.length; i += 10) {
-    var date = new Date(d.startDate.getTime() + aDay() * i);
-    if (ts > i && minTime <= date) ts = i;
-    if (te < i && date <= maxTime) te = i;
-  }
+  var startDate = d.startDate.getTime();
+  var ts = Math.max(
+    0,
+    Math.min(d.dailyFlux.length, parseInt((minTime - startDate) / aDay()))
+  );
+  var te = Math.max(
+    0,
+    Math.min(d.dailyFlux.length, parseInt((maxTime - startDate) / aDay()))
+  );
   var sum = d.dailyFlux.slice(ts, te).reduce((a, b) => a + b, 0);
   d.source.contributed = sum;
   return sum;
@@ -949,8 +952,8 @@ function arraysum(total, num) {
 }
 
 function linkArc(d) {
-  var px1 = padding_x + xScale(d.source.startInfluence);
-  var px2 = padding_x + xScale(d.target.startInfluence);
+  var px1 = maxRadius + xScale(d.source.startInfluence);
+  var px2 = maxRadius + xScale(d.target.startInfluence);
   var py1, py2;
   var sortingOpt = graphSortingOpts[graphSorting.value];
   if (sortingOpt == 'Force Directed') {
@@ -983,10 +986,10 @@ function linkArc(d) {
   }
 
   if (d.source.id == egoID) {
-    px1 = padding_x + xScale(egoTime);
+    px1 = maxRadius + xScale(egoTime);
   }
   if (d.target.id == egoID) {
-    px2 = padding_x + xScale(egoTime);
+    px2 = maxRadius + xScale(egoTime);
   }
 
   var dx = px2 - px1,
@@ -1046,7 +1049,7 @@ function showOtherSongViewCount(othersong) {
 
   var otherNode = d3.select('circle#' + othersong.id).node();
   var xpos = xScale(startDate);
-  var xpos_infoText = padding_x + xpos + 15;
+  var xpos_infoText = maxRadius + xpos + 15;
   var ypos = -90 + parseFloat(d3.select(otherNode.parentNode).attr('cy'));
   if (ypos < chart_topMargin) {
     ypos += 180;
