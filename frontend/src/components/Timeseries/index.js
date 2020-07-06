@@ -1003,11 +1003,11 @@ function hideOtherSongViewCount(othersong) {
   visinfo.select('text#otherInfobox').attr('display', 'none');
   var incoming = d3.select('path#' + othersong.id + egoID);
   if (incoming) {
-    incoming.attr('stroke', '#aaa').attr('stroke-opacity', 0.5);
+    incoming.attr('class', 'edge');
   }
   var outgoing = d3.select('path#' + egoID + othersong.id);
   if (outgoing) {
-    outgoing.attr('stroke', '#aaa').attr('stroke-opacity', 0.5);
+    outgoing.attr('class', 'edge');
   }
 
   yScale.domain([0, oldMaxView]);
@@ -1027,18 +1027,19 @@ function hideOtherSongViewCount(othersong) {
 }
 
 function showOtherSongViewCount(othersong) {
+  console.log('othersong.id', othersong.id, egoID);
   var startDate = new Date(othersong.startDate);
 
   var edgeToEgo = d3.select('path#' + othersong.id + egoID);
   var viewToEgo = 0;
   if (edgeToEgo.data()[0]) {
-    edgeToEgo.attr('stroke', 'blue').attr('stroke-opacity', 1);
+    edgeToEgo.attr('class', 'edge incoming');
     viewToEgo = parseInt(edgeToEgo.data()[0].fluxSum).toLocaleString();
   }
   var edgeFromEgo = d3.select('path#' + egoID + othersong.id);
   var viewFromEgo = 0;
   if (edgeFromEgo.data()[0]) {
-    edgeFromEgo.attr('stroke', 'red').attr('stroke-opacity', 1);
+    edgeFromEgo.attr('class', 'edge outgoing');
     viewFromEgo = parseInt(edgeFromEgo.data()[0].fluxSum).toLocaleString();
   }
 
