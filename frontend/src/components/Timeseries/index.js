@@ -306,7 +306,6 @@ class AttentionFlow extends Component {
     controlPanel.id = 'controlPanel';
 
     var infSliderLabel = document.createElement('div');
-    infSliderLabel.innerHTML = '<b>Influence Filter (%)</b>';
     infSlider = document.createElement('div');
     infSlider.id = 'infSlider';
     noUiSlider.create(infSlider, {
@@ -329,13 +328,14 @@ class AttentionFlow extends Component {
     }
     infSlider.noUiSlider.on('set.one', function() {
       var infVal = parseInt(infSlider.noUiSlider.get());
-      infSliderLabel.innerHTML = '<b>Influence Filter (' + infVal + '%)</b>';
+      infSliderLabel.innerHTML =
+        '<b>Show videos with influence greater than (' + infVal + '%)</b>';
       filterNodes();
       simulation.restart();
     });
 
     var graphSortingLabel = document.createElement('div');
-    graphSortingLabel.innerHTML = '<b>Y-position</b>';
+    graphSortingLabel.innerHTML = '<b>Sort along y-axis by</b>';
 
     graphSorting = document.createElement('SELECT');
     graphSorting.id = 'graphSorting';
@@ -366,7 +366,7 @@ class AttentionFlow extends Component {
     embvideo.width = videoWidth;
     embvideo.height = 0.6 * videoWidth;
     embvideo.style.border = 'none';
-    embvideo.style.margin = '30px 0 0 30px';
+    embvideo.style.margin = '20px 0 0 30px';
     embvideo.src = 'https://www.youtube.com/embed/' + embvideo_id;
     embvideo.src +=
       '?controls=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
