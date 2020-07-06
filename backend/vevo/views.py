@@ -72,9 +72,9 @@ def get_artist_info(request):
     channel_id = "UComP_epzeKzvBX156r6pm1Q" # adele
     video_id = "rYEDA3JcQqw" # rolling in the deep
     output = search_artist_basicinfo(channel_id)
-    # topvideos = search_artist_topvideos(channel_id)
+    topvideos = search_artist_topvideos(channel_id)
     artists = search_1hop_artists(channel_id)
-    # output["topvideos"] = topvideos
+    output["topvideos"] = topvideos
     output["nodes"] = artists["artists"]
     output["links"] = artists["links"]
     return JsonResponse(output)

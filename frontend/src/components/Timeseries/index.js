@@ -186,15 +186,19 @@ class AttentionFlow extends Component {
     var egoInfoText = '';
     if (egoType == 'A') {
       egoInfoText += 'First song published: ' + published.toShortFormat();
+      egoInfoText += '</br>Total views: ' + numFormatter(theEgo.totalView);
+      infocardtext.innerHTML = egoInfoText;
+      infocard.append(infocardtext);
+      this.divInfo.append(infocard);
+      this.addTopVideos(this.divInfo, theEgo);
     } else if (egoType == 'V') {
-      egoInfoText += 'Published: ' + published.toShortFormat() + '</br>';
-      egoInfoText += 'Genres: ' + theEgo.genres.join(',');
+      this.addVideoThumbnail(this.divInfo, theEgo);
+      egoInfoText += 'Published: ' + published.toShortFormat();
+      egoInfoText += '</br>Genres: ' + theEgo.genres.join(',');
+      infocardtext.innerHTML = egoInfoText;
+      infocard.append(infocardtext);
+      this.divInfo.append(infocard);
     }
-    egoInfoText += '</br>Total views: ' + numFormatter(theEgo.totalView);
-
-    infocardtext.innerHTML = egoInfoText;
-    infocard.append(infocardtext);
-    this.divInfo.append(infocard);
 
     var controlPanel = document.createElement('div');
     controlPanel.id = 'controlPanel';
@@ -244,6 +248,59 @@ class AttentionFlow extends Component {
     controlPanel.append(graphSorting);
 
     this.divInfo.append(controlPanel);
+  }
+
+  addVideoThumbnail(div, theEgo) {
+    var embvideo_id;
+    var embvideo = document.createElement('iframe');
+    if (egoType == 'V') {
+      embvideo_id = theEgo.id;
+    } else if (egoType == 'A') {
+      embvideo_id = stringfy(theEgo.topvideos[0][0][0]);
+    }
+    var videoWidth = div.offsetWidth - 60;
+    embvideo.width = videoWidth;
+    embvideo.height = 0.6 * videoWidth;
+    embvideo.style.border = 'none';
+    embvideo.style.margin = '30px 0 0 30px';
+    embvideo.src = 'https://www.youtube.com/embed/' + embvideo_id;
+    embvideo.src +=
+      '?controls=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+    div.append(embvideo);
+  }
+
+  addTopVideos(div, theEgo) {
+    topVideos = {};
+    var topvideos = document.createElement('div');
+    topvideos.innerHTML = '<b>Top Songs</b><br/>';
+    topvideos.style.padding = '0 0 20px 30px';
+    for (var i = 0, j = 0; i < theEgo.topvideos[0].length, j < 5; i++, j++) {
+      var videodiv = document.createElement('div');
+      var video = theEgo.topvideos[0][i];
+      var vtitle = video[1].split('-')[1];
+      var vtitle_str =
+        vtitle.length > 20 ? vtitle.slice(0, 30) + '...' : vtitle;
+      topVideos[video[0]] = {
+        title: vtitle,
+        startDate: video[3],
+        dailyView: video[5],
+      };
+      videodiv.id = stringfy(video[0]);
+      videodiv.innerHTML += '<b>' + vtitle_str + '</b><br/>';
+      videodiv.innerHTML +=
+        numFormatter(video[4]) +
+        ' views • ' +
+        new Date(video[2]).toShortFormat() +
+        '<br/>';
+      videodiv.addEventListener('mouseover', function(e) {
+        showOtherSongViewCount(topVideos[this.id]);
+      });
+      videodiv.addEventListener('mouseout', function(e) {
+        hideOtherSongViewCount(topVideos[this.id]);
+      });
+      topvideos.append(videodiv);
+    }
+    div.append(topvideos);
   }
 
   drawEgoViewCount(theEgo) {
