@@ -114,7 +114,7 @@ class AttentionFlow extends Component {
   drawTimePanel() {
     // console.log('drawTimePanel', this.props);
     egoNode = this.props.egoInfo;
-    console.log('egoNode', egoNode, this.props.egoType);
+    // console.log('egoNode', egoNode, this.props.egoType);
 
     egoType = this.props.egoType;
     egoID = stringfy(egoNode.id);
@@ -168,7 +168,7 @@ class AttentionFlow extends Component {
       connect: true,
       step: aDay(), // A day
       padding: [egoStartDate - minTime, aDay()],
-      start: [egoStartDate, parseInt(minTime + (maxTime - minTime) * 0.9)],
+      start: [egoStartDate, parseInt(minTime + (maxTime - minTime) * 0.98)],
     });
 
     var start_indicator = viewcount
@@ -415,8 +415,8 @@ class AttentionFlow extends Component {
 
     var publishedDate = new Date(egoNode.publishedAt);
     var startDate = new Date(egoNode.startDate);
-    console.log('startDate', egoNode.startDate, startDate);
-    console.log('drawEgoViewCount', startDate, egoNode.dailyView.length);
+    // console.log('startDate', egoNode.startDate, startDate);
+    // console.log('drawEgoViewCount', startDate, egoNode.dailyView.length);
 
     var data = [];
     for (var i = 0; i < egoNode.dailyView.length; i++) {
@@ -680,7 +680,7 @@ class AttentionFlow extends Component {
       });
 
     node.on('click', d => {
-      console.log(d);
+      // console.log(d);
       this.setState({
         clickedOnSong: true,
         clickedVideoID: d.id.substr(1),
@@ -888,16 +888,17 @@ function aDay() {
 
 function filterNodes() {
   // var starttime = Date.now();
-  var minTime = xScale.domain()[0].getTime();
-  var maxTime = xScale.domain()[1].getTime();
+  var minScale = xScale.domain()[0].getTime();
+  var maxScale = xScale.domain()[1].getTime();
+  var trange = getTimeSelection();
   var infSlider = document.getElementById('infSlider').noUiSlider;
 
   for (var i = 0; i < nodes.length; i++) {
     nodes[i].startInfluence = xScale.domain()[1];
     nodes[i].isVisible = false;
   }
-  for (var tick = minTime; tick < maxTime; tick += aDay() * 30 * 6) {
-    var egoViewSum = calculateViewCount(minTime, tick);
+  for (var tick = minScale; tick < maxScale; tick += aDay() * 30) {
+    var egoViewSum = calculateViewCount(trange[0].getTime(), tick);
     for (var i = 0; i < links.length; i++) {
       var d = links[i];
       var curTime = new Date(tick);
@@ -911,7 +912,7 @@ function filterNodes() {
       }
     }
   }
-  var egoViewSum = calculateViewCount(minTime, egoTime);
+  var egoViewSum = calculateViewCount(trange[0].getTime(), egoTime);
   for (var i = 0; i < nodes.length; i++) {
     if (nodes[i].contributed > (infSlider.get() / 100.0) * egoViewSum)
       nodes[i].isVisible = true;
@@ -1027,7 +1028,7 @@ function hideOtherSongViewCount(othersong) {
 }
 
 function showOtherSongViewCount(othersong) {
-  console.log('othersong.id', othersong.id, egoID);
+  // console.log('othersong.id', othersong.id, egoID);
   var startDate = new Date(othersong.startDate);
 
   var edgeToEgo = d3.select('path#' + othersong.id + egoID);
