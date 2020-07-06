@@ -142,8 +142,8 @@ class AttentionFlow extends Component {
     this.drawEgoNetwork(theEgo);
     this.drawTimeSelector(theEgo);
 
-    if (egoType == 'V') infSlider.noUiSlider.set(0);
-    else if (egoType == 'A') infSlider.noUiSlider.set(20);
+    if (egoType == 'V') infSlider.noUiSlider.set(1);
+    else if (egoType == 'A') infSlider.noUiSlider.set(5);
   }
 
   drawTimeSelector(theEgo) {
@@ -261,9 +261,10 @@ class AttentionFlow extends Component {
               new Date(egoTime).toShortFormat() +
               '</tspan>'
           );
-        calculateViewCount(egoTime);
-        simulation.restart();
       }
+      calculateViewCount(egoTime);
+      filterNodes();
+      simulation.restart();
     });
   }
 
@@ -306,11 +307,11 @@ class AttentionFlow extends Component {
     noUiSlider.create(infSlider, {
       range: {
         min: 0,
-        max: 50,
+        max: 20,
       },
       step: 1,
-      start: 10,
-      pips: { mode: 'count', values: 6 },
+      start: 1,
+      pips: { mode: 'count', values: 5 },
     });
 
     var pips = infSlider.querySelectorAll('.noUi-value');
@@ -322,6 +323,8 @@ class AttentionFlow extends Component {
       });
     }
     infSlider.noUiSlider.on('set.one', function() {
+      var infVal = parseInt(infSlider.noUiSlider.get());
+      infSliderLabel.innerHTML = '<b>Influence Filter (' + infVal + '%)</b>';
       filterNodes();
       simulation.restart();
     });
@@ -388,12 +391,12 @@ class AttentionFlow extends Component {
         ' views • ' +
         new Date(video[2]).toShortFormat() +
         '<br/>';
-      videodiv.addEventListener('mouseover', function(e) {
-        showOtherSongViewCount(topVideos[this.id]);
-      });
-      videodiv.addEventListener('mouseout', function(e) {
-        hideOtherSongViewCount(topVideos[this.id]);
-      });
+      // videodiv.addEventListener('mouseover', function(e) {
+      //   showOtherSongViewCount(topVideos[this.id]);
+      // });
+      // videodiv.addEventListener('mouseout', function(e) {
+      //   hideOtherSongViewCount(topVideos[this.id]);
+      // });
       topvideos.append(videodiv);
     }
     div.append(topvideos);
@@ -748,7 +751,8 @@ class AttentionFlow extends Component {
       node
         .attr('display', function(d) {
           if (d.id == egoID) return 'block';
-          if (d.startInfluence.getTime() <= egoTime) return 'block';
+          if (d.isVisible && d.startInfluence.getTime() <= egoTime)
+            return 'block';
           else return 'none';
         })
         .attr('cx', function(d) {
@@ -807,11 +811,15 @@ class AttentionFlow extends Component {
         .attr('stroke-width', d => d.value)
         .attr('display', function(d) {
           if (
-            (d.source.startInfluence.getTime() <= egoTime &&
+            (d.source.isVisible &&
+              d.target.isVisible &&
+              d.source.startInfluence.getTime() <= egoTime &&
               d.target.startInfluence.getTime() <= egoTime) ||
-            (d.source.startInfluence.getTime() <= egoTime &&
+            (d.source.isVisible &&
+              d.source.startInfluence.getTime() <= egoTime &&
               d.target.id == egoID) ||
-            (d.target.startInfluence.getTime() <= egoTime &&
+            (d.target.isVisible &&
+              d.target.startInfluence.getTime() <= egoTime &&
               d.source.id == egoID)
           )
             return 'block';
@@ -869,7 +877,7 @@ function calculateViewCount(curTime) {
     if (nodes[i].id == egoID) egoViewSum = viewSum;
   }
   for (var i = 0; i < links.length; i++) {
-    var fluxSum = linkWeight(links[i], egoViewSum, curTime);
+    var fluxSum = linkWeight(links[i], curTime);
     links[i]['fluxSum'] = fluxSum;
     links[i].value = strokeScale(fluxSum);
   }
@@ -888,8 +896,9 @@ function filterNodes() {
 
   for (var i = 0; i < nodes.length; i++) {
     nodes[i].startInfluence = xScale.domain()[1];
+    nodes[i].isVisible = false;
   }
-  for (var tick = minTime; tick < maxTime; tick += aDay() * 30) {
+  for (var tick = minTime; tick < maxTime; tick += aDay() * 30 * 6) {
     var egoViewSum = calculateViewCount(tick);
     for (var i = 0; i < links.length; i++) {
       var d = links[i];
@@ -903,6 +912,11 @@ function filterNodes() {
       }
     }
   }
+  var egoViewSum = calculateViewCount(egoTime);
+  for (var i = 0; i < nodes.length; i++) {
+    if (nodes[i].contributed > (infSlider.get() / 100.0) * egoViewSum)
+      nodes[i].isVisible = true;
+  }
   // console.log("filterNodes", Date.now()-starttime);
 }
 
@@ -915,13 +929,15 @@ function nodeSize(d, curTime) {
   return d.dailyView.slice(0, i).reduce((a, b) => a + b, 0);
 }
 
-function linkWeight(d, egoViewSum, curTime) {
+function linkWeight(d, curTime) {
   if (curTime == undefined) return d.flux;
   for (var i = 0; i < d.dailyFlux.length; i += 10) {
     var date = new Date(d.startDate.getTime() + aDay() * i);
     if (date.getTime() > curTime) break;
   }
-  return d.dailyFlux.slice(0, i).reduce((a, b) => a + b, 0);
+  var sum = d.dailyFlux.slice(0, i).reduce((a, b) => a + b, 0);
+  d.source.contributed = sum;
+  return sum;
 }
 
 function arraysum(total, num) {
