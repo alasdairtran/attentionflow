@@ -80,7 +80,7 @@ let padding_x = 15;
 let rightMargin = 40;
 let chart_yScale_minimum = 100000;
 let chart_xScale_minimum = new Date('2009-11-01');
-let egoID, egoType, egoTime, simulation, nodes, links;
+let egoNode, egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, infSlider;
 let graphSortingOpts = [
   'Force Directed',
@@ -113,11 +113,11 @@ class AttentionFlow extends Component {
 
   drawTimePanel() {
     // console.log('drawTimePanel', this.props);
-    const theEgo = this.props.egoInfo;
-    console.log('theEgo', theEgo, this.props.egoType);
+    egoNode = this.props.egoInfo;
+    console.log('egoNode', egoNode, this.props.egoType);
 
     egoType = this.props.egoType;
-    egoID = stringfy(theEgo.id);
+    egoID = stringfy(egoNode.id);
 
     this.canvasWidth = this.divTimeline.offsetWidth - padding_x * 2;
     this.chartHeight = 120;
@@ -137,16 +137,16 @@ class AttentionFlow extends Component {
     visinfo = outer.append('g');
     defs = outer.append('defs');
 
-    this.drawEgoInfoCard(theEgo);
-    this.drawEgoViewCount(theEgo);
-    this.drawEgoNetwork(theEgo);
-    this.drawTimeSelector(theEgo);
+    this.drawEgoInfoCard();
+    this.drawEgoViewCount();
+    this.drawEgoNetwork();
+    this.drawTimeSelector();
 
     if (egoType == 'V') infSlider.noUiSlider.set(1);
     else if (egoType == 'A') infSlider.noUiSlider.set(5);
   }
 
-  drawTimeSelector(theEgo) {
+  drawTimeSelector() {
     var old = document.getElementById('timeRange');
     if (old) old.remove();
 
@@ -157,7 +157,7 @@ class AttentionFlow extends Component {
     range.style.left = padding_x * 2 + 'px';
     this.divTimeline.append(range);
 
-    var egoStartDate = theEgo.startDate;
+    var egoStartDate = egoNode.startDate;
     var minTime = xScale.domain()[0].getTime();
     var maxTime = xScale.domain()[1].getTime();
     noUiSlider.create(range, {
@@ -263,36 +263,36 @@ class AttentionFlow extends Component {
               '</tspan>'
           );
       }
-      calculateViewCount(egoTime);
+      calculateViewCount(values[0], egoTime);
       filterNodes();
       simulation.restart();
     });
   }
 
-  drawEgoInfoCard(theEgo) {
+  drawEgoInfoCard() {
     // Set ego title
-    this.divTitle.innerHTML = '<h5><b>' + theEgo.title + '</b></h5>';
+    this.divTitle.innerHTML = '<h5><b>' + egoNode.title + '</b></h5>';
 
     // update ego information
     this.divInfo.innerHTML = '';
     var infocard = document.createElement('div');
     infocard.setAttribute('id', 'egoInfoCard');
 
-    var published = new Date(theEgo.publishedAt);
+    var published = new Date(egoNode.publishedAt);
     var infocardtext = document.createElement('div');
 
     var egoInfoText = '';
     if (egoType == 'A') {
       egoInfoText += 'First song published: ' + published.toShortFormat();
-      egoInfoText += '</br>Total views: ' + numFormatter(theEgo.totalView);
+      egoInfoText += '</br>Total views: ' + numFormatter(egoNode.totalView);
       infocardtext.innerHTML = egoInfoText;
       infocard.append(infocardtext);
       this.divInfo.append(infocard);
-      this.addTopVideos(this.divInfo, theEgo);
+      this.addTopVideos(this.divInfo);
     } else if (egoType == 'V') {
-      this.addVideoThumbnail(this.divInfo, theEgo);
+      this.addVideoThumbnail(this.divInfo);
       egoInfoText += 'Published: ' + published.toShortFormat();
-      egoInfoText += '</br>Genres: ' + theEgo.genres.join(',');
+      egoInfoText += '</br>Genres: ' + egoNode.genres.join(',');
       infocardtext.innerHTML = egoInfoText;
       infocard.append(infocardtext);
       this.divInfo.append(infocard);
@@ -350,13 +350,13 @@ class AttentionFlow extends Component {
     this.divInfo.append(controlPanel);
   }
 
-  addVideoThumbnail(div, theEgo) {
+  addVideoThumbnail(div) {
     var embvideo_id;
     var embvideo = document.createElement('iframe');
     if (egoType == 'V') {
-      embvideo_id = theEgo.id;
+      embvideo_id = egoNode.id;
     } else if (egoType == 'A') {
-      embvideo_id = stringfy(theEgo.topvideos[0][0][0]);
+      embvideo_id = stringfy(egoNode.topvideos[0][0][0]);
     }
     var videoWidth = div.offsetWidth - 60;
     embvideo.width = videoWidth;
@@ -369,14 +369,14 @@ class AttentionFlow extends Component {
     div.append(embvideo);
   }
 
-  addTopVideos(div, theEgo) {
+  addTopVideos(div) {
     topVideos = {};
     var topvideos = document.createElement('div');
     topvideos.innerHTML = '<b>Top Songs</b><br/>';
     topvideos.style.padding = '0 0 20px 30px';
-    for (var i = 0, j = 0; i < theEgo.topvideos[0].length, j < 5; i++, j++) {
+    for (var i = 0, j = 0; i < egoNode.topvideos[0].length, j < 5; i++, j++) {
       var videodiv = document.createElement('div');
-      var video = theEgo.topvideos[0][i];
+      var video = egoNode.topvideos[0][i];
       var vtitle = video[1].split('-')[1];
       var vtitle_str =
         vtitle.length > 20 ? vtitle.slice(0, 30) + '...' : vtitle;
@@ -403,7 +403,7 @@ class AttentionFlow extends Component {
     div.append(topvideos);
   }
 
-  drawEgoViewCount(theEgo) {
+  drawEgoViewCount() {
     viewcount = vis
       .append('g')
       .attr('transform', 'translate(' + padding_x + ',' + 20 + ')');
@@ -413,16 +413,16 @@ class AttentionFlow extends Component {
       .attr('height', this.chartHeight)
       .attr('fill', 'transparent');
 
-    var publishedDate = new Date(theEgo.publishedAt);
-    var startDate = new Date(theEgo.startDate);
-    console.log('startDate', theEgo.startDate, startDate);
-    console.log('drawEgoViewCount', startDate, theEgo.dailyView.length);
+    var publishedDate = new Date(egoNode.publishedAt);
+    var startDate = new Date(egoNode.startDate);
+    console.log('startDate', egoNode.startDate, startDate);
+    console.log('drawEgoViewCount', startDate, egoNode.dailyView.length);
 
     var data = [];
-    for (var i = 0; i < theEgo.dailyView.length; i++) {
+    for (var i = 0; i < egoNode.dailyView.length; i++) {
       data.push({
         date: new Date(startDate.getTime() + aDay() * i),
-        value: theEgo.dailyView[i],
+        value: egoNode.dailyView[i],
       });
     }
     xScale = d3
@@ -479,9 +479,9 @@ class AttentionFlow extends Component {
       );
   }
 
-  drawEgoNetwork(theEgo) {
-    const songsArr = theEgo.nodes;
-    const linksArr = theEgo.links;
+  drawEgoNetwork() {
+    const songsArr = egoNode.nodes;
+    const linksArr = egoNode.links;
 
     const strokeList = linksArr.map(link => link[2]);
     const minStroke = 1;
@@ -863,11 +863,11 @@ function getWindowLeftMargin() {
   return div.getBoundingClientRect().x;
 }
 
-function calculateViewCount(curTime) {
+function calculateViewCount(minTime, maxTime) {
   var egoViewSum;
   for (var i = 0; i < nodes.length; i++) {
     var n = document.getElementById(nodes[i].id);
-    var viewSum = nodeSize(nodes[i], curTime);
+    var viewSum = nodeSize(nodes[i], minTime, maxTime);
     var radius = radiusScale(viewSum);
     nodes[i]['viewSum'] = viewSum;
     nodes[i]['radius'] = radius;
@@ -875,7 +875,7 @@ function calculateViewCount(curTime) {
     if (nodes[i].id == egoID) egoViewSum = viewSum;
   }
   for (var i = 0; i < links.length; i++) {
-    var fluxSum = linkWeight(links[i], curTime);
+    var fluxSum = linkWeight(links[i], minTime, maxTime);
     links[i]['fluxSum'] = fluxSum;
     links[i].value = strokeScale(fluxSum);
   }
@@ -897,7 +897,7 @@ function filterNodes() {
     nodes[i].isVisible = false;
   }
   for (var tick = minTime; tick < maxTime; tick += aDay() * 30 * 6) {
-    var egoViewSum = calculateViewCount(tick);
+    var egoViewSum = calculateViewCount(minTime, tick);
     for (var i = 0; i < links.length; i++) {
       var d = links[i];
       var curTime = new Date(tick);
@@ -906,12 +906,12 @@ function filterNodes() {
         d.target.id == egoID &&
         d.fluxSum > (infSlider.get() / 100.0) * egoViewSum
       ) {
-        var infTime = Math.max(d.source.startDate.getTime(), tick);
-        d.source.startInfluence = new Date(infTime);
+        // console.log("D", d.source.name, d.source.startDate, curTime);
+        d.source.startInfluence = curTime;
       }
     }
   }
-  var egoViewSum = calculateViewCount(egoTime);
+  var egoViewSum = calculateViewCount(minTime, egoTime);
   for (var i = 0; i < nodes.length; i++) {
     if (nodes[i].contributed > (infSlider.get() / 100.0) * egoViewSum)
       nodes[i].isVisible = true;
@@ -919,26 +919,24 @@ function filterNodes() {
   // console.log("filterNodes", Date.now()-starttime);
 }
 
-function nodeSize(d, curTime) {
-  var trange = getTimeSelection();
+function nodeSize(d, minTime, maxTime) {
   var ts = d.dailyView.length;
   var te = 0;
-  for (var i = 0; i < d.dailyView.length; i += 30) {
+  for (var i = 0; i < d.dailyView.length; i += 10) {
     var date = new Date(d.startDate.getTime() + aDay() * i);
-    if (ts > i && trange[0] <= date) ts = i;
-    if (te < i && date <= trange[1]) te = i;
+    if (ts > i && minTime <= date) ts = i;
+    if (te < i && date <= maxTime) te = i;
   }
   return d.dailyView.slice(ts, te).reduce((a, b) => a + b, 0);
 }
 
-function linkWeight(d, curTime) {
-  var trange = getTimeSelection();
+function linkWeight(d, minTime, maxTime) {
   var ts = d.dailyFlux.length;
   var te = 0;
   for (var i = 0; i < d.dailyFlux.length; i += 10) {
     var date = new Date(d.startDate.getTime() + aDay() * i);
-    if (ts > i && trange[0] <= date) ts = i;
-    if (te < i && date <= trange[1]) te = i;
+    if (ts > i && minTime <= date) ts = i;
+    if (te < i && date <= maxTime) te = i;
   }
   var sum = d.dailyFlux.slice(ts, te).reduce((a, b) => a + b, 0);
   d.source.contributed = sum;
