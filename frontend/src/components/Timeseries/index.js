@@ -139,8 +139,8 @@ class AttentionFlow extends Component {
 
     this.drawEgoInfoCard(theEgo);
     this.drawEgoViewCount(theEgo);
-    this.drawTimeSelector(theEgo);
     this.drawEgoNetwork(theEgo);
+    this.drawTimeSelector(theEgo);
 
     if (egoType == 'V') infSlider.noUiSlider.set(0);
     else if (egoType == 'A') infSlider.noUiSlider.set(20);
@@ -167,7 +167,103 @@ class AttentionFlow extends Component {
       },
       connect: true,
       step: aDay(), // A day
-      start: [egoStartDate, maxTime],
+      start: [egoStartDate, parseInt(minTime + (maxTime - minTime) * 0.9)],
+    });
+
+    var start_indicator = viewcount
+      .append('line')
+      .attr('id', 'startIndicator')
+      .attr('y1', 0)
+      .attr('y2', this.chartHeight + 525)
+      .attr('display', 'none');
+    var time_indicator = viewcount
+      .append('line')
+      .attr('id', 'egoIndicator')
+      .attr('y1', 0)
+      .attr('y2', this.chartHeight + 525)
+      .attr('display', 'none');
+    var other_indicator = viewcount
+      .append('line')
+      .attr('id', 'otherIndicator')
+      .attr('y1', 0)
+      .attr('y2', this.chartHeight + 525)
+      .attr('display', 'none');
+
+    // add highlighted layer under timecover
+    highlighted = viewcount.append('g');
+    var time_cover_l = viewcount
+      .append('rect')
+      .attr('id', 'timeCover_left')
+      .attr('class', 'timeCover')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('width', 0)
+      .attr('height', this.chartHeight + 525);
+    var time_cover_r = viewcount
+      .append('rect')
+      .attr('id', 'timeCover_right')
+      .attr('class', 'timeCover')
+      .attr('y', 0)
+      .attr('width', 0)
+      .attr('height', this.chartHeight + 525);
+
+    egoTime = Math.floor(xScale.invert(0));
+    var egoInfoBox = visinfo.append('text').style('font-size', '12px');
+    visinfo.append('rect').attr('id', 'otherInfobox');
+    visinfo
+      .append('text')
+      .attr('id', 'otherInfobox')
+      .attr('display', 'none');
+
+    range.noUiSlider.on('update', function(
+      values,
+      handle,
+      unencoded,
+      isTap,
+      positions
+    ) {
+      if (handle == 0) {
+        // left handle
+        var m_pos = xScale(values[0]);
+        start_indicator
+          .attr('x1', m_pos)
+          .attr('x2', m_pos)
+          .attr('display', 'block');
+        time_cover_l.attr('width', m_pos);
+      } else if (handle == 1) {
+        // right handle
+        var m_pos = xScale(values[1]);
+        egoTime = parseInt(values[1]);
+        time_indicator
+          .attr('x1', m_pos)
+          .attr('x2', m_pos)
+          .attr('display', 'block');
+        var chartWidth = document
+          .getElementById('timeRange')
+          .getBoundingClientRect().width;
+        time_cover_r.attr('x', m_pos + 1).attr('width', chartWidth - m_pos);
+
+        var egoCircle = d3.select('circle#' + egoID);
+        var pos_y =
+          30 + parseFloat(d3.select(egoCircle.node().parentNode).attr('cy'));
+        var viewSum = egoCircle.data()[0].viewSum;
+        egoInfoBox
+          .attr('y', pos_y)
+          .html(
+            '<tspan x="' +
+              (padding_x + m_pos + 15) +
+              '" dy="0">' +
+              numFormatter(viewSum) +
+              ' views</tspan>' +
+              '<tspan x="' +
+              (padding_x + m_pos + 15) +
+              '" dy="15">' +
+              new Date(egoTime).toShortFormat() +
+              '</tspan>'
+          );
+        calculateViewCount(egoTime);
+        simulation.restart();
+      }
     });
   }
 
@@ -377,72 +473,6 @@ class AttentionFlow extends Component {
             return yScale(d.value);
           })
       );
-
-    var time_indicator = viewcount
-      .append('line')
-      .attr('id', 'egoIndicator')
-      .attr('y1', 0)
-      .attr('y2', this.chartHeight + 525)
-      .attr('display', 'none');
-    var other_indicator = viewcount
-      .append('line')
-      .attr('id', 'otherIndicator')
-      .attr('y1', 0)
-      .attr('y2', this.chartHeight + 525)
-      .attr('display', 'none');
-
-    // add highlighted layer under timecover
-    highlighted = viewcount.append('g');
-    var time_cover = viewcount
-      .append('rect')
-      .attr('class', 'timeCover')
-      .attr('y', 0)
-      .attr('width', 0)
-      .attr('height', this.chartHeight + 525);
-
-    egoTime = Math.floor(xScale.invert(0));
-    var egoInfoBox = visinfo.append('text').style('font-size', '12px');
-    visinfo.append('rect').attr('id', 'otherInfobox');
-    visinfo
-      .append('text')
-      .attr('id', 'otherInfobox')
-      .attr('display', 'none');
-
-    viewcount.on('mousemove', function(e) {
-      setMousePosition(e);
-      var m_pos = getTimePositionX();
-      egoTime = Math.floor(xScale.invert(m_pos));
-      time_indicator
-        .attr('x1', m_pos)
-        .attr('x2', m_pos)
-        .attr('display', 'block');
-      var chartWidth = document
-        .getElementById('timeRange')
-        .getBoundingClientRect().width;
-      time_cover.attr('x', m_pos + 1).attr('width', chartWidth - m_pos);
-
-      var egoCircle = d3.select('circle#' + egoID);
-      var pos_y =
-        30 + parseFloat(d3.select(egoCircle.node().parentNode).attr('cy'));
-      var viewSum = egoCircle.data()[0].viewSum;
-      egoInfoBox
-        .attr('y', pos_y)
-        .html(
-          '<tspan x="' +
-            (padding_x + m_pos + 15) +
-            '" dy="0">' +
-            numFormatter(viewSum) +
-            ' views</tspan>' +
-            '<tspan x="' +
-            (padding_x + m_pos + 15) +
-            '" dy="15">' +
-            new Date(egoTime).toShortFormat() +
-            '</tspan>'
-        );
-
-      calculateViewCount(egoTime);
-      simulation.restart();
-    });
   }
 
   drawEgoNetwork(theEgo) {

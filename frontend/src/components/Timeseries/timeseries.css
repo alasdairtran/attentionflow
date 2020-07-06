@@ -39,6 +39,7 @@
   height: 20px;
 }
 
+#startIndicator,
 #egoIndicator {
   stroke: #495057;
   stroke-width: 2;
