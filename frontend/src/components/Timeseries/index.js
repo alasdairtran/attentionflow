@@ -519,6 +519,8 @@ class AttentionFlow extends Component {
       startDate: new Date(video[6]),
       time: new Date(video[7]),
       startInfluence: new Date(video[6] + aDay() * video[4].length),
+      contributed: 0,
+      received: 0,
     }));
 
     links = linksArr.map(video => ({
@@ -718,7 +720,11 @@ class AttentionFlow extends Component {
       var sortingOpt = graphSortingOpts[graphSorting.value];
       if (sortingOpt == 'Force Directed') {
         chart_y.attr('display', 'none');
-      } else if (sortingOpt == 'Total View') {
+      } else if (
+        sortingOpt == 'Total View' ||
+        sortingOpt == 'Contributed' ||
+        sortingOpt == 'Received'
+      ) {
         chart_y
           .attr('display', 'block')
           .attr(
@@ -770,6 +776,16 @@ class AttentionFlow extends Component {
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.viewSum))
             );
+          } else if (sortingOpt == 'Contributed') {
+            return (
+              chart_topMargin +
+              chart_yScale_view(Math.max(chart_yScale_minimum, d.contributed))
+            );
+          } else if (sortingOpt == 'Received') {
+            return (
+              chart_topMargin +
+              chart_yScale_view(Math.max(chart_yScale_minimum, d.received))
+            );
           } else if (sortingOpt == 'Artist Name') {
             return (
               chart_topMargin +
@@ -791,6 +807,14 @@ class AttentionFlow extends Component {
             new_y =
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.viewSum));
+          } else if (sortingOpt == 'Contributed') {
+            new_y =
+              chart_topMargin +
+              chart_yScale_view(Math.max(chart_yScale_minimum, d.contributed));
+          } else if (sortingOpt == 'Received') {
+            new_y =
+              chart_topMargin +
+              chart_yScale_view(Math.max(chart_yScale_minimum, d.received));
           } else if (sortingOpt == 'Artist Name') {
             new_y =
               chart_topMargin +
@@ -943,7 +967,7 @@ function linkWeight(d, minTime, maxTime) {
     Math.min(d.dailyFlux.length, parseInt((maxTime - startDate) / aDay()))
   );
   var sum = d.dailyFlux.slice(ts, te).reduce((a, b) => a + b, 0);
-  d.source.contributed = sum;
+  d.source.contributed = d.target.received = sum;
   return sum;
 }
 
@@ -971,6 +995,24 @@ function linkArc(d) {
     );
     var ypos2 = chart_yScale_view(
       Math.max(chart_yScale_minimum, d.target.viewSum)
+    );
+    py1 = chart_topMargin + ypos1;
+    py2 = chart_topMargin + ypos2;
+  } else if (sortingOpt == 'Contributed') {
+    var ypos1 = chart_yScale_view(
+      Math.max(chart_yScale_minimum, d.source.contributed)
+    );
+    var ypos2 = chart_yScale_view(
+      Math.max(chart_yScale_minimum, d.target.contributed)
+    );
+    py1 = chart_topMargin + ypos1;
+    py2 = chart_topMargin + ypos2;
+  } else if (sortingOpt == 'Received') {
+    var ypos1 = chart_yScale_view(
+      Math.max(chart_yScale_minimum, d.source.received)
+    );
+    var ypos2 = chart_yScale_view(
+      Math.max(chart_yScale_minimum, d.target.received)
     );
     py1 = chart_topMargin + ypos1;
     py2 = chart_topMargin + ypos2;
