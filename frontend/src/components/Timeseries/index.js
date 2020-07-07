@@ -631,23 +631,17 @@ class AttentionFlow extends Component {
       .attr('id', d => 'grad' + d.id);
 
     const gradColour = (d, offset) => {
-      if (offset === 0) {
-        return 'white';
-      }
       const nPoints = d.dailyView.length;
       const end = Math.round((nPoints * offset) / 100);
       const nViews = d.dailyView.slice(0, end).reduce((a, b) => a + b, 0);
       const totalViews = d.totalView;
       const viewColourScale = d3
-        .scaleSequential(
-          d.id === egoID ? d3.interpolatePuBu : d3.interpolateBuPu
-        )
-        .domain([0, totalViews]);
+        .scaleSequential(d3.interpolateGnBu)
+        .domain([0, d.totalView]);
       return viewColourScale(nViews);
     };
 
-    const offsets = [0, 20, 40, 60, 80, 100];
-
+    const offsets = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     offsets.forEach(offset => {
       grads
         .append('stop')
