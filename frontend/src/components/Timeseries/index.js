@@ -250,8 +250,7 @@ class AttentionFlow extends Component {
 
         var egoCircle = d3.select('circle#' + egoID);
         var ego_ypos = d3.select(egoCircle.node().parentNode).attr('cy');
-        var pos_y = 0;
-        if (ego_ypos) pos_y = 30 + ego_ypos;
+        var pos_y = (pos_y = 30 + parseFloat(ego_ypos));
         var viewSum = egoCircle.data()[0].viewSum;
         egoInfoBox
           .attr('y', pos_y)
