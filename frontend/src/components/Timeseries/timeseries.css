@@ -51,7 +51,7 @@
 }
 
 rect#otherInfobox {
-  fill: #ffffffaa;
+  fill: #ffffffdd;
   stroke: #f78ca0;
   stroke-width: 1.5px;
 }
@@ -80,11 +80,11 @@ path.edge {
   opacity: 0.5;
 }
 path.edge.incoming {
-  stroke: blue;
+  stroke: steelblue;
   opacity: 1;
 }
 path.edge.outgoing {
-  stroke: red;
+  stroke: #f78ca0;
   opacity: 1;
 }
 

@@ -544,18 +544,17 @@ class AttentionFlow extends Component {
         d3
           .forceLink(links)
           .id(d => d.id)
-          .strength(0.05)
+          .strength(0.001)
       )
       .force(
-        'collide',
+        'collision',
         d3
           .forceCollide()
           .radius(function(d) {
-            return d.radius + 10;
+            return radiusScale(d.totalView) + 10;
           })
-          .iterations(100)
+          .iterations(10)
       )
-      .force('charge', d3.forceManyBody().strength(10))
       .force(
         'center',
         d3.forceCenter(this.canvasWidth / 2, chart_topMargin + chart_height / 2)
@@ -688,10 +687,10 @@ class AttentionFlow extends Component {
 
     node.on('mouseover', function(d) {
       if (d.id == egoID) return;
-      d3.select(this)
-        .raise()
-        .select('circle')
-        .style('fill', hcolor);
+      // d3.select(this)
+      //   .raise()
+      //   .select('circle')
+      //   .style('fill', hcolor);
       d3.select(this)
         .raise()
         .select('text')
