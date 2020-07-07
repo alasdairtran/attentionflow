@@ -637,7 +637,7 @@ class AttentionFlow extends Component {
       const totalViews = d.totalView;
       const viewColourScale = d3
         .scaleSequential(d3.interpolateGnBu)
-        .domain([0, d.totalView]);
+        .domain([0, totalViews]);
       return viewColourScale(nViews);
     };
 
