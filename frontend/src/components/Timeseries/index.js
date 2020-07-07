@@ -625,15 +625,12 @@ class AttentionFlow extends Component {
       .enter()
       .append('radialGradient')
       .attr('gradientUnits', 'objectBoundingBox')
-      .attr('cx', '50%')
-      .attr('cy', '50%')
-      .attr('r', '100%')
       .attr('id', d => 'grad' + d.id);
 
     const gradColour = (d, offset) => {
       const nPoints = d.dailyView.length;
-      const ts = Math.round((nPoints * (offset - 10)) / 100);
-      const te = Math.round((nPoints * offset) / 100);
+      const ts = parseInt((nPoints * (offset - 10)) / 100);
+      const te = parseInt((nPoints * offset) / 100);
       const nViews = d.dailyView.slice(ts, te).reduce((a, b) => a + b, 0);
       const totalViews = d.totalView;
       const viewColourScale = d3
@@ -643,10 +640,15 @@ class AttentionFlow extends Component {
     };
 
     const offsets = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    var smoothness = 3;
     offsets.forEach(offset => {
       grads
         .append('stop')
-        .attr('offset', `${offset}%`)
+        .attr('offset', `${offset - (10 - smoothness)}%`)
+        .style('stop-color', d => gradColour(d, offset));
+      grads
+        .append('stop')
+        .attr('offset', `${offset - smoothness}%`)
         .style('stop-color', d => gradColour(d, offset));
     });
 
