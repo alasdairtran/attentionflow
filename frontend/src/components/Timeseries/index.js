@@ -249,8 +249,9 @@ class AttentionFlow extends Component {
         time_cover_r.attr('x', m_pos + 1).attr('width', chartWidth - m_pos);
 
         var egoCircle = d3.select('circle#' + egoID);
-        var pos_y =
-          30 + parseFloat(d3.select(egoCircle.node().parentNode).attr('cy'));
+        var ego_ypos = d3.select(egoCircle.node().parentNode).attr('cy');
+        var pos_y = 0;
+        if (ego_ypos) pos_y = 30 + ego_ypos;
         var viewSum = egoCircle.data()[0].viewSum;
         egoInfoBox
           .attr('y', pos_y)
@@ -583,22 +584,22 @@ class AttentionFlow extends Component {
       .range([0, chart_height]);
     var chart_y = chart.append('g');
 
-    defs
-      .selectAll('marker')
-      .data(links)
-      .enter()
-      .append('marker')
-      .attr('id', d => 'arrow_' + d.target.id)
-      .attr('markerWidth', '12')
-      .attr('markerHeight', '12')
-      .attr('markerUnits', 'userSpaceOnUse')
-      .attr('viewBox', '0 -6 12 12')
-      .attr('refX', d => 10 + d.target.radius)
-      .attr('refY', d => -d.value / 2)
-      .attr('orient', 'auto')
-      .append('path')
-      .attr('d', 'M0,-6L12,0L0,6')
-      .style('fill', '#aaa');
+    // defs
+    //   .selectAll('marker')
+    //   .data(links)
+    //   .enter()
+    //   .append('marker')
+    //   .attr('id', d => 'arrow_' + d.target.id)
+    //   .attr('markerWidth', '12')
+    //   .attr('markerHeight', '12')
+    //   .attr('markerUnits', 'userSpaceOnUse')
+    //   .attr('viewBox', '0 -6 12 12')
+    //   .attr('refX', d => 10 + d.target.radius)
+    //   .attr('refY', d => -d.value / 2)
+    //   .attr('orient', 'auto')
+    //   .append('path')
+    //   .attr('d', 'M0,-6L12,0L0,6')
+    //   .style('fill', '#aaa');
 
     var link = chart
       .append('g')
