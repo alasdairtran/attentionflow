@@ -632,12 +632,13 @@ class AttentionFlow extends Component {
 
     const gradColour = (d, offset) => {
       const nPoints = d.dailyView.length;
-      const end = Math.round((nPoints * offset) / 100);
-      const nViews = d.dailyView.slice(0, end).reduce((a, b) => a + b, 0);
+      const ts = Math.round((nPoints * (offset - 10)) / 100);
+      const te = Math.round((nPoints * offset) / 100);
+      const nViews = d.dailyView.slice(ts, te).reduce((a, b) => a + b, 0);
       const totalViews = d.totalView;
       const viewColourScale = d3
-        .scaleSequential(d3.interpolateGnBu)
-        .domain([0, totalViews]);
+        .scaleSequential(d3.interpolateYlGnBu)
+        .domain([0, totalViews / 2]);
       return viewColourScale(nViews);
     };
 
