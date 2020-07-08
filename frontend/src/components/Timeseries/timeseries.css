@@ -45,6 +45,10 @@
   stroke-width: 2;
 }
 
+#otherIndicatorPub {
+  fill: #ddddddaa;
+  stroke: #ddd;
+}
 #otherIndicator {
   stroke: #f78ca0;
   stroke-width: 1;

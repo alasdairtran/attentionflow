@@ -78,7 +78,7 @@ const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let padding_x = 15;
 let rightMargin = 50;
-let chart_yScale_minimum = 100000;
+let chart_yScale_minimum = 1000000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let egoNode, egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, infSlider;
@@ -186,6 +186,10 @@ class AttentionFlow extends Component {
       .attr('id', 'egoIndicator')
       .attr('y1', 0)
       .attr('y2', this.chartHeight + 525)
+      .attr('display', 'none');
+    var other_indicator_pub = viewcount
+      .append('path')
+      .attr('id', 'otherIndicatorPub')
       .attr('display', 'none');
     var other_indicator = viewcount
       .append('line')
@@ -1040,6 +1044,7 @@ function linkArc(d) {
 }
 
 function hideOtherSongViewCount(othersong) {
+  viewcount.select('path#otherIndicatorPub').attr('display', 'none');
   viewcount.select('line#otherIndicator').attr('display', 'none');
   visinfo.select('rect#otherInfobox').attr('display', 'none');
   visinfo.select('text#otherInfobox').attr('display', 'none');
@@ -1087,19 +1092,31 @@ function showOtherSongViewCount(othersong) {
 
   var otherNode = d3.select('circle#' + othersong.id).node();
   var xpos = xScale(startDate);
-  var xpos_infoText = maxRadius + xpos + 15;
-  var ypos = -90 + parseFloat(d3.select(otherNode.parentNode).attr('cy'));
-  if (ypos < chart_topMargin) {
-    ypos += 180;
+  var xpos_influence = xScale(othersong.startInfluence);
+  var xpos_infoText = maxRadius + xpos_influence + 15;
+  var ypos = parseFloat(d3.select(otherNode.parentNode).attr('cy'));
+  var ypos_infoText = -90 + ypos;
+  if (ypos_infoText < chart_topMargin) {
+    ypos_infoText += 180;
   }
+  var delayArea = [
+    [xpos, 0],
+    [xpos, chart_topMargin - 20],
+    [xpos_influence, ypos],
+    [xpos_influence, 0],
+  ];
+  viewcount
+    .select('path#otherIndicatorPub')
+    .attr('d', d3.line()(delayArea))
+    .attr('display', 'block');
   viewcount
     .select('line#otherIndicator')
-    .attr('x1', xpos)
-    .attr('x2', xpos)
+    .attr('x1', xpos_influence)
+    .attr('x2', xpos_influence)
     .attr('display', 'block');
   var infotext = visinfo
     .select('text#otherInfobox')
-    .attr('y', ypos)
+    .attr('y', ypos_infoText)
     .attr('display', 'block')
     .html(
       '<tspan x="' +
@@ -1129,7 +1146,7 @@ function showOtherSongViewCount(othersong) {
   visinfo
     .select('rect#otherInfobox')
     .attr('x', xpos_infoText - 10)
-    .attr('y', ypos - 15)
+    .attr('y', ypos_infoText - 15)
     .attr('width', textWidth + 20)
     .attr('height', 70)
     .attr('display', 'block');
