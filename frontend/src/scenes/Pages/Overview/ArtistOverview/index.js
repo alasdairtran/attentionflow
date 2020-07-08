@@ -52,6 +52,7 @@ export default class AnalyticsDashboard1 extends Component {
     this.state = {
       clickedOnSong: false,
       title: null,
+      artistID: props.match.params.id,
       dropdownOpen: false,
       activeTab1: '11',
       isLoaded: false,
@@ -68,13 +69,20 @@ export default class AnalyticsDashboard1 extends Component {
 
   componentWillReceiveProps(newProps) {
     this.setState({
-      clickedOnSong: false,
+      clickedOnArtist: false,
+      artistID: newProps.match.params.id,
     });
   }
 
   componentDidMount() {
     document.body.classList.add('bg-light');
     this.fetchExample();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.artistID !== this.state.artistID) {
+      this.fetchExample();
+    }
   }
 
   toggle() {
@@ -93,7 +101,7 @@ export default class AnalyticsDashboard1 extends Component {
 
   fetchExample = e => {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
-    const options = {};
+    const options = { params: { artistID: this.state.artistID } };
     axios
       .get('/vevo/artist_info/', options)
       .then(res => {
@@ -126,9 +134,9 @@ export default class AnalyticsDashboard1 extends Component {
   };
 
   render() {
-    if (this.state.clickedOnSong === true) {
+    if (!this.state.artistID) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/video/${this.state.videoId}`} />;
+      return <Redirect push to={`/overview/artist/UComP_epzeKzvBX156r6pm1Q`} />;
     }
     return (
       <>

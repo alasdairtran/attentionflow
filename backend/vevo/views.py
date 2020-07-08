@@ -69,7 +69,7 @@ def get_suggestions(request):
 
 @csrf_exempt
 def get_artist_info(request):
-    channel_id = "UComP_epzeKzvBX156r6pm1Q" # adele
+    channel_id = request.GET['artistID'] # "UComP_epzeKzvBX156r6pm1Q" # adele
     output = search_artist_basicinfo(channel_id)
     topvideos = search_artist_topvideos(channel_id)
     artists = search_1hop_artists(channel_id)

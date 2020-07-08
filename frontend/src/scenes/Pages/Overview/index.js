@@ -26,12 +26,8 @@ const Overview = ({ match }) => (
           <Route path={`${match.url}/basic`} component={BasicOverview} />
           <Route exact path={`${match.url}/genre`} component={GenreOverview} />
           <Route path={`${match.url}/genre/:id`} component={GenreNetwork} />
-          <Route
-            exact
-            path={`${match.url}/artist`}
-            component={ArtistOverview}
-          />
-          <Route path={`${match.url}/artist/:id`} component={ArtistEgo} />
+          <Route path={`${match.url}/artist/:id?`} component={ArtistOverview} />
+          {/* <Route path={`${match.url}/artist/:id`} component={ArtistEgo} /> */}
           <Route path={`${match.url}/video/:id?`} component={VideoOverview} />
           {/* <Route path={`${match.url}/video/:id`} component={VideoEgo} /> */}
         </div>

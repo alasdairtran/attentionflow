@@ -860,7 +860,12 @@ class AttentionFlow extends Component {
       console.log('redirecting');
       console.log(this.state);
       return (
-        <Redirect push to={`/overview/video/${this.state.clickedVideoID}`} />
+        <Redirect
+          push
+          to={`/overview/${this.props.egoType == 'A' ? 'artist' : 'video'}/${
+            this.state.clickedVideoID
+          }`}
+        />
       );
     }
     return <div ref="canvas" />;
