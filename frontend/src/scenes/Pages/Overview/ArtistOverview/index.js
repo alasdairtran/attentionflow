@@ -76,7 +76,9 @@ export default class AnalyticsDashboard1 extends Component {
 
   componentDidMount() {
     document.body.classList.add('bg-light');
-    this.fetchExample();
+    if (this.state.artistID) {
+      this.fetchExample();
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
