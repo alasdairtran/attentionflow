@@ -74,6 +74,11 @@ function stringfy(id) {
   return '_' + id;
 }
 
+function markerEnd(d) {
+  var scale = Math.max(6, Math.min(maxStroke * 2, strokeScale(d.flux)));
+  return 'M0,-' + scale + 'L' + 2 * scale + ',0L0,' + scale;
+}
+
 const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let padding_x = 15;
@@ -586,22 +591,25 @@ class AttentionFlow extends Component {
       .range([0, chart_height]);
     var chart_y = chart.append('g');
 
-    // defs
-    //   .selectAll('marker')
-    //   .data(links)
-    //   .enter()
-    //   .append('marker')
-    //   .attr('id', d => 'arrow_' + d.target.id)
-    //   .attr('markerWidth', '12')
-    //   .attr('markerHeight', '12')
-    //   .attr('markerUnits', 'userSpaceOnUse')
-    //   .attr('viewBox', '0 -6 12 12')
-    //   .attr('refX', d => 10 + d.target.radius)
-    //   .attr('refY', d => -d.value / 2)
-    //   .attr('orient', 'auto')
-    //   .append('path')
-    //   .attr('d', 'M0,-6L12,0L0,6')
-    //   .style('fill', '#aaa');
+    defs
+      .selectAll('marker')
+      .data(links)
+      .enter()
+      .append('marker')
+      .attr('id', d => 'arrow' + d.id)
+      .attr('markerWidth', maxStroke * 2)
+      .attr('markerHeight', maxStroke * 2)
+      .attr('markerUnits', 'userSpaceOnUse')
+      .attr(
+        'viewBox',
+        '0 -' + [maxStroke, maxStroke * 2, maxStroke * 2].join(' ')
+      )
+      .attr('refX', d => 10 + d.target.radius)
+      .attr('refY', 0)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', d => markerEnd(d))
+      .style('fill', d => (d.target.id == egoID ? 'steelblue' : '#f78ca0'));
 
     var link = chart
       .append('g')
@@ -610,7 +618,7 @@ class AttentionFlow extends Component {
       .join('path')
       .attr('class', 'edge')
       .attr('id', d => d.id);
-    // .attr('marker-end', d => 'url(#arrow_' + d.target.id + ')');
+    // .attr('marker-end', d => 'url(#arrow_' + d.id + ')');
 
     var node = chart
       .append('g')
@@ -1049,7 +1057,6 @@ function linkArc(d) {
   var dx = px2 - px1,
     dy = py2 - py1,
     dr = Math.sqrt(dx * dx + dy * dy);
-  if (d.label == '') dr = 10000;
   return (
     'M' + px1 + ',' + py1 + 'A' + dr + ',' + dr + ' 0 0,1 ' + px2 + ',' + py2
   );
@@ -1062,11 +1069,11 @@ function hideOtherSongViewCount(othersong) {
   visinfo.select('text#otherInfobox').attr('display', 'none');
   var incoming = d3.select('path#' + othersong.id + egoID);
   if (incoming) {
-    incoming.attr('class', 'edge');
+    incoming.attr('class', 'edge').attr('marker-end', 'none');
   }
   var outgoing = d3.select('path#' + egoID + othersong.id);
   if (outgoing) {
-    outgoing.attr('class', 'edge');
+    outgoing.attr('class', 'edge').attr('marker-end', 'none');
   }
 
   yScale.domain([0, oldMaxView]);
@@ -1092,13 +1099,17 @@ function showOtherSongViewCount(othersong) {
   var edgeToEgo = d3.select('path#' + othersong.id + egoID);
   var viewToEgo = 0;
   if (edgeToEgo.data()[0]) {
-    edgeToEgo.attr('class', 'edge incoming');
+    edgeToEgo
+      .attr('class', 'edge incoming')
+      .attr('marker-end', d => 'url(#arrow' + d.id + ')');
     viewToEgo = parseInt(edgeToEgo.data()[0].fluxSum).toLocaleString();
   }
   var edgeFromEgo = d3.select('path#' + egoID + othersong.id);
   var viewFromEgo = 0;
   if (edgeFromEgo.data()[0]) {
-    edgeFromEgo.attr('class', 'edge outgoing');
+    edgeFromEgo
+      .attr('class', 'edge outgoing')
+      .attr('marker-end', d => 'url(#arrow' + d.id + ')');
     viewFromEgo = parseInt(edgeFromEgo.data()[0].fluxSum).toLocaleString();
   }
 
