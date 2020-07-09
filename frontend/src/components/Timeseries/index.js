@@ -629,35 +629,35 @@ class AttentionFlow extends Component {
       .attr('gradientUnits', 'objectBoundingBox')
       .attr('id', d => 'grad' + d.id);
 
-    const gradColour = (d, offset, gap) => {
+    const gradColour = (d, trange, unit) => {
+      const maxPoints = 10 * unit;
       const nPoints = d.dailyView.length;
-      const os = (offset - gap) / 100;
-      const oe = Math.min(100, offset) / 100;
-      console.log(d.name, os, oe);
-      const ts = parseInt(nPoints * os);
-      const te = parseInt(nPoints * oe);
-      const nViews = d.dailyView.slice(ts, te).reduce((a, b) => a + b, 0);
+      const nViews = d.dailyView.slice(0, trange).reduce((a, b) => a + b, 0);
       const totalViews = d.totalView;
+      const offset = (100 * nViews) / totalViews;
       const viewColourScale = d3
         .scaleSequential(d3.interpolateYlGnBu)
-        .domain([0, (2 * totalViews) / nPoints]);
-      return viewColourScale(nViews / (nPoints * (oe - os)));
+        .domain([0, maxPoints]);
+      return [offset, viewColourScale(trange)];
     };
 
     var smoothness = 3;
     nodes.forEach(function(node) {
       var numDays = node.dailyView.length;
-      var gap = 100 / (numDays / 365);
-      for (var offset = gap; offset < 100 + gap; offset += gap) {
-        var gcolor = gradColour(node, offset, gap);
+      var unit = 365;
+      var prevOffset = 0;
+      for (var trange = unit; trange < numDays + unit; trange += unit) {
+        var grad = gradColour(node, trange, unit);
+        // console.log(node.name, prevOffset, grad[0], grad[1])
         d3.selectAll('radialGradient#grad' + node.id)
           .append('stop')
-          .attr('offset', `${offset - (gap - smoothness)}%`)
-          .style('stop-color', gcolor);
+          .attr('offset', `${prevOffset + smoothness}%`)
+          .style('stop-color', grad[1]);
         d3.selectAll('radialGradient#grad' + node.id)
           .append('stop')
-          .attr('offset', `${offset - smoothness}%`)
-          .style('stop-color', gcolor);
+          .attr('offset', `${grad[0] - smoothness}%`)
+          .style('stop-color', grad[1]);
+        prevOffset = grad[0];
       }
     });
 
