@@ -629,9 +629,9 @@ class AttentionFlow extends Component {
       .attr('gradientUnits', 'objectBoundingBox')
       .attr('id', d => 'grad' + d.id);
 
-    const gradColour = (d, offset) => {
+    const gradColour = (d, offset, gap) => {
       const nPoints = d.dailyView.length;
-      const ts = parseInt((nPoints * (offset - 10)) / 100);
+      const ts = parseInt((nPoints * (offset - gap)) / 100);
       const te = parseInt((nPoints * offset) / 100);
       const nViews = d.dailyView.slice(ts, te).reduce((a, b) => a + b, 0);
       const totalViews = d.totalView;
@@ -641,17 +641,20 @@ class AttentionFlow extends Component {
       return viewColourScale(nViews);
     };
 
-    const offsets = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     var smoothness = 3;
-    offsets.forEach(offset => {
-      grads
-        .append('stop')
-        .attr('offset', `${offset - (10 - smoothness)}%`)
-        .style('stop-color', d => gradColour(d, offset));
-      grads
-        .append('stop')
-        .attr('offset', `${offset - smoothness}%`)
-        .style('stop-color', d => gradColour(d, offset));
+    nodes.forEach(function(node) {
+      var numDays = node.dailyView.length;
+      var gap = 100 / (numDays / 365);
+      for (var offset = gap; offset < 100 + gap; offset += gap) {
+        d3.selectAll('radialGradient#grad' + node.id)
+          .append('stop')
+          .attr('offset', `${offset - (gap - smoothness)}%`)
+          .style('stop-color', gradColour(node, offset, gap));
+        d3.selectAll('radialGradient#grad' + node.id)
+          .append('stop')
+          .attr('offset', `${offset - smoothness}%`)
+          .style('stop-color', gradColour(node, offset, gap));
+      }
     });
 
     node
