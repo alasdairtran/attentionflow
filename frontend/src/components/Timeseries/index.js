@@ -492,7 +492,7 @@ class AttentionFlow extends Component {
     const linksArr = egoNode.links;
 
     const strokeList = linksArr.map(link => link[2]);
-    const viewsList = songsArr.map(d => d[2]);
+    const viewsList = songsArr.map(d => Math.sqrt(d[2]));
 
     strokeScale = d3
       .scaleLinear()
@@ -515,7 +515,7 @@ class AttentionFlow extends Component {
     nodes = songsArr.map(video => ({
       id: stringfy(video[0]),
       name: video[1],
-      radius: radiusScale(video[2]),
+      radius: radiusScale(Math.sqrt(video[2])),
       colour: colourScale(video[3]),
       totalView: video[2],
       dailyView: video[4],
@@ -554,7 +554,7 @@ class AttentionFlow extends Component {
         d3
           .forceCollide()
           .radius(function(d) {
-            return radiusScale(d.totalView) + 10;
+            return radiusScale(Math.sqrt(d.totalView)) + 10;
           })
           .iterations(10)
       )
@@ -903,7 +903,7 @@ function calculateViewCount(minTime, maxTime) {
   for (var i = 0; i < nodes.length; i++) {
     var n = document.getElementById(nodes[i].id);
     var viewSum = nodeSize(nodes[i], minTime, maxTime);
-    var radius = radiusScale(viewSum);
+    var radius = radiusScale(Math.sqrt(viewSum));
     nodes[i]['viewSum'] = viewSum;
     nodes[i]['radius'] = radius;
     n.style.r = radius;
