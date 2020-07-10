@@ -1165,6 +1165,7 @@ function showOtherSongViewCount(othersong) {
     .attr('x2', xpos_influence)
     .attr('display', 'block');
 
+  var timeLeft = new Date(Math.max(othersong.startInfluence, startDate));
   var infotext = visinfo
     .select('text#otherInfobox')
     .attr('y', ypos_infoText)
@@ -1179,7 +1180,7 @@ function showOtherSongViewCount(othersong) {
         '" dy="15">' +
         numFormatter(othersong.viewSum) +
         ' views (' +
-        startDate.toShortFormat() +
+        timeLeft.toShortFormat() +
         ' ~ ' +
         new Date(egoTime).toShortFormat() +
         ')</tspan><tspan x="' +
