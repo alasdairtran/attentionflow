@@ -82,7 +82,7 @@ function markerEnd(d) {
 const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let padding_x = 15;
-let rightMargin = 50;
+let rightMargin = 80;
 let chart_yScale_minimum = 1000000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let egoNode, egoID, egoType, egoTime, simulation, nodes, links;
@@ -722,6 +722,7 @@ class AttentionFlow extends Component {
 
     node.on('click', d => {
       // console.log(d);
+      if (d.id == egoID) return;
       this.setState({
         clickedOnSong: true,
         clickedVideoID: d.id.substr(1),
@@ -729,7 +730,7 @@ class AttentionFlow extends Component {
     });
 
     node.on('mouseover', function(d) {
-      if (d.id == egoID) return;
+      // if (d.id == egoID) return;
       // d3.select(this)
       //   .raise()
       //   .select('circle')
@@ -1082,9 +1083,27 @@ function linkArc(d) {
   var dx = px2 - px1,
     dy = py2 - py1,
     dr = Math.sqrt(dx * dx + dy * dy);
-  return (
-    'M' + px1 + ',' + py1 + 'A' + dr + ',' + dr + ' 0 0,1 ' + px2 + ',' + py2
-  );
+  if (d.source.id == d.target.id && d.source.id == egoID) {
+    var drs = d.source.radius;
+    return (
+      'M' +
+      (px1 + drs / 2) +
+      ',' +
+      (py1 - drs / 2) +
+      'A' +
+      drs +
+      ',' +
+      drs +
+      ' 135,1,1 ' +
+      (px2 + drs / 2) +
+      ',' +
+      (py2 + drs / 2)
+    );
+  } else {
+    return (
+      'M' + px1 + ',' + py1 + 'A' + dr + ',' + dr + ' 0,0,1 ' + px2 + ',' + py2
+    );
+  }
 }
 
 function hideOtherSongViewCount(othersong) {
@@ -1124,17 +1143,17 @@ function showOtherSongViewCount(othersong) {
   var edgeToEgo = d3.select('path#' + othersong.id + egoID);
   var viewToEgo = 0;
   if (edgeToEgo.data()[0]) {
-    edgeToEgo
-      .attr('class', 'edge incoming')
-      .attr('marker-end', d => 'url(#arrow' + d.id + ')');
+    edgeToEgo.attr('class', 'edge incoming');
+    if (othersong.id != egoID)
+      edgeToEgo.attr('marker-end', d => 'url(#arrow' + d.id + ')');
     viewToEgo = parseInt(edgeToEgo.data()[0].fluxSum).toLocaleString();
   }
   var edgeFromEgo = d3.select('path#' + egoID + othersong.id);
   var viewFromEgo = 0;
   if (edgeFromEgo.data()[0]) {
-    edgeFromEgo
-      .attr('class', 'edge outgoing')
-      .attr('marker-end', d => 'url(#arrow' + d.id + ')');
+    edgeFromEgo.attr('class', 'edge outgoing');
+    if (othersong.id != egoID)
+      edgeFromEgo.attr('marker-end', d => 'url(#arrow' + d.id + ')');
     viewFromEgo = parseInt(edgeFromEgo.data()[0].fluxSum).toLocaleString();
   }
 
