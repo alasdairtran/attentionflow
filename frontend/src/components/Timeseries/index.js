@@ -222,64 +222,18 @@ class AttentionFlow extends Component {
       .attr('height', this.chartHeight + 525);
 
     egoTime = Math.floor(xScale.invert(0));
-    var egoInfoBox = visinfo.append('text').style('font-size', '12px');
+    var egoInfoBox = visinfo
+      .append('text')
+      .attr('id', 'egoInfoBox')
+      .style('font-size', '12px');
     visinfo.append('rect').attr('id', 'otherInfobox');
     visinfo
       .append('text')
       .attr('id', 'otherInfobox')
       .attr('display', 'none');
 
-    range.noUiSlider.on('update', function(
-      values,
-      handle,
-      unencoded,
-      isTap,
-      positions
-    ) {
-      if (handle == 0) {
-        // left handle
-        var m_pos = xScale(values[0]);
-        start_indicator
-          .attr('x1', m_pos)
-          .attr('x2', m_pos)
-          .attr('display', 'block');
-        time_cover_l.attr('width', m_pos);
-      } else if (handle == 1) {
-        // right handle
-        var m_pos = xScale(values[1]);
-        egoTime = parseInt(values[1]);
-        time_indicator
-          .attr('x1', m_pos)
-          .attr('x2', m_pos)
-          .attr('display', 'block');
-        var chartWidth = document
-          .getElementById('timeRange')
-          .getBoundingClientRect().width;
-        time_cover_r.attr('x', m_pos + 1).attr('width', chartWidth - m_pos);
-
-        var egoCircle = d3.select('circle#' + egoID);
-        var ego_ypos = d3.select(egoCircle.node().parentNode).attr('cy');
-        var pos_y = (pos_y = 30 + parseFloat(ego_ypos));
-        var viewSum = egoCircle.data()[0].viewSum;
-        egoInfoBox
-          .attr('y', pos_y)
-          .html(
-            '<tspan x="' +
-              (maxRadius + m_pos + 15) +
-              '" dy="0">' +
-              numFormatter(viewSum) +
-              ' views</tspan>' +
-              '<tspan x="' +
-              (maxRadius + m_pos + 15) +
-              '" dy="15">' +
-              new Date(egoTime).toShortFormat() +
-              '</tspan>'
-          );
-      }
-      calculateViewCount(values[0], egoTime);
-      filterNodes();
-      simulation.restart();
-    });
+    range.noUiSlider.on('update', updateTimeSlider);
+    range.noUiSlider.on('set', updateTimeSlider);
   }
 
   drawEgoInfoCard() {
@@ -1106,6 +1060,55 @@ function linkArc(d) {
   }
 }
 
+function updateTimeSlider(values, handle, unencoded, isTap, positions) {
+  if (handle == 0) {
+    // left handle
+    var m_pos = xScale(values[0]);
+    d3.select('#startIndicator')
+      .attr('x1', m_pos)
+      .attr('x2', m_pos)
+      .attr('display', 'block');
+    d3.select('#timeCover_left').attr('width', m_pos);
+  } else if (handle == 1) {
+    // right handle
+    var m_pos = xScale(values[1]);
+    egoTime = parseInt(values[1]);
+    d3.select('#egoIndicator')
+      .attr('x1', m_pos)
+      .attr('x2', m_pos)
+      .attr('display', 'block');
+    var chartWidth = document
+      .getElementById('timeRange')
+      .getBoundingClientRect().width;
+    d3.select('#timeCover_right')
+      .attr('x', m_pos + 1)
+      .attr('width', chartWidth - m_pos);
+
+    var egoCircle = d3.select('circle#' + egoID);
+    var ego_ypos = d3.select(egoCircle.node().parentNode).attr('cy');
+    var pos_y = (pos_y = 30 + parseFloat(ego_ypos));
+    var viewSum = egoCircle.data()[0].viewSum;
+
+    d3.select('#egoInfoBox')
+      .attr('y', pos_y)
+      .html(
+        '<tspan x="' +
+          (maxRadius + m_pos + 15) +
+          '" dy="0">' +
+          numFormatter(viewSum) +
+          ' views</tspan>' +
+          '<tspan x="' +
+          (maxRadius + m_pos + 15) +
+          '" dy="15">' +
+          new Date(egoTime).toShortFormat() +
+          '</tspan>'
+      );
+  }
+  calculateViewCount(values[0], egoTime);
+  filterNodes();
+  simulation.restart();
+}
+
 function hideOtherSongViewCount(othersong) {
   viewcount.select('path#otherIndicatorPub').attr('display', 'none');
   viewcount.select('line#otherIndicator').attr('display', 'none');
@@ -1181,6 +1184,7 @@ function showOtherSongViewCount(othersong) {
     .attr('x1', xpos_influence)
     .attr('x2', xpos_influence)
     .attr('display', 'block');
+
   var infotext = visinfo
     .select('text#otherInfobox')
     .attr('y', ypos_infoText)
