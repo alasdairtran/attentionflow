@@ -637,36 +637,61 @@ class AttentionFlow extends Component {
       .attr('gradientUnits', 'objectBoundingBox')
       .attr('id', d => 'grad' + d.id);
 
-    const gradColour = (d, trange, unit) => {
-      const maxPoints = 10 * unit;
+    // const gradColour = (d, trange, unit) => {
+    //   const maxPoints = 10 * unit;
+    //   const nPoints = d.dailyView.length;
+    //   const nViews = d.dailyView.slice(0, trange).reduce((a, b) => a + b, 0);
+    //   const totalViews = d.totalView;
+    //   const offset = (100 * nViews) / totalViews;
+    //   const viewColourScale = d3
+    //     .scaleSequential(d3.interpolateYlGnBu)
+    //     .domain([0, maxPoints]);
+    //   return [offset, viewColourScale(trange)];
+    // };
+    //
+    // var smoothness = 3;
+    // nodes.forEach(function(node) {
+    //   var numDays = node.dailyView.length;
+    //   var unit = 365;
+    //   var prevOffset = 0;
+    //   for (var trange = unit; trange < numDays + unit; trange += unit) {
+    //     var grad = gradColour(node, trange, unit);
+    //     // console.log(node.name, prevOffset, grad[0], grad[1])
+    //     d3.selectAll('radialGradient#grad' + node.id)
+    //       .append('stop')
+    //       .attr('offset', `${prevOffset + smoothness}%`)
+    //       .style('stop-color', grad[1]);
+    //     d3.selectAll('radialGradient#grad' + node.id)
+    //       .append('stop')
+    //       .attr('offset', `${grad[0] - smoothness}%`)
+    //       .style('stop-color', grad[1]);
+    //     prevOffset = grad[0];
+    //   }
+    // });
+
+    const gradColour = (d, offset) => {
       const nPoints = d.dailyView.length;
-      const nViews = d.dailyView.slice(0, trange).reduce((a, b) => a + b, 0);
+      const ts = parseInt((nPoints * (offset - 10)) / 100);
+      const te = parseInt((nPoints * offset) / 100);
+      const nViews = d.dailyView.slice(ts, te).reduce((a, b) => a + b, 0);
       const totalViews = d.totalView;
-      const offset = (100 * nViews) / totalViews;
       const viewColourScale = d3
         .scaleSequential(d3.interpolateYlGnBu)
-        .domain([0, maxPoints]);
-      return [offset, viewColourScale(trange)];
+        .domain([0, totalViews / 2]);
+      return viewColourScale(nViews);
     };
 
+    const offsets = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     var smoothness = 3;
-    nodes.forEach(function(node) {
-      var numDays = node.dailyView.length;
-      var unit = 365;
-      var prevOffset = 0;
-      for (var trange = unit; trange < numDays + unit; trange += unit) {
-        var grad = gradColour(node, trange, unit);
-        // console.log(node.name, prevOffset, grad[0], grad[1])
-        d3.selectAll('radialGradient#grad' + node.id)
-          .append('stop')
-          .attr('offset', `${prevOffset + smoothness}%`)
-          .style('stop-color', grad[1]);
-        d3.selectAll('radialGradient#grad' + node.id)
-          .append('stop')
-          .attr('offset', `${grad[0] - smoothness}%`)
-          .style('stop-color', grad[1]);
-        prevOffset = grad[0];
-      }
+    offsets.forEach(offset => {
+      grads
+        .append('stop')
+        .attr('offset', `${offset - (10 - smoothness)}%`)
+        .style('stop-color', d => gradColour(d, offset));
+      grads
+        .append('stop')
+        .attr('offset', `${offset - smoothness}%`)
+        .style('stop-color', d => gradColour(d, offset));
     });
 
     node
