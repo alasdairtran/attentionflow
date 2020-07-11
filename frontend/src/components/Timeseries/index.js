@@ -83,7 +83,7 @@ const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let padding_x = 15;
 let rightMargin = 80;
-let chart_yScale_minimum = 1000000;
+let chart_yScale_minimum = 100000000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let egoNode, egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, infSlider;
@@ -532,13 +532,13 @@ class AttentionFlow extends Component {
       .scaleLog()
       .domain([
         chart_yScale_minimum,
-        2 *
+        5 *
           d3.max(nodes, function(d) {
             return d.totalView;
           }),
       ])
-      .range([chart_height, 0])
-      .nice();
+      .range([chart_height, 0]);
+    // .nice();
     chart_yScale_artist = d3
       .scaleBand()
       .domain([''].concat(Array.from(artistSet)))
@@ -636,7 +636,7 @@ class AttentionFlow extends Component {
       .attr('fill', d => `url(#grad${d.id})`);
 
     nodes.sort((a, b) => a.radius - b.radius);
-    const radiusLimit = minRadius * 2;
+    const radiusLimit = minRadius * 1.5;
     node
       .append('text')
       .call(drag(simulation))
@@ -1165,7 +1165,7 @@ function showOtherSongViewCount(othersong) {
     .attr('x2', xpos_influence)
     .attr('display', 'block');
 
-  var timeLeft = new Date(Math.max(othersong.startInfluence, startDate));
+  var timeLeft = new Date(Math.max(getTimeSelection()[0], startDate));
   var infotext = visinfo
     .select('text#otherInfobox')
     .attr('y', ypos_infoText)
