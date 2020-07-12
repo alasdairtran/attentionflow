@@ -150,9 +150,21 @@ class AttentionFlow extends Component {
     this.drawEgoViewCount();
     this.drawEgoNetwork();
     this.drawTimeSelector();
+    this.drawAxes();
 
     if (egoType == 'V') infSlider.noUiSlider.set(1);
     else if (egoType == 'A') infSlider.noUiSlider.set(5);
+  }
+
+  drawAxes() {
+    viewcount
+      .append('g')
+      .attr('transform', 'translate(0,' + this.chartHeight + ')')
+      .call(d3.axisBottom(xScale).tickFormat(''));
+    yAxis = viewcount
+      .append('g')
+      .attr('transform', 'translate(' + startPos + ',0)')
+      .call(d3.axisLeft(yScale).tickFormat(numFormatter));
   }
 
   drawTimeSelector() {
@@ -421,14 +433,14 @@ class AttentionFlow extends Component {
         return d.date;
       })
     );
-    viewcount
-      .append('g')
-      .attr('transform', 'translate(0,' + this.chartHeight + ')')
-      .call(d3.axisBottom(xScale).tickFormat(''));
-    yAxis = viewcount
-      .append('g')
-      .attr('transform', 'translate(' + startPos + ',0)')
-      .call(d3.axisLeft(yScale).tickFormat(numFormatter));
+    // viewcount
+    //   .append('g')
+    //   .attr('transform', 'translate(0,' + this.chartHeight + ')')
+    //   .call(d3.axisBottom(xScale).tickFormat(''));
+    // yAxis = viewcount
+    //   .append('g')
+    //   .attr('transform', 'translate(' + startPos + ',0)')
+    //   .call(d3.axisLeft(yScale).tickFormat(numFormatter));
     viewCountPath = viewcount
       .append('path')
       .datum(data)
