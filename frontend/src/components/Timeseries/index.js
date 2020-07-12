@@ -255,7 +255,7 @@ class AttentionFlow extends Component {
     // update ego information
     this.divInfo.innerHTML = '';
     var infocard = document.createElement('div');
-    infocard.setAttribute('id', 'egoInfoCard');
+    infocard.id = 'egoInfoCard';
 
     var published = new Date(egoNode.publishedAt);
     var infocardtext = document.createElement('div');
@@ -263,15 +263,16 @@ class AttentionFlow extends Component {
     var egoInfoText = '';
     if (egoType == 'A') {
       egoInfoText += 'First song published: ' + published.toShortFormat();
-      egoInfoText += '</br>Total views: ' + numFormatter(egoNode.totalView);
+      egoInfoText += '<br/>Total views: ' + numFormatter(egoNode.totalView);
       infocardtext.innerHTML = egoInfoText;
       infocard.append(infocardtext);
       this.divInfo.append(infocard);
       this.addTopVideos(this.divInfo);
     } else if (egoType == 'V') {
-      this.addVideoThumbnail(this.divInfo);
-      egoInfoText += 'Published: ' + published.toShortFormat();
-      egoInfoText += '</br>Genres: ' + egoNode.genres.join(',');
+      this.addVideoThumbnail(infocard);
+      egoInfoText += '<br/>Published: ' + published.toShortFormat();
+      egoInfoText += '<br/>Total Views: ' + numFormatter(egoNode.totalView);
+      egoInfoText += '<br/>Genres: ' + egoNode.genres.join(', ');
       infocardtext.innerHTML = egoInfoText;
       infocard.append(infocardtext);
       this.divInfo.append(infocard);
@@ -335,13 +336,12 @@ class AttentionFlow extends Component {
     if (egoType == 'V') {
       embvideo_id = egoNode.id;
     } else if (egoType == 'A') {
-      embvideo_id = stringfy(egoNode.topvideos[0][0][0]);
+      embvideo_id = egoNode.topvideos[0][0][0];
     }
-    var videoWidth = div.offsetWidth - 60;
+    var videoWidth = this.divInfo.offsetWidth - 60;
     embvideo.width = videoWidth;
     embvideo.height = 0.6 * videoWidth;
     embvideo.style.border = 'none';
-    embvideo.style.margin = '20px 0 0 30px';
     embvideo.src = 'https://www.youtube.com/embed/' + embvideo_id;
     embvideo.src +=
       '?controls=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
@@ -353,19 +353,20 @@ class AttentionFlow extends Component {
     var topvideos = document.createElement('div');
     topvideos.innerHTML = '<b>Top Songs</b><br/>';
     topvideos.style.padding = '0 0 20px 30px';
-    for (var i = 0, j = 0; i < egoNode.topvideos[0].length, j < 5; i++, j++) {
+    this.addVideoThumbnail(topvideos);
+    for (var i = 0, j = 0; i < egoNode.topvideos[0].length, j < 4; i++, j++) {
       var videodiv = document.createElement('div');
       var video = egoNode.topvideos[0][i];
       var vtitle = video[1].split('-')[1];
-      var vtitle_str =
-        vtitle.length > 20 ? vtitle.slice(0, 30) + '...' : vtitle;
+      var vtitle_str = vtitle;
+      // vtitle.length > 20 ? vtitle.slice(0, 30) + '...' : vtitle;
       topVideos[video[0]] = {
         title: vtitle,
         startDate: video[3],
         dailyView: video[5],
       };
       videodiv.id = stringfy(video[0]);
-      videodiv.innerHTML += '<b>' + vtitle_str + '</b><br/>';
+      videodiv.innerHTML += '<b>' + vtitle_str + '</b><br/>   ';
       videodiv.innerHTML +=
         numFormatter(video[4]) +
         ' views • ' +
