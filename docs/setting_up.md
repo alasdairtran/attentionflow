@@ -5,7 +5,8 @@ the virtual machine.
 
 ```sh
 # Install essential packages on Centos
-sudo yum install -y git tmux zsh util-linux-user gcc-c++ make nodejs nginx ufw rsync vim
+sudo yum install -y git tmux zsh util-linux-user gcc-c++ make nodejs nginx \
+    ufw rsync vim certbot python3-certbot-nginx
 sudo systemctl enable nginx
 sudo systemctl start nginx
 
@@ -39,6 +40,22 @@ sudo ufw allow from 150.203.0.0/16 proto tcp comment 'ANU Secure in CECS'
 sudo ufw enable
 sudo ufw status verbose
 
+# Get up-to-date Cloudflare IPs from https://www.cloudflare.com/ips/
+sudo ufw allow from 173.245.48.0/20 to any port https comment 'Cloudflare'
+sudo ufw allow from 103.21.244.0/22 to any port https comment 'Cloudflare'
+sudo ufw allow from 103.22.200.0/22 to any port https comment 'Cloudflare'
+sudo ufw allow from 103.31.4.0/22 to any port https comment 'Cloudflare'
+sudo ufw allow from 141.101.64.0/18 to any port https comment 'Cloudflare'
+sudo ufw allow from 108.162.192.0/18 to any port https comment 'Cloudflare'
+sudo ufw allow from 190.93.240.0/20 to any port https comment 'Cloudflare'
+sudo ufw allow from 188.114.96.0/20 to any port https comment 'Cloudflare'
+sudo ufw allow from 197.234.240.0/22 to any port https comment 'Cloudflare'
+sudo ufw allow from 198.41.128.0/17 to any port https comment 'Cloudflare'
+sudo ufw allow from 162.158.0.0/15 to any port https comment 'Cloudflare'
+sudo ufw allow from 104.16.0.0/12 to any port https comment 'Cloudflare'
+sudo ufw allow from 172.64.0.0/13 to any port https comment 'Cloudflare'
+sudo ufw allow from 131.0.72.0/22 to any port https comment 'Cloudflare'
+
 # Create an SSH key so we can communicate with GitHub without passwords
 sudo ssh-keygen -t rsa -b 4096 -C "alasdair.tran@anu.edu.au" -f /root/.ssh/vevoviz_rsa
 echo "Host *
@@ -65,6 +82,27 @@ yarn create react-app frontend
 
 # Start the app
 sudo docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Temporarily set SSL/TLS encryption in Cloudflare to Flexible to allow HTTP
+sudo ufw allow 80,443/tcp
+sudo certbot certonly --nginx \
+    -d attentionflow.ml \
+    -d neo4j.attentionflow.ml \
+    -d django.attentionflow.ml \
+    -d www.attentionflow.ml \
+    -d dev.attentionflow.ml \
+    -d neo4jdev.attentionflow.ml \
+    -d djangodev.attentionflow.ml
+
+# Restore nginx configs
+sudo adduser --system --no-create-home --shell /bin/false www-data
+sudo cp nginx/nginx.conf /etc/nginx/nginx.conf
+sudo cp nginx/attentionflow.conf /etc/nginx/conf.d/attentionflow.conf
+sudo rm -rfv /etc/nginx/sites-enabled/default
+# Verify the syntax of our configuration edits.
+sudo nginx -t
+# Reload Nginx to load the new configuration.
+sudo systemctl restart nginx
 ```
 
 ## Maintenance

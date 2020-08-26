@@ -6,8 +6,8 @@ An interactive visualisation exploring how YouTube music videos drive attention 
 
 | Service       | Production                      | Development                     | Local                       |
 | ------------- | ------------------------------- | ------------------------------- | --------------------------- |
-| Frontend App  | http://43.240.97.170:3001       | http://43.240.97.170:3002       | http://localhost:3002       |
-| Neo4j Browser | http://43.240.97.170:7474/      | http://43.240.97.170:7475       | http://localhost:7475       |
+| Frontend App  | https://attentionflow.ml        | https://dev.attentionflow.ml    | http://localhost:3002       |
+| Neo4j Browser | http://43.240.97.170:7474       | http://43.240.97.170:7475       | http://localhost:7475       |
 | Django server | http://43.240.97.170:8001/admin | http://43.240.97.170:8002/admin | http://localhost:8002/admin |
 
 ## Getting Started
