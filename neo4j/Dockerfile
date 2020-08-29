@@ -1,4 +1,4 @@
-FROM neo4j:3.5.12
+FROM neo4j:4.1.1
 
 # COPY ./conf /conf
 # COPY ./plugins /plugins
