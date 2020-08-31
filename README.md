@@ -57,7 +57,7 @@ docker-compose stop neo4j
 docker run \
 --name neo4j-restore \
 --mount type=bind,source=$HOME/projects/vevoviz/neo4j/data,target=/data \
-neo4j:3.5.12 bin/neo4j-admin load --database=graph.db --from=/data/backups/graph.db.dump --force
+neo4j:4.1.1 bin/neo4j-admin load --database=graph.db --from=/data/backups/graph.db.dump --force
 
 # Start the database again
 docker-compose start neo4j
