@@ -6,7 +6,7 @@ from difflib import SequenceMatcher, get_close_matches
 
 def main():
     # input files
-    input_dir = '/Users/siqiwu/Developments/GitWorks/networked-popularity/data'
+    input_dir = 'data/networked-popularity/'
     print('input dir:', input_dir)
     persistent_network = os.path.join(input_dir, 'persistent_network.csv')
     vevo_en_embeds_60k = os.path.join(input_dir, 'vevo_en_embeds_60k.txt')
@@ -15,7 +15,8 @@ def main():
     artist_info = os.path.join(input_dir, 'vevo_en_vid_artist_duration_vtitle.txt')
 
     # output files
-    output_dir = '/Users/siqiwu/Developments/GitWorks/vevoviz/neo4j/import'
+    output_dir = 'data/neo4j/import'
+    os.makedirs(output_dir, exist_ok=True)
     print('output dir:', output_dir)
     video_nodes_path = os.path.join(output_dir, 'video_nodes.json')
     video_edges_path = os.path.join(output_dir, 'video_edges.csv')
