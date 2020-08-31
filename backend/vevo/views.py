@@ -1,13 +1,15 @@
 import json
 import os
+from datetime import date
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from neo4j import GraphDatabase
-from datetime import date
+
 from .search import *
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
+
 
 @csrf_exempt
 def get_video(request):
@@ -21,6 +23,7 @@ def get_video(request):
     elif (hop_count == 3):
         output = search_3hop_video(title)
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_video_incoming_outgoing(request):
@@ -54,7 +57,8 @@ def get_suggestions(request):
 
     title = request.GET["title"]
     with driver.session() as session:
-        result2 = session.run("CALL db.index.fulltext.queryNodes(\"titleAndArtist\", \"" + title +"\") YIELD node, score RETURN node.title AS title, node.artist AS artist ORDER BY node.totalView DESC")
+        result2 = session.run("CALL db.index.fulltext.queryNodes(\"titleAndArtist\", \"" + title +
+                              "\") YIELD node, score RETURN node.title AS title, node.artist AS artist ORDER BY node.totalView DESC")
         key = result2.keys()
         value = list(result2.records())
         result_title = [v[0] for v in value if not v[0] is None]
@@ -67,9 +71,10 @@ def get_suggestions(request):
     }
     return JsonResponse(output)
 
+
 @csrf_exempt
 def get_artist_info(request):
-    channel_id = request.GET['artistID'] # "UComP_epzeKzvBX156r6pm1Q" # adele
+    channel_id = request.GET['artistID']  # "UComP_epzeKzvBX156r6pm1Q" # adele
     output = search_artist_basicinfo(channel_id)
     topvideos = search_artist_topvideos(channel_id)
     artists = search_1hop_artists(channel_id)
@@ -77,6 +82,7 @@ def get_artist_info(request):
     output["nodes"] = artists["artists"]
     output["links"] = artists["links"]
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_video_info(request):
@@ -93,6 +99,7 @@ def get_video_info(request):
     output["nodes"] = videos["videos"]
     output["links"] = videos["links"]
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_genre(request):
@@ -112,6 +119,7 @@ def get_genre(request):
         "genres": result['genres'],
     }
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_genre_incoming_outgoing(request):
@@ -136,6 +144,7 @@ def get_genre_incoming_outgoing(request):
         "outgoing": result['outgoing'],
     }
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_artist(request):
@@ -180,10 +189,12 @@ def get_artist_incoming_outgoing(request):
     }
     return JsonResponse(output)
 
+
 @csrf_exempt
 def get_videos_by_artist(request):
     output = search_videos_by_artist(request.GET['artist'])
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_genre_bubbles(request):
@@ -200,6 +211,7 @@ def get_genre_bubbles(request):
         "genres": result['genres'],
     }
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_genre_top_artists(request):
@@ -222,6 +234,7 @@ def get_genre_top_artists(request):
         "artists": result['artists'],
     }
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_genre_top_50_artists(request):
@@ -248,6 +261,7 @@ def get_genre_top_50_artists(request):
     }
     return JsonResponse(output)
 
+
 @csrf_exempt
 def get_genre_artist_top_videos(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
@@ -268,6 +282,7 @@ def get_genre_artist_top_videos(request):
         "videos": result['videos'],
     }
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_top_50_videos(request):
@@ -296,6 +311,7 @@ def get_top_50_videos(request):
     }
     return JsonResponse(output)
 
+
 @csrf_exempt
 def get_top_50_artists(request):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
@@ -321,6 +337,7 @@ def get_top_50_artists(request):
         "links": result['links'],
     }
     return JsonResponse(output)
+
 
 @csrf_exempt
 def get_genre_bubbles_single(request):

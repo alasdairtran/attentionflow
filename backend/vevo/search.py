@@ -1,8 +1,11 @@
-import os,json
-from neo4j import GraphDatabase
+import json
+import os
 from datetime import date, datetime
 
+from neo4j import GraphDatabase
+
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
+
 
 def search_artist_topvideos(channel_id):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
@@ -15,6 +18,7 @@ def search_artist_topvideos(channel_id):
         result = results.single()
     driver.close()
     return result
+
 
 def search_artist_basicinfo(channel_id):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
@@ -77,6 +81,7 @@ def search_video_basicinfo(video_id):
     }
     return output
 
+
 def search_videos_by_artist(channel_id):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
@@ -102,6 +107,7 @@ def search_videos_by_artist(channel_id):
     }
     return output
 
+
 def search_1hop_artists(channel_id):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
@@ -121,6 +127,7 @@ def search_1hop_artists(channel_id):
     }
     return output
 
+
 def search_1hop_videos(video_id):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
@@ -139,6 +146,7 @@ def search_1hop_videos(video_id):
         "links": result['links'],
     }
     return output
+
 
 def search_2hop_videos(video_id):
     driver = GraphDatabase.driver("bolt://neo4j:7687",
