@@ -16,5 +16,5 @@ RUN apt update && apt install -yq --no-install-recommends \
 COPY conda.yaml /backend/
 RUN conda env update -f=/backend/conda.yaml
 
-COPY . /backend/
+# COPY . /backend/
 WORKDIR /backend
