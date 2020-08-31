@@ -28,8 +28,6 @@ class WikiFlow extends Component {
           title: 'Yellow vests movement',
           kind: 'central',
           attn: 0,
-          fx: 568,
-          fy: 318,
           series: [
             1513,
             1460,
@@ -178,8 +176,6 @@ class WikiFlow extends Component {
           title: 'Arc de Triomphe',
           kind: 'neighbor',
           attn: 0.0354412004484662,
-          fx: 123,
-          fy: 456,
           series: [
             1814,
             1974,
@@ -328,8 +324,6 @@ class WikiFlow extends Component {
           title: 'Joker (2019 film)',
           kind: 'neighbor',
           attn: 0.02799676757838045,
-          fx: 540,
-          fy: 194,
           series: [
             62587,
             52933,
@@ -478,8 +472,6 @@ class WikiFlow extends Component {
           title: 'Emmanuel Macron',
           kind: 'neighbor',
           attn: 0.022770619552050318,
-          fx: 181,
-          fy: 194,
           series: [
             3570,
             3698,
@@ -628,8 +620,6 @@ class WikiFlow extends Component {
           title: 'Turning Point USA',
           kind: 'neighbor',
           attn: 0.03140008707331227,
-          fx: 369,
-          fy: 456,
           series: [
             1715,
             1599,
@@ -778,8 +768,6 @@ class WikiFlow extends Component {
           title: 'La République En Marche!',
           kind: 'neighbor',
           attn: 0.016711919335648417,
-          fx: 92,
-          fy: 318,
           series: [
             599,
             600,
@@ -928,8 +916,6 @@ class WikiFlow extends Component {
           title: 'Neoliberalism',
           kind: 'neighbor',
           attn: 0.04064391067783747,
-          fx: 224,
-          fy: 377,
           series: [
             4271,
             3790,
@@ -1078,8 +1064,6 @@ class WikiFlow extends Component {
           title: 'Michel Houellebecq',
           kind: 'neighbor',
           attn: 0.021066951266090785,
-          fx: 384,
-          fy: 194,
           series: [
             529,
             518,
@@ -1228,8 +1212,6 @@ class WikiFlow extends Component {
           title: 'Black bloc',
           kind: 'neighbor',
           attn: 0.03216394981635468,
-          fx: 516,
-          fy: 456,
           series: [
             256,
             278,
@@ -1378,8 +1360,6 @@ class WikiFlow extends Component {
           title: 'Yellow',
           kind: 'neighbor',
           attn: 0.019883899749921902,
-          fx: 249,
-          fy: 278,
           series: [
             860,
             813,
