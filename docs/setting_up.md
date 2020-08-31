@@ -103,6 +103,10 @@ sudo rm -rfv /etc/nginx/sites-enabled/default
 sudo nginx -t
 # Reload Nginx to load the new configuration.
 sudo systemctl restart nginx
+
+# Add neo4j plugin to make loading csv easier
+cd neo4j/plugins
+sudo wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/4.1.0.2/apoc-4.1.0.2-all.jar
 ```
 
 ## Maintenance
