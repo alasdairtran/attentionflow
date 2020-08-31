@@ -25,7 +25,7 @@ def get_video(request):
 @csrf_exempt
 def get_video_incoming_outgoing(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     title = request.GET['title']
     with driver.session() as session:
@@ -50,7 +50,7 @@ def get_video_incoming_outgoing(request):
 @csrf_exempt
 def get_suggestions(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     title = request.GET["title"]
     with driver.session() as session:
@@ -97,7 +97,7 @@ def get_video_info(request):
 @csrf_exempt
 def get_genre(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
         results = session.run("MATCH (g:G) where g.genre <> 'genre' and g.genre <> 'Music' "
@@ -116,7 +116,7 @@ def get_genre(request):
 @csrf_exempt
 def get_genre_incoming_outgoing(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     genre = request.GET['genre']
     with driver.session() as session:
@@ -154,7 +154,7 @@ def get_artist(request):
 @csrf_exempt
 def get_artist_incoming_outgoing(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     channel_id = request.GET['artist']
     with driver.session() as session:
@@ -188,7 +188,7 @@ def get_videos_by_artist(request):
 @csrf_exempt
 def get_genre_bubbles(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
         results = session.run("MATCH (g:G) where g.genre <> 'Music' and g.genre <> 'genre' and g.genre <> 'Film' "
@@ -204,7 +204,7 @@ def get_genre_bubbles(request):
 @csrf_exempt
 def get_genre_top_artists(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     genre = request.GET['genre']
     with driver.session() as session:
@@ -226,7 +226,7 @@ def get_genre_top_artists(request):
 @csrf_exempt
 def get_genre_top_50_artists(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     genre = request.GET['genre']
     with driver.session() as session:
@@ -251,7 +251,7 @@ def get_genre_top_50_artists(request):
 @csrf_exempt
 def get_genre_artist_top_videos(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     genre = request.GET['genre']
     artist = request.GET['artist']
@@ -272,7 +272,7 @@ def get_genre_artist_top_videos(request):
 @csrf_exempt
 def get_top_50_videos(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
         results = session.run("MATCH (v:V) "
@@ -299,7 +299,7 @@ def get_top_50_videos(request):
 @csrf_exempt
 def get_top_50_artists(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
         results = session.run("MATCH (a:A) "
@@ -325,7 +325,7 @@ def get_top_50_artists(request):
 @csrf_exempt
 def get_genre_bubbles_single(request):
     driver = GraphDatabase.driver("neo4j://neo4j:7687",
-                                  auth=("neo4j", NEO4J_PASS))
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
         results = session.run("MATCH (g:G) WHERE g.genre <> 'Music' and g.genre <> 'genre' and g.genre <> 'Film' "
