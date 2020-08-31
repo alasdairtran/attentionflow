@@ -21,4 +21,9 @@ export const ComponentsNav = [
     label: 'Video',
     to: '#/overview/video',
   },
+  {
+    icon: 'pe-7s-share',
+    label: 'Wiki',
+    to: '#/overview/wiki',
+  },
 ];
