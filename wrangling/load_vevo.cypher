@@ -16,12 +16,11 @@ SET v.videoId = value.vid,
     v.artistName = value.artist_name,
     v.collaboration = value.collaboration,
     v.startDate = datetime(value.start_date)',
-{batchSize:100})
+{batchSize:1000});
 
 // update index
-CREATE INDEX ON :V(embed)
+CREATE INDEX FOR (n:V) ON (n.embed);
 
-// create video->video edges from local json file
 CALL apoc.periodic.iterate('CALL apoc.load.json("file:///video_edges.json") YIELD value',
 'MATCH (a:V)
 MATCH (b:V)
@@ -30,9 +29,8 @@ CREATE (a)-[r:RV]->(b)
 SET r.weight = toFloat(value.weight),
     r.flux = toFloat(value.flux),
     r.startDate = datetime(value.start_date),
-    r.temporalFlux = value.temporal_flux
-RETURN r',
-{batchSize:100})
+    r.temporalFlux = value.temporal_flux',
+{batchSize:1000});
 
 // create artist nodes from local json file
 CALL apoc.periodic.iterate('
@@ -44,10 +42,10 @@ SET a.numVideos = toInteger(value.num_videos),
     a.artistName = value.artist_name,
     a.dailyView = value.daily_view,
     a.startDate = datetime(value.start_date)',
-{batchSize:100})
+{batchSize:1000});
 
 // update index
-CREATE INDEX ON :A(channelId)
+CREATE INDEX FOR (n:A) ON (n.channelId);
 
 // create artist->artist edges from local json file
 CALL apoc.periodic.iterate('CALL apoc.load.json("file:///artist_edges.json") YIELD value',
@@ -57,16 +55,19 @@ WHERE a.channelId = value.src_channel AND b.channelId = value.tar_channel
 CREATE (a)-[r:RA]->(b)
 SET r.channelFlux = toFloat(value.channel_flux),
     r.startDate = datetime(value.start_date),
-    r.temporalChannelFlux = value.temporal_channel_flux
-RETURN r',
-{batchSize:100})
+    r.temporalChannelFlux = value.temporal_channel_flux',
+{batchSize:1000});
 
 //create genre nodes
 LOAD CSV WITH HEADERS FROM 'file:///genre_nodes.csv' AS n
-CREATE (g: G{genre: n.Genre, numVideos: toInteger(n.NumVideos), numViews: toFloat(n.NumViews)})
+CREATE (g: G{
+    genre: n.Genre,
+    numVideos: toInteger(n.NumVideos),
+    numViews: toFloat(n.NumViews)
+});
 
 // update index
-CREATE INDEX ON :G(genre)
+CREATE INDEX FOR (n:G) ON (n.genre);
 
 //create genre->genre edges
 LOAD CSV WITH HEADERS FROM 'file:///genre_edges.csv' AS e
@@ -74,56 +75,49 @@ MATCH (a:G)
 MATCH (b:G)
 WHERE a.genre = e.SourceGenre AND b.genre = e.TargetGenre
 CREATE (a)-[r:RG]->(b)
-SET r.genreFlux = toFloat(e.GenreFlux)
-RETURN r
+SET r.genreFlux = toFloat(e.GenreFlux);
 
 //create video->artist edge
 LOAD CSV WITH HEADERS FROM 'file:///video_artist.csv' AS e
 MATCH (a:V)
 MATCH (b:A)
 WHERE a.embed = toInteger(e.Embed) AND b.channelId = e.ChannelId
-CREATE (a)-[r:VA]->(b)
-RETURN r
+CREATE (a)-[r:VA]->(b);
 
 //create artist->video edge
 LOAD CSV WITH HEADERS FROM 'file:///video_artist.csv' AS e
 MATCH (a:V)
 MATCH (b:A)
 WHERE a.embed = toInteger(e.Embed) AND b.channelId = e.ChannelId
-CREATE (b)-[r:AV]->(a)
-RETURN r
+CREATE (b)-[r:AV]->(a);
 
 //create video->genre edge
 LOAD CSV WITH HEADERS FROM 'file:///video_genre.csv' AS e
 MATCH (a:V)
 MATCH (b:G)
 WHERE a.embed = toInteger(e.Embed) AND b.genre = e.Genre
-CREATE (a)-[r:VG]->(b)
-RETURN r
+CREATE (a)-[r:VG]->(b);
 
 //create genre->video edge
 LOAD CSV WITH HEADERS FROM 'file:///video_genre.csv' AS e
 MATCH (a:V)
 MATCH (b:G)
 WHERE a.embed = toInteger(e.Embed) AND b.genre = e.Genre
-CREATE (b)-[r:GV]->(a)
-RETURN r
+CREATE (b)-[r:GV]->(a);
 
 //create artist->genre edge
 LOAD CSV WITH HEADERS FROM 'file:///artist_genre.csv' AS e
 MATCH (a:A)
 MATCH (b:G)
 WHERE a.channelId = e.ChannelId AND b.genre = e.Genre
-CREATE (a)-[r:AG]->(b)
-RETURN r
+CREATE (a)-[r:AG]->(b);
 
 //create genre->artist edge
 LOAD CSV WITH HEADERS FROM 'file:///artist_genre.csv' AS e
 MATCH (a:A)
 MATCH (b:G)
 WHERE a.channelId = e.ChannelId AND b.genre = e.Genre
-CREATE (b)-[r:GA]->(a)
-RETURN r
+CREATE (b)-[r:GA]->(a);
 
 // update index
-CREATE INDEX ON :V(videoId)
+CREATE INDEX FOR (n:V) ON (n.videoId);
