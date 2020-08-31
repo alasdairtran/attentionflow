@@ -112,6 +112,7 @@ export default class AnalyticsDashboard1 extends Component {
             errorMessage: res.data.error,
           });
         } else {
+          console.log(res.data);
           this.setState({
             isLoaded: true,
             isLoading: false,
