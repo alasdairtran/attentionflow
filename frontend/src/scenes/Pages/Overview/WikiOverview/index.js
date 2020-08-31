@@ -41,7 +41,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as d3 from 'd3';
 import { getIncomingOutgoing } from '../../../../components/VideoEgo/incomingOutgoing';
 import PageTitle from '../../../Layout/AppMain/PageTitle';
-import Timeseries from '../../../../components/Timeseries';
+import WikiFlow from '../../../../components/WikiFlow';
 
 export default class AnalyticsDashboard1 extends Component {
   constructor(props) {
@@ -176,7 +176,7 @@ export default class AnalyticsDashboard1 extends Component {
                         }}
                       />
                     ) : (
-                      <Timeseries egoType="V" egoInfo={this.state.videoInfo} />
+                      <WikiFlow egoType="V" egoInfo={this.state.videoInfo} />
                     )}
                   </div>
                 </Col>
