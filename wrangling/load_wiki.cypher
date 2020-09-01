@@ -26,14 +26,14 @@ MERGE (:Category {
     title: row.title
 });
 
-// Takes 20 minutes
+// Takes 60 minutes
 CALL apoc.periodic.iterate(
     'CALL apoc.load.csv("file:///page_links.csv") YIELD map',
     'MATCH (source:Page { graphID: map.startID })
      MATCH (dest:Page { graphID: map.endID })
      MERGE (source)-[r:LINKS_TO]->(dest)
      ON CREATE
-     SET r.stateDates = [i in split(map.startDates,";") | date(i)],
+     SET r.startDates = [i in split(map.startDates,";") | date(i)],
          r.endDates = [i in split(map.endDates,";") | date(i)]
      ',
     {batchSize:1000});
@@ -45,7 +45,7 @@ CALL apoc.periodic.iterate(
      MATCH (dest:Category { id: map.endID })
      MERGE (source)-[r:PART_OF]->(dest)
      ON CREATE
-     SET r.stateDates = [i in split(map.startDates,";") | date(i)],
+     SET r.startDates = [i in split(map.startDates,";") | date(i)],
          r.endDates = [i in split(map.endDates,";") | date(i)]
      ',
     {batchSize:1000});
