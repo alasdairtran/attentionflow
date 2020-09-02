@@ -35,13 +35,13 @@ export default class WikiOverview extends Component {
 
   componentDidMount() {
     document.body.classList.add('bg-light');
-    if (this.state.videoID) {
+    if (this.state.graphID) {
       this.fetchExample();
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.videoID !== this.state.videoID) {
+    if (prevState.graphID !== this.state.graphID) {
       this.fetchExample();
     }
   }
