@@ -29,7 +29,7 @@ export default class WikiOverview extends Component {
   componentWillReceiveProps(newProps) {
     this.setState({
       clickedOnSong: false,
-      videoID: newProps.match.params.id,
+      graphID: newProps.match.params.id,
     });
   }
 
@@ -63,6 +63,7 @@ export default class WikiOverview extends Component {
   fetchExample = e => {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
     const options = { params: { graphID: this.state.graphID } };
+    console.log('Fetching Wiki page', this.state.graphID);
     axios
       .get('/vevo/wiki_page/', options)
       .then(res => {
@@ -96,7 +97,7 @@ export default class WikiOverview extends Component {
   };
 
   render() {
-    if (!this.state.videoID) {
+    if (!this.state.graphID) {
       console.log('redirecting');
       return <Redirect push to={`/overview/wiki/353191`} />;
     }
