@@ -1,28 +1,29 @@
-import json
 import os
-from datetime import date
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from neo4j import GraphDatabase
 
-from .search import *
+from .search import (search_1hop_artists, search_1hop_videos,
+                     search_artist_basicinfo, search_artist_topvideos,
+                     search_video_basicinfo, search_videos_by_artist)
+from .wiki import TitleDoesNotExist, search_for_wiki_page
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
 
 
-@csrf_exempt
-def get_video(request):
-    hop_count = int(request.GET["hops"])
-    title = request.GET["title"]
-    output = {}
-    if (hop_count == 1):
-        output = search_1hop_video(title)
-    elif (hop_count == 2):
-        output = search_2hop_video(title)
-    elif (hop_count == 3):
-        output = search_3hop_video(title)
-    return JsonResponse(output)
+# @csrf_exempt
+# def get_video(request):
+#     hop_count = int(request.GET["hops"])
+#     title = request.GET["title"]
+#     output = {}
+#     if (hop_count == 1):
+#         output = search_1hop_video(title)
+#     elif (hop_count == 2):
+#         output = search_2hop_video(title)
+#     elif (hop_count == 3):
+#         output = search_3hop_video(title)
+#     return JsonResponse(output)
 
 
 @csrf_exempt
@@ -146,18 +147,18 @@ def get_genre_incoming_outgoing(request):
     return JsonResponse(output)
 
 
-@csrf_exempt
-def get_artist(request):
-    hop_count = int(request.GET["hops"])
-    channel_id = request.GET["artist"]
-    output = {}
-    if (hop_count == 1):
-        output = search_1hop_artist(channel_id)
-    elif (hop_count == 2):
-        output = search_2hop_artist(channel_id)
-    elif (hop_count == 3):
-        output = search_3hop_artist(channel_id)
-    return JsonResponse(output)
+# @csrf_exempt
+# def get_artist(request):
+#     hop_count = int(request.GET["hops"])
+#     channel_id = request.GET["artist"]
+#     output = {}
+#     if (hop_count == 1):
+#         output = search_1hop_artist(channel_id)
+#     elif (hop_count == 2):
+#         output = search_2hop_artist(channel_id)
+#     elif (hop_count == 3):
+#         output = search_3hop_artist(channel_id)
+#     return JsonResponse(output)
 
 
 @csrf_exempt
@@ -361,4 +362,16 @@ def get_genre_bubbles_single(request):
     output = {
         "rootArr": result['rootArr']
     }
+    return JsonResponse(output)
+
+
+@csrf_exempt
+def get_wiki_graph_for_page(request):
+    graph_id = int(request.GET['graphID'])
+
+    try:
+        output = search_for_wiki_page(graph_id)
+    except TitleDoesNotExist:
+        output = {'error': f'Graph ID {graph_id} does not exist.'}
+
     return JsonResponse(output)

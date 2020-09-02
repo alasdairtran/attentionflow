@@ -43,14 +43,14 @@ import { getIncomingOutgoing } from '../../../../components/VideoEgo/incomingOut
 import PageTitle from '../../../Layout/AppMain/PageTitle';
 import WikiFlow from '../../../../components/WikiFlow';
 
-export default class AnalyticsDashboard1 extends Component {
+export default class WikiOverview extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       clickedOnSong: false,
       title: null,
-      videoID: props.match.params.id,
+      graphID: props.match.params.id,
       dropdownOpen: false,
       activeTab1: '11',
       isLoaded: false,
@@ -100,9 +100,9 @@ export default class AnalyticsDashboard1 extends Component {
 
   fetchExample = e => {
     this.setState({ isLoaded: false, isLoading: true, hasError: false });
-    const options = { params: { videoID: this.state.videoID } };
+    const options = { params: { graphID: this.state.graphID } };
     axios
-      .get('/vevo/video_info/', options)
+      .get('/vevo/wiki_page/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -116,7 +116,7 @@ export default class AnalyticsDashboard1 extends Component {
           this.setState({
             isLoaded: true,
             isLoading: false,
-            videoInfo: res.data,
+            wikiGraph: res.data,
           });
         }
       })
@@ -136,7 +136,7 @@ export default class AnalyticsDashboard1 extends Component {
   render() {
     if (!this.state.videoID) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/wiki/rYEDA3JcQqw`} />;
+      return <Redirect push to={`/overview/wiki/353191`} />;
     }
     return (
       <>
@@ -176,7 +176,7 @@ export default class AnalyticsDashboard1 extends Component {
                         }}
                       />
                     ) : (
-                      <WikiFlow egoType="V" egoInfo={this.state.videoInfo} />
+                      <WikiFlow wikiGraph={this.state.wikiGraph} />
                     )}
                   </div>
                 </Col>
