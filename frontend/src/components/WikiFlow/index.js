@@ -37,7 +37,7 @@ class WikiFlow extends Component {
 
     // set the dimensions and margins of the graph
     var margin = { top: 10, right: 30, bottom: 30, left: 30 },
-      width = 1000 - margin.left - margin.right,
+      width = 1100 - margin.left - margin.right,
       height = 800 - margin.top - margin.bottom;
 
     d3.select(this.refs.canvas)
@@ -368,7 +368,7 @@ class WikiFlow extends Component {
     }
 
     g.append('rect')
-      .attr('x', 1090)
+      .attr('x', 890)
       .attr('y', 440)
       .attr('width', 110)
       .attr('height', 80)
@@ -382,9 +382,9 @@ class WikiFlow extends Component {
       .style('stroke', '#aaa')
       .attr('stroke-width', 1)
       .attr('marker-end', 'url(#end)')
-      .attr('x1', 1125)
+      .attr('x1', 925)
       .attr('y1', 460)
-      .attr('x2', 1150)
+      .attr('x2', 950)
       .attr('y2', 460);
 
     svg
@@ -392,40 +392,40 @@ class WikiFlow extends Component {
       .style('stroke', '#aaa')
       .attr('stroke-width', 3)
       .attr('marker-end', 'url(#end)')
-      .attr('x1', 1125)
+      .attr('x1', 925)
       .attr('y1', 477)
-      .attr('x2', 1150)
+      .attr('x2', 950)
       .attr('y2', 477);
 
     svg
       .append('circle')
-      .attr('cx', 1130)
+      .attr('cx', 930)
       .attr('cy', 500)
       .attr('r', 6)
       .style('fill', '#c6d9ec');
     svg
       .append('circle')
-      .attr('cx', 1145)
+      .attr('cx', 945)
       .attr('cy', 500)
       .attr('r', 6)
       .style('fill', '#ffdb99');
 
     svg
       .append('circle')
-      .attr('cx', 1130)
+      .attr('cx', 930)
       .attr('cy', 520)
       .attr('r', 6)
       .style('fill', '#6699cc');
     svg
       .append('circle')
-      .attr('cx', 1145)
+      .attr('cx', 945)
       .attr('cy', 520)
       .attr('r', 6)
       .style('fill', 'orange');
 
     svg
       .append('text')
-      .attr('x', 1155)
+      .attr('x', 955)
       .attr('y', 461)
       .text('less attention')
       .style('fill', '#555')
@@ -435,7 +435,7 @@ class WikiFlow extends Component {
 
     svg
       .append('text')
-      .attr('x', 1155)
+      .attr('x', 955)
       .attr('y', 478)
       .text('more attention')
       .style('fill', '#555')
@@ -445,7 +445,7 @@ class WikiFlow extends Component {
 
     svg
       .append('text')
-      .attr('x', 1155)
+      .attr('x', 955)
       .attr('y', 500)
       .text('backcast period')
       .style('fill', '#555')
@@ -454,7 +454,7 @@ class WikiFlow extends Component {
       .attr('alignment-baseline', 'middle');
     svg
       .append('text')
-      .attr('x', 1155)
+      .attr('x', 955)
       .attr('y', 520)
       .text('forecast period')
       .style('fill', '#555')
