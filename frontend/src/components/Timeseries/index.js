@@ -62,7 +62,7 @@ function numFormatter(num) {
   else if (Math.abs(num) > 999)
     newNum = Math.sign(num) * (Math.abs(num) / 1000).toFixed(1) + 'K';
   else newNum = Math.sign(num) * Math.abs(num);
-  return newNum == 0 ? '' : newNum;
+  return newNum === 0 ? '' : newNum;
 }
 
 function stringfy(id) {
@@ -147,8 +147,8 @@ class AttentionFlow extends Component {
     this.drawTimeSelector();
     this.drawAxes();
 
-    if (egoType == 'V') infSlider.noUiSlider.set(1);
-    else if (egoType == 'A') infSlider.noUiSlider.set(5);
+    if (egoType === 'V') infSlider.noUiSlider.set(1);
+    else if (egoType === 'A') infSlider.noUiSlider.set(5);
   }
 
   drawAxes() {
@@ -256,14 +256,14 @@ class AttentionFlow extends Component {
     var infocardtext = document.createElement('div');
 
     var egoInfoText = '';
-    if (egoType == 'A') {
+    if (egoType === 'A') {
       egoInfoText += 'First song published: ' + published.toShortFormat();
       egoInfoText += '<br/>Total views: ' + numFormatter(egoNode.totalView);
       infocardtext.innerHTML = egoInfoText;
       infocard.append(infocardtext);
       this.divInfo.append(infocard);
       this.addTopVideos(this.divInfo);
-    } else if (egoType == 'V') {
+    } else if (egoType === 'V') {
       this.addVideoThumbnail(infocard);
       egoInfoText += '<br/>Published: ' + published.toShortFormat();
       egoInfoText += '<br/>Total Views: ' + numFormatter(egoNode.totalView);
@@ -328,9 +328,9 @@ class AttentionFlow extends Component {
   addVideoThumbnail(div) {
     var embvideo_id;
     var embvideo = document.createElement('iframe');
-    if (egoType == 'V') {
+    if (egoType === 'V') {
       embvideo_id = egoNode.id;
-    } else if (egoType == 'A') {
+    } else if (egoType === 'A') {
       embvideo_id = egoNode.topvideos[0][0][0];
     }
     var videoWidth = this.divInfo.offsetWidth - 60;
@@ -571,7 +571,7 @@ class AttentionFlow extends Component {
       .attr('orient', 'auto')
       .append('path')
       .attr('d', d => markerEnd(d))
-      .style('fill', d => (d.target.id == egoID ? 'steelblue' : '#f78ca0'));
+      .style('fill', d => (d.target.id === egoID ? 'steelblue' : '#f78ca0'));
 
     var link = chart
       .append('g')
@@ -650,21 +650,21 @@ class AttentionFlow extends Component {
       .call(drag(simulation))
       .attr('class', 'node')
       .text(function(d) {
-        if (egoType == 'V') return d.name.split('-')[1];
-        if (egoType == 'A') return d.name;
+        if (egoType === 'V') return d.name.split('-')[1];
+        if (egoType === 'A') return d.name;
       })
       .attr('x', function(d) {
         return -2.5 * (1 + !d.name ? 0 : d.name.length);
       })
       .attr('y', 3)
       .style('visibility', function(d) {
-        if (d.id == egoID) return 'visible';
+        if (d.id === egoID) return 'visible';
         else return d.radius > radiusLimit ? 'visible' : 'hidden';
       });
 
     node.on('click', d => {
       // console.log(d);
-      if (d.id == egoID) return;
+      if (d.id === egoID) return;
       this.setState({
         clickedOnSong: true,
         clickedVideoID: d.id.substr(1),
@@ -672,7 +672,7 @@ class AttentionFlow extends Component {
     });
 
     node.on('mouseover', function(d) {
-      // if (d.id == egoID) return;
+      // if (d.id === egoID) return;
       // d3.select(this)
       //   .raise()
       //   .select('circle')
@@ -693,7 +693,7 @@ class AttentionFlow extends Component {
         .raise()
         .select('text')
         .style('visibility', function(d) {
-          if (d.id == egoID) return 'visible';
+          if (d.id === egoID) return 'visible';
           else return d.radius > radiusLimit ? 'visible' : 'hidden';
         });
       hideOtherSongViewCount(d);
@@ -701,12 +701,12 @@ class AttentionFlow extends Component {
 
     graphSorting.addEventListener('change', function() {
       var sortingOpt = graphSortingOpts[graphSorting.value];
-      if (sortingOpt == 'Force Directed') {
+      if (sortingOpt === 'Force Directed') {
         chart_y.attr('display', 'none');
       } else if (
-        sortingOpt == 'Total View' ||
-        sortingOpt == 'Contributed' ||
-        sortingOpt == 'Received'
+        sortingOpt === 'Total View' ||
+        sortingOpt === 'Contributed' ||
+        sortingOpt === 'Received'
       ) {
         chart_y
           .attr('display', 'block')
@@ -720,7 +720,7 @@ class AttentionFlow extends Component {
               .ticks(5)
               .tickFormat(numFormatter)
           );
-      } else if (sortingOpt == 'Artist Name') {
+      } else if (sortingOpt === 'Artist Name') {
         chart_y
           .attr('display', 'block')
           .attr(
@@ -736,40 +736,40 @@ class AttentionFlow extends Component {
       // ## this code makes nodes NOT bounded in the panel
       node
         .attr('display', function(d) {
-          if (d.id == egoID) return 'block';
+          if (d.id === egoID) return 'block';
           if (d.isVisible && d.startInfluence.getTime() <= egoTime)
             return 'block';
           else return 'none';
         })
         .attr('cx', function(d) {
-          if (d.id == egoID) return maxRadius + xScale(egoTime);
+          if (d.id === egoID) return maxRadius + xScale(egoTime);
           if (d.startInfluence.getTime() <= egoTime) {
             return maxRadius + xScale(d.startInfluence);
           }
         })
         .attr('cy', function(d) {
           var sortingOpt = graphSortingOpts[graphSorting.value];
-          if (sortingOpt == 'Force Directed') {
+          if (sortingOpt === 'Force Directed') {
             return Math.min(
               chart_topMargin + chart_height - 20,
               Math.max(chart_topMargin + 20, d.y)
             );
-          } else if (sortingOpt == 'Total View') {
+          } else if (sortingOpt === 'Total View') {
             return (
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.viewSum))
             );
-          } else if (sortingOpt == 'Contributed') {
+          } else if (sortingOpt === 'Contributed') {
             return (
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.contributed))
             );
-          } else if (sortingOpt == 'Received') {
+          } else if (sortingOpt === 'Received') {
             return (
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.received))
             );
-          } else if (sortingOpt == 'Artist Name') {
+          } else if (sortingOpt === 'Artist Name') {
             return (
               chart_topMargin +
               chart_yScale_artist.bandwidth() / 2 +
@@ -781,30 +781,30 @@ class AttentionFlow extends Component {
           var new_x = maxRadius + xScale(d.startInfluence);
           var new_y;
           var sortingOpt = graphSortingOpts[graphSorting.value];
-          if (sortingOpt == 'Force Directed') {
+          if (sortingOpt === 'Force Directed') {
             new_y = Math.min(
               chart_topMargin + chart_height - 20,
               Math.max(chart_topMargin + 20, d.y)
             );
-          } else if (sortingOpt == 'Total View') {
+          } else if (sortingOpt === 'Total View') {
             new_y =
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.viewSum));
-          } else if (sortingOpt == 'Contributed') {
+          } else if (sortingOpt === 'Contributed') {
             new_y =
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.contributed));
-          } else if (sortingOpt == 'Received') {
+          } else if (sortingOpt === 'Received') {
             new_y =
               chart_topMargin +
               chart_yScale_view(Math.max(chart_yScale_minimum, d.received));
-          } else if (sortingOpt == 'Artist Name') {
+          } else if (sortingOpt === 'Artist Name') {
             new_y =
               chart_topMargin +
               chart_yScale_artist.bandwidth() / 2 +
               chart_yScale_artist(d.artist);
           }
-          if (d.id == egoID) {
+          if (d.id === egoID) {
             new_x = maxRadius + xScale(egoTime);
             // new_y = chart_topMargin;
           }
@@ -821,10 +821,10 @@ class AttentionFlow extends Component {
               d.target.startInfluence.getTime() <= egoTime) ||
             (d.source.isVisible &&
               d.source.startInfluence.getTime() <= egoTime &&
-              d.target.id == egoID) ||
+              d.target.id === egoID) ||
             (d.target.isVisible &&
               d.target.startInfluence.getTime() <= egoTime &&
-              d.source.id == egoID)
+              d.source.id === egoID)
           )
             return 'block';
           else return 'none';
@@ -845,7 +845,7 @@ class AttentionFlow extends Component {
       return (
         <Redirect
           push
-          to={`/overview/${this.props.egoType == 'A' ? 'artist' : 'video'}/${
+          to={`/overview/${this.props.egoType === 'A' ? 'artist' : 'video'}/${
             this.state.clickedVideoID
           }`}
         />
@@ -883,7 +883,7 @@ function calculateViewCount(minTime, maxTime) {
     nodes[i]['viewSum'] = viewSum;
     nodes[i]['radius'] = radius;
     n.style.r = radius;
-    if (nodes[i].id == egoID) egoViewSum = viewSum;
+    if (nodes[i].id === egoID) egoViewSum = viewSum;
   }
   for (var i = 0; i < links.length; i++) {
     var fluxSum = linkWeight(links[i], minTime, maxTime);
@@ -915,7 +915,7 @@ function filterNodes() {
       var curTime = new Date(tick);
       if (
         d.source.startInfluence > curTime &&
-        d.target.id == egoID &&
+        d.target.id === egoID &&
         d.fluxSum > (infSlider.get() / 100.0) * egoViewSum
       ) {
         // console.log("D", d.source.name, d.source.startDate, curTime);
@@ -968,7 +968,7 @@ function linkArc(d) {
   var px2 = maxRadius + xScale(d.target.startInfluence);
   var py1, py2;
   var sortingOpt = graphSortingOpts[graphSorting.value];
-  if (sortingOpt == 'Force Directed') {
+  if (sortingOpt === 'Force Directed') {
     py1 = Math.min(
       chart_topMargin + chart_height - 20,
       Math.max(chart_topMargin + 20, d.source.y)
@@ -977,7 +977,7 @@ function linkArc(d) {
       chart_topMargin + chart_height - 20,
       Math.max(chart_topMargin + 20, d.target.y)
     );
-  } else if (sortingOpt == 'Total View') {
+  } else if (sortingOpt === 'Total View') {
     var ypos1 = chart_yScale_view(
       Math.max(chart_yScale_minimum, d.source.viewSum)
     );
@@ -986,7 +986,7 @@ function linkArc(d) {
     );
     py1 = chart_topMargin + ypos1;
     py2 = chart_topMargin + ypos2;
-  } else if (sortingOpt == 'Contributed') {
+  } else if (sortingOpt === 'Contributed') {
     var ypos1 = chart_yScale_view(
       Math.max(chart_yScale_minimum, d.source.contributed)
     );
@@ -995,7 +995,7 @@ function linkArc(d) {
     );
     py1 = chart_topMargin + ypos1;
     py2 = chart_topMargin + ypos2;
-  } else if (sortingOpt == 'Received') {
+  } else if (sortingOpt === 'Received') {
     var ypos1 = chart_yScale_view(
       Math.max(chart_yScale_minimum, d.source.received)
     );
@@ -1004,7 +1004,7 @@ function linkArc(d) {
     );
     py1 = chart_topMargin + ypos1;
     py2 = chart_topMargin + ypos2;
-  } else if (sortingOpt == 'Artist Name') {
+  } else if (sortingOpt === 'Artist Name') {
     py1 =
       chart_topMargin +
       chart_yScale_artist.bandwidth() / 2 +
@@ -1015,17 +1015,17 @@ function linkArc(d) {
       chart_yScale_artist(d.target.artist);
   }
 
-  if (d.source.id == egoID) {
+  if (d.source.id === egoID) {
     px1 = maxRadius + xScale(egoTime);
   }
-  if (d.target.id == egoID) {
+  if (d.target.id === egoID) {
     px2 = maxRadius + xScale(egoTime);
   }
 
   var dx = px2 - px1,
     dy = py2 - py1,
     dr = Math.sqrt(dx * dx + dy * dy);
-  if (d.source.id == d.target.id && d.source.id == egoID) {
+  if (d.source.id === d.target.id && d.source.id === egoID) {
     var drs = d.source.radius;
     return (
       'M' +
@@ -1049,7 +1049,7 @@ function linkArc(d) {
 }
 
 function updateTimeSlider(values, handle, unencoded, isTap, positions) {
-  if (handle == 0) {
+  if (handle === 0) {
     // left handle
     var m_pos = xScale(values[0]);
     d3.select('#startIndicator')
@@ -1057,7 +1057,7 @@ function updateTimeSlider(values, handle, unencoded, isTap, positions) {
       .attr('x2', m_pos)
       .attr('display', 'block');
     d3.select('#timeCover_left').attr('width', m_pos);
-  } else if (handle == 1) {
+  } else if (handle === 1) {
     // right handle
     var m_pos = xScale(values[1]);
     egoTime = parseInt(values[1]);
@@ -1135,7 +1135,7 @@ function showOtherSongViewCount(othersong) {
   var viewToEgo = 0;
   if (edgeToEgo.data()[0]) {
     edgeToEgo.attr('class', 'edge incoming');
-    if (othersong.id != egoID)
+    if (othersong.id !== egoID)
       edgeToEgo.attr('marker-end', d => 'url(#arrow' + d.id + ')');
     viewToEgo = parseInt(edgeToEgo.data()[0].fluxSum).toLocaleString();
   }
@@ -1143,7 +1143,7 @@ function showOtherSongViewCount(othersong) {
   var viewFromEgo = 0;
   if (edgeFromEgo.data()[0]) {
     edgeFromEgo.attr('class', 'edge outgoing');
-    if (othersong.id != egoID)
+    if (othersong.id !== egoID)
       edgeFromEgo.attr('marker-end', d => 'url(#arrow' + d.id + ')');
     viewFromEgo = parseInt(edgeFromEgo.data()[0].fluxSum).toLocaleString();
   }

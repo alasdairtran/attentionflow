@@ -92,7 +92,7 @@ class WikiFlow extends Component {
         }
       })
       .attr('height', n => {
-        if (n.kind === 'alter' || n.kind == 'ego') {
+        if (n.kind === 'alter' || n.kind === 'ego') {
           return nodeHeight;
         } else if (n.kind === 'decomposition') {
           return layerHeight;
@@ -172,13 +172,13 @@ class WikiFlow extends Component {
       .enter()
       .append('path')
       .attr('fill', n => {
-        if (n.kind == 'alter') {
+        if (n.kind === 'alter') {
           return '#c6d9ec';
-        } else if (n.kind == 'ego') {
+        } else if (n.kind === 'ego') {
           return '#ffdb99';
-        } else if (n.kind == 'decomposition') {
+        } else if (n.kind === 'decomposition') {
           return 'orange';
-        } else if (n.kind == 'forecast') {
+        } else if (n.kind === 'forecast') {
           return 'orange';
         }
       })
@@ -192,9 +192,9 @@ class WikiFlow extends Component {
       .enter()
       .append('path')
       .attr('fill', n => {
-        if (n.kind == 'alter') {
+        if (n.kind === 'alter') {
           return '#6699cc';
-        } else if (n.kind == 'ego') {
+        } else if (n.kind === 'ego') {
           return 'orange';
         }
       })
@@ -212,9 +212,9 @@ class WikiFlow extends Component {
       .style('fill', '#555')
       .style('font-family', 'Helvetica')
       .style('font-size', n => {
-        if (n.kind == 'concat') {
+        if (n.kind === 'concat') {
           return 40;
-        } else if (n.kind == 'decomposition') {
+        } else if (n.kind === 'decomposition') {
           return 10;
         } else {
           return 14;
@@ -263,7 +263,7 @@ class WikiFlow extends Component {
       });
 
       path1.attr('d', function(n, i) {
-        if (n.kind == 'module' || n.kind == 'concat') {
+        if (n.kind === 'module' || n.kind === 'concat') {
           return;
         }
         let xDomain = [0, 140];
@@ -308,10 +308,10 @@ class WikiFlow extends Component {
 
       path2.attr('d', function(n, i) {
         if (
-          n.kind == 'module' ||
-          n.kind == 'concat' ||
-          n.kind == 'decomposition' ||
-          n.kind == 'forecast'
+          n.kind === 'module' ||
+          n.kind === 'concat' ||
+          n.kind === 'decomposition' ||
+          n.kind === 'forecast'
         ) {
           return;
         }
@@ -343,19 +343,19 @@ class WikiFlow extends Component {
 
       text
         .attr('x', d => {
-          if (d.kind == 'concat') {
+          if (d.kind === 'concat') {
             return d.x + 15;
           }
 
           return d.x + nodeWidth / 2;
         })
         .attr('y', d => {
-          if (d.kind == 'module') {
+          if (d.kind === 'module') {
             return d.y + nodeWidth / 2 - 5;
           }
-          if (d.kind == 'concat') {
+          if (d.kind === 'concat') {
             return d.y + 26;
-          } else if (d.kind == 'decomposition') {
+          } else if (d.kind === 'decomposition') {
             return d.y + 10;
           } else {
             return d.y - 10;
@@ -491,7 +491,7 @@ class WikiFlow extends Component {
      * @param maxY:Number the "bottom" side of the rectangle
      * @param check:boolean (optional) whether to treat point inside the rect as error
      * @return an object with x and y members for the intersection
-     * @throws if check == true and (x,y) is inside the rectangle
+     * @throws if check === true and (x,y) is inside the rectangle
      * @author TWiStErRob
      * @see <a href="https://stackoverflow.com/a/31254199/253468">source</a>
      * @see <a href="https://stackoverflow.com/a/18292964/253468">based on</a>
@@ -511,14 +511,14 @@ class WikiFlow extends Component {
       const midX = (minX + maxX) / 2;
       const midY = (minY + maxY) / 2;
 
-      if (midX - x == 0) {
+      if (midX - x === 0) {
         return {
           x: minX,
           y: minY,
         };
       }
 
-      // if (midX - x == 0) -> m == ±Inf -> minYx/maxYx == x (because value / ±Inf = ±0)
+      // if (midX - x === 0) -> m === ±Inf -> minYx/maxYx === x (because value / ±Inf = ±0)
       const m = (midY - y) / (midX - x);
 
       if (x <= midX) {
@@ -579,7 +579,7 @@ class WikiFlow extends Component {
       return (
         <Redirect
           push
-          to={`/overview/${this.props.egoType == 'A' ? 'artist' : 'video'}/${
+          to={`/overview/${this.props.egoType === 'A' ? 'artist' : 'video'}/${
             this.state.clickedVideoID
           }`}
         />
