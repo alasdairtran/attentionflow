@@ -33,6 +33,10 @@ cd $HOME/projects/vevoviz/frontend && yarn
 # Migrate the postgres database
 cd $HOME/projects/vevoviz && docker-compose run backend python manage.py migrate --noinput
 
+# Make you you have the apoc plugin (useful Cypher helper functions)
+cd neo4j/plugins
+sudo wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/4.1.0.2/apoc-4.1.0.2-all.jar
+
 # Start the frontend app and Neo4j database
 cd $HOME/projects/vevoviz
 docker-compose up
@@ -44,14 +48,20 @@ Note that the local Neo4j database needs restore the data dump from the remote s
 ```sh
 cd $HOME/projects/vevoviz
 
+# Delete old database
+rm -rf neo4j/data/*
+
+# Shut down the local server
+docker-compose down
+
+# For any major upgrades, we also need to rebuild the docker images
+docker-compose build --no-cache
+
 # Download the backup
 rsync -rlptzhe ssh --info=progress2 <username>@43.240.97.170:/mnt/vevoviz_prod/neo4j/data/backups neo4j/data/
 
 ## if you see this error: "rsync: --info=progress2: unknown option"
 ## make sure rsync is with the latest version (>=3.1.3)
-
-# Shut down neo4j
-docker-compose stop neo4j
 
 # Restore
 docker run \
@@ -59,11 +69,11 @@ docker run \
 --mount type=bind,source=$HOME/projects/vevoviz/neo4j/data,target=/data \
 neo4j:4.1.1 bin/neo4j-admin load --database=neo4j --from=/data/backups/neo4j.dump --force
 
-# Start the database again
-docker-compose start neo4j
-
 # Delete the restore container
 docker rm neo4j-restore
+
+# Start the server again
+docker-compose up
 ```
 
 Before making a commit, make sure that you format the code properly:
