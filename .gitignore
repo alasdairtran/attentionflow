@@ -6,6 +6,7 @@ __pycache__
 .ipynb_checkpoints
 *.pyc
 .mypy_cache
+*.ipynb
 
 # Databases
 /neo4j/data
