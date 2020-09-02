@@ -1,9 +1,7 @@
-import React, { Fragment } from 'react';
 import axios from 'axios';
-
-import cx from 'classnames';
-import '../../../Pages/Overview/Basic';
+import React from 'react';
 import Autosuggest from 'react-autosuggest';
+import '../../../Pages/Overview/Basic';
 
 let titles = [];
 
@@ -21,25 +19,26 @@ class Artist {
 
 // suggestion to output(in the text)
 const getSuggestionValue = suggestion => {
-  if(suggestion.name instanceof Artist){
+  if (suggestion.name instanceof Artist) {
     return suggestion.name.artist;
   } else {
     return suggestion.name.title;
   }
-}
+};
 
 // render suggestion list
 const renderSuggestion = suggestion => {
-  if(suggestion.name instanceof Artist){
-    return (
-      <div>A:{suggestion.name.artist}</div>
-    )
+  if (suggestion.name instanceof Artist) {
+    return <div>A:{suggestion.name.artist}</div>;
   } else {
-    return <div>V:{suggestion.name.title}</div>
+    return <div>V:{suggestion.name.title}</div>;
   }
 };
 
-const onSuggestionSelected = (event, { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }) => {
+const onSuggestionSelected = (
+  event,
+  { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }
+) => {
   console.log(suggestionValue);
 };
 
@@ -78,10 +77,10 @@ class SearchBox extends React.Component {
         titles = [];
         const result = res.data.title;
         const artist = res.data.artist;
-        for (let i = 0; i < artist.length && i<3; i++) {
+        for (let i = 0; i < artist.length && i < 3; i++) {
           titles.push({ name: new Artist(artist[i]) });
         }
-        for (let i = 0; i < result.length && i <5; i++) {
+        for (let i = 0; i < result.length && i < 5; i++) {
           titles.push({ name: new Video(result[i]) });
         }
         if (inputLength > 0) {

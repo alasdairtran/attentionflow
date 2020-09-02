@@ -1,16 +1,10 @@
-import React, { Component } from 'react';
 import * as d3 from 'd3';
-
+import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
+import { drag } from '../Helper/helper';
+import { getArtistEgo } from './artistEgo';
 import { getIncomingOutgoing } from './incomingOutgoing';
 import { getVideosByArtist } from './videosByArtist';
-import { getArtistEgo } from './artistEgo';
-import {
-  strokeScaleFunc,
-  radiusScaleFunc,
-  colorScaleFunc,
-  drag,
-} from '../Helper/helper';
 
 class BarChart extends Component {
   constructor(props) {

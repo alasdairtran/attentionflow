@@ -1,16 +1,10 @@
-import React, { Fragment } from 'react';
-import { connect } from 'react-redux';
-
-import Hamburger from 'react-hamburgers';
-
-import cx from 'classnames';
-
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import cx from 'classnames';
+import React from 'react';
+import Hamburger from 'react-hamburgers';
+import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
-
 import {
   setEnableMobileMenu,
   setEnableMobileMenuSmall,

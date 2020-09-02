@@ -1,12 +1,8 @@
-import React, { Fragment } from 'react';
 import cx from 'classnames';
-
-import { connect } from 'react-redux';
-
+import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-
+import { connect } from 'react-redux';
 import HeaderLogo from '../AppLogo';
-
 import SearchBox from './Components/SearchBox';
 
 class Header extends React.Component {

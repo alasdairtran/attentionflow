@@ -1,21 +1,16 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Route } from 'react-router-dom';
-
-// DASHBOARDS
-
-import BasicOverview from './Basic';
-import GenreOverview from './GenreOverview';
-import ArtistOverview from './ArtistOverview';
-import VideoOverview from './VideoOverview';
-import GenreNetwork from './GenreNetwork';
-import VideoEgo from './VideoEgo';
-import ArtistEgo from './ArtistEgo';
-import WikiOverview from './WikiOverview';
+import AppFooter from '../../Layout/AppFooter';
 // Layout
-
 import AppHeader from '../../Layout/AppHeader';
 import AppSidebar from '../../Layout/AppSidebar';
-import AppFooter from '../../Layout/AppFooter';
+import ArtistOverview from './ArtistOverview';
+// DASHBOARDS
+import BasicOverview from './Basic';
+import GenreNetwork from './GenreNetwork';
+import GenreOverview from './GenreOverview';
+import VideoOverview from './VideoOverview';
+import WikiOverview from './WikiOverview';
 
 const Overview = ({ match }) => (
   <>

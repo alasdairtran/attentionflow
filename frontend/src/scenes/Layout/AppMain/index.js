@@ -1,7 +1,5 @@
-import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
-import React, { Suspense, lazy, Fragment } from 'react';
-
-import { ToastContainer } from 'react-toastify';
+import React, { lazy, Suspense } from 'react';
+import { Redirect, Route } from 'react-router-dom';
 
 const Overview = lazy(() => import('../../Pages/Overview'));
 // const Widgets = lazy(() => import('../../DemoPages/Widgets'));

@@ -1,14 +1,8 @@
-import * as d3 from 'd3';
-
 import axios from 'axios';
-import { getVideosByArtist } from './videosByArtist';
+import * as d3 from 'd3';
+import { drag } from '../Helper/helper';
 import { getArtistEgo } from './artistEgo';
-import {
-  strokeScaleFunc,
-  radiusScaleFunc,
-  colorScaleFunc,
-  drag,
-} from '../Helper/helper';
+import { getVideosByArtist } from './videosByArtist';
 
 export function getIncomingOutgoing(artist, oWidth) {
   d3.select('#graphContainer3').html('');

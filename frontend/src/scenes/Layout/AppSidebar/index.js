@@ -1,14 +1,11 @@
-import React, { Component, Fragment } from 'react';
-import { connect } from 'react-redux';
 import cx from 'classnames';
-
+import React, { Component } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-
 import PerfectScrollbar from 'react-perfect-scrollbar';
-import Nav from '../AppNav/VerticalNavWrapper';
-import HeaderLogo from '../AppLogo';
-
+import { connect } from 'react-redux';
 import { setEnableMobileMenu } from '../../reducers/ThemeOptions';
+import HeaderLogo from '../AppLogo';
+import Nav from '../AppNav/VerticalNavWrapper';
 
 class AppSidebar extends Component {
   state = {};

@@ -1,10 +1,9 @@
-import React, { Component } from 'react';
-import * as d3 from 'd3';
 import axios from 'axios';
-import { getVideoInfo } from './popout';
+import * as d3 from 'd3';
+import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-
 import { getIncomingOutgoing } from './incomingOutgoing';
+import { getVideoInfo } from './popout';
 
 const drag = simulation => {
   function dragstarted(d) {

@@ -1,15 +1,9 @@
-import * as d3 from 'd3';
 import axios from 'axios';
-
-import { getVideoInfo } from '../VideoEgo/popout';
+import * as d3 from 'd3';
+import { drag } from '../Helper/helper';
 import { getIncomingOutgoing } from '../VideoEgo/incomingOutgoing';
+import { getVideoInfo } from '../VideoEgo/popout';
 import { getVideoEgo } from '../VideoEgo/videoEgo';
-import {
-  strokeScaleFunc,
-  radiusScaleFunc,
-  colorScaleFunc,
-  drag,
-} from '../Helper/helper';
 
 export function getVideosByArtist(artist, oWidth) {
   d3.select('#graphContainer2').html('');

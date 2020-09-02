@@ -1,21 +1,17 @@
-import React, { Component, Fragment } from 'react';
-
+import { faBusinessTime, faStar } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { Component } from 'react';
+import { Slide, toast } from 'react-toastify';
 import {
-  UncontrolledDropdown,
-  DropdownToggle,
+  Button,
   DropdownMenu,
+  DropdownToggle,
   Nav,
   NavItem,
   NavLink,
-  Button,
+  UncontrolledDropdown,
   UncontrolledTooltip,
 } from 'reactstrap';
-
-import { faStar, faBusinessTime } from '@fortawesome/free-solid-svg-icons';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-import { toast, Slide } from 'react-toastify';
 
 export default class TitleComponent2 extends Component {
   toggle(name) {

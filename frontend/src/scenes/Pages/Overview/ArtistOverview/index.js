@@ -1,49 +1,9 @@
-import React, { Component, Fragment } from 'react';
 import axios from 'axios';
+import React, { Component } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import classnames from 'classnames';
 import { Redirect } from 'react-router-dom';
-
-import {
-  Row,
-  Col,
-  Button,
-  CardHeader,
-  Card,
-  CardBody,
-  Progress,
-  TabContent,
-  TabPane,
-} from 'reactstrap';
-
-import {
-  AreaChart,
-  Area,
-  Line,
-  ResponsiveContainer,
-  Bar,
-  BarChart,
-  ComposedChart,
-  CartesianGrid,
-  Tooltip,
-  LineChart,
-} from 'recharts';
-
-import {
-  faAngleUp,
-  faArrowRight,
-  faArrowUp,
-  faArrowLeft,
-  faAngleDown,
-} from '@fortawesome/free-solid-svg-icons';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import * as d3 from 'd3';
-import PageTitle from '../../../Layout/AppMain/PageTitle';
-import VideoEgo from '../../../../components/VideoEgo';
-import ArtistTop50 from '../../../../components/ArtistTop50';
+import { Card, Col, Row } from 'reactstrap';
 import Timeseries from '../../../../components/Timeseries';
-import { getIncomingOutgoing } from '../../../../components/VideoEgo/incomingOutgoing';
 
 export default class AnalyticsDashboard1 extends Component {
   constructor(props) {

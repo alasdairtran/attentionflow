@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
 import * as d3 from 'd3';
-
+import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import {
-  strokeScaleFunc,
-  radiusScaleFunc,
   colorScaleFunc,
   drag,
+  radiusScaleFunc,
+  strokeScaleFunc,
 } from '../Helper/helper';
 
 let vis;

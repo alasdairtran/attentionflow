@@ -1,14 +1,9 @@
-import React, { Component } from 'react';
 import * as d3 from 'd3';
-import axios from 'axios';
-import { Redirect } from 'react-router-dom';
-
 import noUiSlider from 'nouislider';
 import 'nouislider/distribute/nouislider.css';
+import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import './timeseries.css';
-
-import { getVideoInfo } from '../VideoEgo/popout';
-import { getIncomingOutgoing } from '../VideoEgo/incomingOutgoing';
 
 const drag = simulation => {
   function dragstarted(d) {

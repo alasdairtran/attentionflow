@@ -1,10 +1,7 @@
-import React, { Component } from 'react';
-import * as d3 from 'd3';
 import axios from 'axios';
-
-import { getVideoInfo } from './popout';
+import * as d3 from 'd3';
 import { getIncomingOutgoing } from './incomingOutgoing';
-import { getArtistEgo } from '../ArtistEgo/artistEgo';
+import { getVideoInfo } from './popout';
 
 const drag = simulation => {
   function dragstarted(d) {

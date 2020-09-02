@@ -1,14 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 // import registerServiceWorker from './registerServiceWorker';
 import { HashRouter } from 'react-router-dom';
-import { unregister } from './scenes/registerServiceWorker';
-
 import './scenes/assets/base.css';
-import Main from './scenes/Pages/Main';
 import configureStore from './scenes/config/configureStore';
-import { Provider } from 'react-redux';
-import axios from 'axios';
+import Main from './scenes/Pages/Main';
+import { unregister } from './scenes/registerServiceWorker';
 
 const store = configureStore();
 const rootElement = document.getElementById('root');

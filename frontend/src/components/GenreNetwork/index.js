@@ -1,9 +1,7 @@
-import React, { Component } from 'react';
 import * as d3 from 'd3';
-import axios from 'axios';
-
-import { getIncomingOutgoing } from './incomingOutgoing';
+import React, { Component } from 'react';
 import { getGenreTopArtists } from './genreTopArtists';
+import { getIncomingOutgoing } from './incomingOutgoing';
 
 const drag = simulation => {
   function dragstarted(d) {

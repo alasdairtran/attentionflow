@@ -1,47 +1,34 @@
-import React, { Component, Fragment } from 'react';
-import axios from 'axios';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import classnames from 'classnames';
-import { Redirect } from 'react-router-dom';
-
 import {
-  Row,
-  Col,
+  faAngleDown,
+  faAngleUp,
+  faArrowLeft,
+  faArrowRight,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
+import classnames from 'classnames';
+import React, { Component } from 'react';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import { Redirect } from 'react-router-dom';
+import {
   Button,
-  CardHeader,
   Card,
-  CardBody,
-  Progress,
+  CardHeader,
+  Col,
+  Row,
   TabContent,
   TabPane,
 } from 'reactstrap';
 import {
-  AreaChart,
   Area,
-  Line,
-  ResponsiveContainer,
+  AreaChart,
   Bar,
   BarChart,
-  ComposedChart,
-  CartesianGrid,
-  Tooltip,
+  Line,
   LineChart,
+  ResponsiveContainer,
 } from 'recharts';
-import {
-  faAngleUp,
-  faArrowRight,
-  faArrowUp,
-  faArrowLeft,
-  faAngleDown,
-} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import * as d3 from 'd3';
-import VideoTop50 from '../../../../components/VideoTop50';
 import VideoEgo from '../../../../components/VideoEgo';
-
-import PageTitle from '../../../Layout/AppMain/PageTitle';
-
-import { getIncomingOutgoing } from '../../../../components/VideoEgo/incomingOutgoing';
 
 const data = [
   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },

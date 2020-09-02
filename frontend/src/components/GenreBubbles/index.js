@@ -1,6 +1,5 @@
-import React, { Component } from 'react';
 import * as d3 from 'd3';
-import { getIncomingOutgoing } from '../VideoEgo/incomingOutgoing';
+import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 
 class GenreBubbles extends Component {

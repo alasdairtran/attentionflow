@@ -1,10 +1,8 @@
-import React, { Fragment } from 'react';
-import { connect } from 'react-redux';
 import cx from 'classnames';
-import { withRouter } from 'react-router-dom';
-
+import React from 'react';
+import { connect } from 'react-redux';
 import ResizeDetector from 'react-resize-detector';
-
+import { withRouter } from 'react-router-dom';
 import AppMain from '../../Layout/AppMain';
 
 class Main extends React.Component {

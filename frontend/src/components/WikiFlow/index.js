@@ -1,10 +1,6 @@
-import React, { Component } from 'react';
 import * as d3 from 'd3';
-import axios from 'axios';
+import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-
-import { getVideoInfo } from '../VideoEgo/popout';
-import { getIncomingOutgoing } from '../VideoEgo/incomingOutgoing';
 
 class WikiFlow extends Component {
   constructor(props) {

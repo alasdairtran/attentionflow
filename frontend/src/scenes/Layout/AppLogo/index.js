@@ -1,15 +1,12 @@
-import React, { Fragment } from 'react';
-import { connect } from 'react-redux';
-
+import React from 'react';
 import Hamburger from 'react-hamburgers';
-
-import AppMobileMenu from '../AppMobileMenu';
-
+import { connect } from 'react-redux';
 import {
   setEnableClosedSidebar,
   setEnableMobileMenu,
   setEnableMobileMenuSmall,
 } from '../../reducers/ThemeOptions';
+import AppMobileMenu from '../AppMobileMenu';
 
 class HeaderLogo extends React.Component {
   constructor(props) {

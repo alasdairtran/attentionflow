@@ -1,16 +1,14 @@
-import React, { Component } from 'react';
-import * as d3 from 'd3';
 import axios from 'axios';
-
-import { getIncomingOutgoing } from './incomingOutgoing';
-import { getVideosByArtist } from './videosByArtist';
+import * as d3 from 'd3';
+import '../../scenes/assets/vevovis.css';
 import {
-  strokeScaleFunc,
-  radiusScaleFunc,
   colorScaleFunc,
   drag,
+  radiusScaleFunc,
+  strokeScaleFunc,
 } from '../Helper/helper';
-import '../../scenes/assets/vevovis.css';
+import { getIncomingOutgoing } from './incomingOutgoing';
+import { getVideosByArtist } from './videosByArtist';
 
 export function getArtistEgo(artist, oWidth, hops) {
   d3.select('#graphContainer').html('');

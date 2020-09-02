@@ -1,9 +1,7 @@
-import React, { Component, Fragment } from 'react';
-import { withRouter } from 'react-router-dom';
-
+import React, { Component } from 'react';
 import MetisMenu from 'react-metismenu';
-
-import { MainNav, ComponentsNav } from './NavItems';
+import { withRouter } from 'react-router-dom';
+import { ComponentsNav, MainNav } from './NavItems';
 
 class Nav extends Component {
   state = {};
