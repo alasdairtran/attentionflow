@@ -27,6 +27,13 @@ services:
     volumes:
       - ./postgres:/var/lib/postgresql/data
 
+  jina:
+    build: ./jina
+    command:
+      - dijkstra-jina
+    volumes:
+      - ./secrets/.ssh:/root/.ssh
+
   backend:
     build: ./backend
     env_file: secrets/.env
@@ -45,6 +52,7 @@ services:
     depends_on:
       - neo4j
       - postgres
+      - jina
 
   frontend:
     build: ./frontend
