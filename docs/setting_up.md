@@ -6,7 +6,7 @@ the virtual machine.
 ```sh
 # Install essential packages on Centos
 sudo yum install -y git tmux zsh util-linux-user gcc-c++ make nodejs nginx \
-    ufw rsync vim certbot python3-certbot-nginx
+    ufw rsync vim certbot python3-certbot-nginx autossh
 sudo systemctl enable nginx
 sudo systemctl start nginx
 
@@ -31,6 +31,19 @@ sudo mkdir /mnt/cache
 sudo mv /var/lib/docker /mnt/cache/docker
 sudo ln -s /mnt/cache/docker /var/lib/docker
 sudo service docker start
+
+sudo yum install gcc openssl-devel readline-devel zlib-devel
+wget https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.1.tar.gz
+tar -xzf ruby-2.7.1.tar.gz
+cd ruby-2.7.1 && ./configure && make && sudo make install
+cd .. && rm -rf ruby-2.7.1 ruby-2.7.1.tar.gz
+sudo /usr/local/bin/gem install tmuxinator
+cd ~ && git clone https://github.com/gpakosz/.tmux.git
+ln -s -f .tmux/.tmux.conf
+cp .tmux/.tmux.conf.local .
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+# Restore ~/.tmux.conf.local, ~/.tmux/yank.sh, and tmuxinator template from backup
+chmod +x ~/.tmux/yank.sh
 
 # Set up firewall
 sudo ufw default deny incoming
