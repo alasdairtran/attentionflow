@@ -15,7 +15,6 @@ __pycache__
 
 # Passwords and credentials
 /secrets
-/jina/.ssh
 
 # Raw data
 /data
