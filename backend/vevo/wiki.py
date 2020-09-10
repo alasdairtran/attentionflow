@@ -1,9 +1,12 @@
 import json
 import os
 import pickle
+import time
 from datetime import date, datetime
 
 import numpy as np
+from jina.clients import py_client
+from jina.drivers.helper import pb2array
 from neo4j import GraphDatabase
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
@@ -13,6 +16,25 @@ with open('data/evaluate-metrics.json') as rf:
 
 graphid2pos = {graphid: pos for pos, graphid in
                enumerate(model_results['keys'])}
+
+
+def process_output(outputs, request):
+    array = pb2array(request.index.docs[0].embedding)
+    outputs.append(array)
+
+
+def get_prediction(obs):
+    flow_client = py_client(port_expose=4192, host='localhost')
+    query = pickle.dumps([obs])
+
+    # A bit convoluted because we want blocking instead of async callback
+    outputs = []
+    flow_client.index(query, output_fn=lambda r: process_output(outputs, r),
+                      batch_size=1)
+    while not outputs:
+        time.sleep(0.1)
+
+    return outputs[0]
 
 
 class TitleDoesNotExist(Exception):

@@ -8,6 +8,7 @@ dependencies:
   - pytest
   - pip:
       - neo4j
+      - jina
       - django==3.*
       - djangorestframework
       - django-cors-headers
