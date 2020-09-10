@@ -120,6 +120,9 @@ sudo systemctl restart nginx
 # Add neo4j plugin to make loading csv easier
 cd neo4j/plugins
 sudo wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/4.1.0.2/apoc-4.1.0.2-all.jar
+
+# We need an SSH key to access the forecaster on dijkstra
+ssh-keygen -t rsa -b 4096 -C "alasdair.tran@anu.edu.au" -f secrets/.ssh/vevoviz_docker_rsa
 ```
 
 ## Maintenance
