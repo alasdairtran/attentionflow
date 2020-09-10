@@ -2,13 +2,12 @@ name: base
 channels:
   - defaults
 dependencies:
-  - anaconda
-  - pip
+  - python=3.8.5
+  - pip=20.2.2
   - psycopg2 # connects to Postgres
   - pytest
   - pip:
       - neo4j
-      - jina
       - django==3.*
       - djangorestframework
       - django-cors-headers

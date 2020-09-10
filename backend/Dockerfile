@@ -15,6 +15,8 @@ RUN apt update && apt install -yq --no-install-recommends \
     && apt clean && rm -rf /var/lib/apt/lists/*
 COPY conda.yaml /backend/
 RUN conda env update -f=/backend/conda.yaml
+RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel* \
+    && pip install --no-cache-dir jina
 
 # COPY . /backend/
 WORKDIR /backend
