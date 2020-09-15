@@ -18,7 +18,6 @@ __pycache__
 
 # Raw data
 /data
-/backend/data
 
 # Neo4j plugin and import folders
 /neo4j/plugins
