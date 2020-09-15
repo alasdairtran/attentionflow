@@ -3,9 +3,9 @@ import React, { Component } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { Redirect } from 'react-router-dom';
 import { Card, Col, Row } from 'reactstrap';
-import Timeseries from '../../../../components/Timeseries';
+import WikiFlow from '../../../../components/WikiFlow';
 
-export default class WikiOverview extends Component {
+export default class WhatIfsOverview extends Component {
   constructor(props) {
     super(props);
 
@@ -65,7 +65,7 @@ export default class WikiOverview extends Component {
     const options = { params: { graphID: this.state.graphID } };
     console.log('Fetching Wiki page', this.state.graphID);
     axios
-      .get('/vevo/wiki_info/', options)
+      .get('/vevo/wiki_page/', options)
       .then(res => {
         if (res.data.error) {
           this.setState({
@@ -79,7 +79,7 @@ export default class WikiOverview extends Component {
           this.setState({
             isLoaded: true,
             isLoading: false,
-            wikiInfo: res.data,
+            wikiGraph: res.data,
           });
         }
       })
@@ -99,7 +99,7 @@ export default class WikiOverview extends Component {
   render() {
     if (!this.state.graphID) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/wiki/283508`} />;
+      return <Redirect push to={`/overview/whatifs/353191`} />;
     }
     return (
       <>
@@ -113,39 +113,38 @@ export default class WikiOverview extends Component {
         >
           <div>
             <button id="display" hidden="hidden" onClick={this.display} />
-            {this.state.hasError ? (
+            {this.state.hasError && (
               <div className="alert alert-danger" role="alert">
                 {this.state.errorMessage}
               </div>
-            ) : (
-              <Card className="mb-3" id="attentionFlow">
-                <Row>
-                  <Col md="12" lg="12" id="egoTitle"></Col>
-                </Row>
-                <Row>
-                  <Col md="3" lg="3" id="egoInfo"></Col>
-                  <Col md="9" lg="9" id="egoTimeline">
-                    <div id="graphContainer">
-                      {this.state.isLoading ? (
-                        <div
-                          style={{
-                            width: '50px',
-                            height: '50px',
-                            border: '10px solid #f3f3f3',
-                            borderRadius: '50%',
-                            borderTop: '10px solid #3498db',
-                            animation: 'spin 2s linear infinite',
-                            margin: '100px auto',
-                          }}
-                        />
-                      ) : (
-                        <Timeseries egoType="W" egoInfo={this.state.wikiInfo} />
-                      )}
-                    </div>
-                  </Col>
-                </Row>
-              </Card>
             )}
+            <Card className="mb-3" id="attentionFlow">
+              <Row>
+                <Col md="12" lg="12" id="egoTitle"></Col>
+              </Row>
+              <Row>
+                <Col md="3" lg="3" id="egoInfo"></Col>
+                <Col md="9" lg="9" id="egoTimeline">
+                  <div id="graphContainer">
+                    {this.state.isLoading ? (
+                      <div
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          border: '10px solid #f3f3f3',
+                          borderRadius: '50%',
+                          borderTop: '10px solid #3498db',
+                          animation: 'spin 2s linear infinite',
+                          margin: '100px auto',
+                        }}
+                      />
+                    ) : (
+                      <WikiFlow wikiGraph={this.state.wikiGraph} />
+                    )}
+                  </div>
+                </Col>
+              </Row>
+            </Card>
           </div>
         </ReactCSSTransitionGroup>
       </>

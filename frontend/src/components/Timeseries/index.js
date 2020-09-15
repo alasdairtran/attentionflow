@@ -79,7 +79,6 @@ let radiusScale, strokeScale;
 let padding_x = 15;
 let rightMargin = 80;
 let chart_yScale_minimum = 100000000;
-let chart_xScale_minimum = new Date('2009-11-01');
 let egoNode, egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, infSlider;
 let graphSortingOpts = [
@@ -271,6 +270,9 @@ class AttentionFlow extends Component {
       infocardtext.innerHTML = egoInfoText;
       infocard.append(infocardtext);
       this.divInfo.append(infocard);
+    } else if (egoType === 'W') {
+      egoInfoText += '<br/>Published: ' + published.toShortFormat();
+      egoInfoText += '<br/>Total Views: ' + numFormatter(egoNode.totalView);
     }
 
     var controlPanel = document.createElement('div');
@@ -400,6 +402,10 @@ class AttentionFlow extends Component {
         value: egoNode.dailyView[i],
       });
     }
+    const chart_xScale_minimum =
+      this.props.egoType === 'W'
+        ? new Date('2015-07-01')
+        : new Date('2009-11-01');
     xScale = d3
       .scaleTime()
       .domain([
@@ -842,12 +848,18 @@ class AttentionFlow extends Component {
     if (this.state.clickedOnSong === true) {
       console.log('redirecting');
       console.log(this.state);
+      let suffix = '';
+      if (this.props.egoType === 'A') {
+        suffix = 'artist';
+      } else if (this.props.egoType === 'V') {
+        suffix = 'video';
+      } else if (this.props.egoType === 'W') {
+        suffix = 'wiki';
+      }
       return (
         <Redirect
           push
-          to={`/overview/${this.props.egoType === 'A' ? 'artist' : 'video'}/${
-            this.state.clickedVideoID
-          }`}
+          to={`/overview/${suffix}/${this.state.clickedVideoID}`}
         />
       );
     }
