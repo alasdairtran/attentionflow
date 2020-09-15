@@ -22,4 +22,5 @@ urlpatterns = [
     path('genre_bubbles_single/', views.get_genre_bubbles_single),
 
     path('wiki_page/', views.get_wiki_graph_for_page),
+    path('wiki_info/', views.get_wiki_info)
 ]

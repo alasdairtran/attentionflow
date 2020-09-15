@@ -11,11 +11,19 @@ from neo4j import GraphDatabase
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
 
-with open('data/evaluate-metrics.json') as rf:
-    model_results = json.load(rf)
+with open('data/test_set.json') as rf:
+    test_set = json.load(rf)
 
 graphid2pos = {graphid: pos for pos, graphid in
-               enumerate(model_results['keys'])}
+               enumerate(test_set['keys'])}
+
+
+def unix_time_millis(d):
+    d = d.to_native()
+    dt = datetime.combine(d, datetime.min.time())
+    diff = (dt - datetime.utcfromtimestamp(0))
+    print(diff, type(diff))
+    return diff.total_seconds() * 1000.0
 
 
 def process_output(outputs, request):
@@ -51,13 +59,103 @@ def forward_fill_missing(arr):
     return out
 
 
+def search_wiki_info(graph_id):
+    # try:
+    #     pos = graphid2pos[graph_id]
+    # except KeyError:
+    #     raise TitleDoesNotExist
+
+    # neigh_ids = test_set['neigh_keys'][pos]
+    # match_ids = [graph_id] + neigh_ids
+    # match_ids = [str(i) for i in match_ids]
+
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
+
+    with driver.session() as session:
+        r = session.run(
+            '''
+            MATCH (u:Page)-[r]->(v:Page)
+            WHERE v.id = $graph_id
+            AND r.endDates[-1] = date({year:2020,month:6,day:30})
+            RETURN
+                apoc.coll.toSet(
+                    collect(DISTINCT u) +
+                    collect(DISTINCT v)
+                ) as nodes,
+                collect([u.id, v.id, r.startDates, r.endDates]) as edges
+            ''',
+            graph_id=str(graph_id))
+        r = r.single()
+    driver.close()
+
+    nodes = []
+    output = {}
+    neigh_views = []
+    for n in r['nodes']:
+        desktop_views = forward_fill_missing(n['desktop'])
+        mobile_views = forward_fill_missing(n['mobile'])
+        app_views = forward_fill_missing(n['app'])
+        total_views = desktop_views + mobile_views + app_views
+
+        node = [
+            n['id'],
+            n['title'],
+            int(sum(total_views)),
+            10000,
+            total_views.tolist(),
+            'no-artist',
+            unix_time_millis(n['startDate']),
+            unix_time_millis(n['startDate']),
+        ]
+        if int(n['id']) == graph_id:
+            output = {
+                'id': n['id'],
+                'title': n['title'],
+                'totalView': int(sum(total_views)),
+                'publishedAt': unix_time_millis(n['startDate']),
+                'startDate': unix_time_millis(n['startDate']),
+                'dailyView': total_views.tolist(),
+            }
+            ego_node = node
+
+        else:
+            nodes.append(node)
+
+        if int(n['id']) != graph_id:
+            neigh_views.append(int(sum(total_views)))
+
+    # Keep only 20 random neighbours
+    top_idx = np.argsort(np.array(neigh_views))[::-1][:20]
+    nodes = np.array(nodes)[top_idx].tolist() + [ego_node]
+    # nodes = nodes[:20] + [ego_node]
+    kept_ids = set([n[0] for n in nodes])
+
+    output['nodes'] = nodes
+
+    edges = []
+    for e in r['edges']:
+        if e[0] not in kept_ids:
+            continue
+        edges.append([
+            e[0],
+            e[1],
+            1000,
+            unix_time_millis(e[2][0]),
+            [100] * len(total_views),
+        ])
+    output['links'] = edges
+
+    return output
+
+
 def search_for_wiki_page(graph_id):
     try:
         pos = graphid2pos[graph_id]
     except KeyError:
         raise TitleDoesNotExist
 
-    neigh_ids = model_results['neigh_keys'][pos]
+    neigh_ids = test_set['neigh_keys'][pos]
     match_ids = [graph_id] + neigh_ids
     match_ids = [str(i) for i in match_ids]
 
@@ -68,14 +166,14 @@ def search_for_wiki_page(graph_id):
         r = session.run(
             '''
             MATCH (u:Page)-[r]->(v:Page)
-            WHERE v.graphID IN $match_ids
-            AND u.graphID IN $match_ids
+            WHERE v.id IN $match_ids
+            AND u.id IN $match_ids
             RETURN
                 apoc.coll.toSet(
                     collect(DISTINCT u) +
                     collect(DISTINCT v)
                 ) as nodes,
-                collect([u.graphID, v.graphID, r.startDates, r.endDates]) as edges
+                collect([u.id, v.id, r.startDates, r.endDates]) as edges
             ''',
             match_ids=match_ids)
         r = r.single()
@@ -84,7 +182,7 @@ def search_for_wiki_page(graph_id):
     nodes = []
     for n in r['nodes']:
         node = {}
-        node['id'] = int(n['graphID'])
+        node['id'] = int(n['id'])
         node['title'] = n['title']
         node['startDate'] = str(n['startDate'])
         node['kind'] = 'ego' if node['id'] == graph_id else 'alter'

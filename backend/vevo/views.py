@@ -7,7 +7,7 @@ from neo4j import GraphDatabase
 from .search import (search_1hop_artists, search_1hop_videos,
                      search_artist_basicinfo, search_artist_topvideos,
                      search_video_basicinfo, search_videos_by_artist)
-from .wiki import TitleDoesNotExist, search_for_wiki_page
+from .wiki import TitleDoesNotExist, search_for_wiki_page, search_wiki_info
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
 
@@ -372,6 +372,18 @@ def get_wiki_graph_for_page(request):
     try:
         output = search_for_wiki_page(graph_id)
     except TitleDoesNotExist:
+        output = {'error': f'Graph ID {graph_id} does not exist.'}
+
+    return JsonResponse(output)
+
+
+@csrf_exempt
+def get_wiki_info(request):
+    graph_id = request.GET['graphID']
+    try:
+        graph_id = int(graph_id)
+        output = search_wiki_info(graph_id)
+    except (ValueError, TitleDoesNotExist):
         output = {'error': f'Graph ID {graph_id} does not exist.'}
 
     return JsonResponse(output)
