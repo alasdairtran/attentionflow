@@ -1,4 +1,4 @@
-CREATE CONSTRAINT ON (n:Page) ASSERT (n.graphID) IS UNIQUE;
+CREATE CONSTRAINT ON (n:Page) ASSERT (n.id) IS UNIQUE;
 CREATE INDEX FOR (n:Page) ON (n.title);
 CREATE CONSTRAINT ON (n:Category) ASSERT (n.id) IS UNIQUE;
 CREATE INDEX FOR (n:Category) ON (n.title);
@@ -6,7 +6,7 @@ CREATE INDEX FOR (n:Category) ON (n.title);
 // Takes 20 minutes
 CALL apoc.periodic.iterate(
     'CALL apoc.load.csv("file:///pages.csv") YIELD map',
-    'MERGE (n:Page {graphID: map.graphID})
+    'MERGE (n:Page {id: map.graphID})
      ON CREATE
      SET n.trafficID = map.trafficID,
          n.pageID = map.pageID,
@@ -29,8 +29,8 @@ MERGE (:Category {
 // Takes 60 minutes
 CALL apoc.periodic.iterate(
     'CALL apoc.load.csv("file:///page_links.csv") YIELD map',
-    'MATCH (source:Page { graphID: map.startID })
-     MATCH (dest:Page { graphID: map.endID })
+    'MATCH (source:Page { id: map.startID })
+     MATCH (dest:Page { id: map.endID })
      MERGE (source)-[r:LINKS_TO]->(dest)
      ON CREATE
      SET r.startDates = [i in split(map.startDates,";") | date(i)],
@@ -41,7 +41,7 @@ CALL apoc.periodic.iterate(
 // Takes 7 minutes
 CALL apoc.periodic.iterate(
     'CALL apoc.load.csv("file:///cat_links.csv") YIELD map',
-    'MATCH (source:Page { graphID: map.startID })
+    'MATCH (source:Page { id: map.startID })
      MATCH (dest:Category { id: map.endID })
      MERGE (source)-[r:PART_OF]->(dest)
      ON CREATE
