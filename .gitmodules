@@ -1,3 +1,6 @@
 [submodule "ieeevis2020"]
 	path = ieeevis2020
 	url = https://git.overleaf.com/5ee30f8ef8b3110001dfdc1a
+[submodule "wdsm2021demo"]
+	path = wdsm2021demo
+	url = https://git.overleaf.com/5f604b425c5fec0001842105
