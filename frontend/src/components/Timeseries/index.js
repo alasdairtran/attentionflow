@@ -78,7 +78,9 @@ const hcolor = '#f78ca0';
 let radiusScale, strokeScale;
 let padding_x = 15;
 let rightMargin = 80;
-let chart_yScale_minimum = 100000000;
+let chart_yScale_minimum = 1000000;
+let chart_xScale_minimum = new Date('2009-11-01');
+let chart_xScale_maximum = new Date('2018-11-01');
 let egoNode, egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, infSlider;
 let graphSortingOpts = [
@@ -458,6 +460,20 @@ class AttentionFlow extends Component {
             return yScale(d.value);
           })
       );
+
+    var div = document.createElement('div');
+    div.setAttribute('data-toggle', 'tooltip');
+    div.setAttribute('data-placement', 'right');
+    div.className = 'tooltip';
+    this.divTimeline.append(div);
+    viewcount.on('mouseover', function() {
+      console.log('MOUSEOVER');
+      setMousePosition();
+      div.innerText = '54th Annual Grammy Awards';
+      div.style.opacity = 1;
+      div.style.left = mouse.x - getWindowLeftMargin() + 'px';
+      div.style.top = mouse.y - 178 + 'px';
+    });
   }
 
   drawEgoNetwork() {
@@ -607,17 +623,20 @@ class AttentionFlow extends Component {
 
     const gradColour = (d, ts, te) => {
       const nPoints = d.dailyView.length;
-      const nViews = d.dailyView.slice(ts, te).reduce((a, b) => a + b, 0);
-      const dailyAvg = d.totalView / nPoints;
-      const offset = (100 * te) / nPoints;
+      const nViews = d.dailyView.slice(0, te).reduce((a, b) => a + b, 0);
+      const offset = (100 * nViews) / d.totalView;
       const viewColourScale = d3
-        .scaleSequential(d3.interpolateYlGnBu)
-        .domain([0, dailyAvg * 3]);
-      // console.log(d.name, ts, te, nViews/(te-ts))
-      return [offset, viewColourScale(nViews / (te - ts))];
+        .scaleSequential(d3.interpolateSpectral)
+        .domain([
+          chart_xScale_minimum.getYear(),
+          chart_xScale_maximum.getYear(),
+        ]);
+      const currentTime = d.startDate.getYear() + parseInt(te / 365);
+      // console.log(d.name, te, currentTime, offset, viewColourScale.domain(), viewColourScale(currentTime));
+      return [offset, viewColourScale(currentTime)];
     };
 
-    var smoothness = 3;
+    var smoothness = 0;
     nodes.forEach(function(node) {
       var numDays = node.dailyView.length;
       var secondYear = new Date(1901 + node.startDate.getYear(), 0, 1);
@@ -629,6 +648,7 @@ class AttentionFlow extends Component {
       var prevIndex = 0;
       for (var trange = startIdx; trange < numDays + unit; trange += unit) {
         var grad = gradColour(node, prevIndex, Math.min(numDays, trange));
+        // console.log("grad", grad);
         d3.selectAll('radialGradient#grad' + node.id)
           .append('stop')
           .attr('offset', `${prevOffset + smoothness}%`)
