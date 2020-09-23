@@ -621,47 +621,6 @@ class AttentionFlow extends Component {
       .attr('gradientUnits', 'objectBoundingBox')
       .attr('id', d => 'grad' + d.id);
 
-    const gradColour = (d, ts, te) => {
-      const nPoints = d.dailyView.length;
-      const nViews = d.dailyView.slice(0, te).reduce((a, b) => a + b, 0);
-      const offset = (100 * nViews) / d.totalView;
-      const viewColourScale = d3
-        .scaleSequential(d3.interpolateSpectral)
-        .domain([
-          chart_xScale_minimum.getYear(),
-          chart_xScale_maximum.getYear(),
-        ]);
-      const currentTime = d.startDate.getYear() + parseInt(te / 365);
-      // console.log(d.name, te, currentTime, offset, viewColourScale.domain(), viewColourScale(currentTime));
-      return [offset, viewColourScale(currentTime)];
-    };
-
-    var smoothness = 0;
-    nodes.forEach(function(node) {
-      var numDays = node.dailyView.length;
-      var secondYear = new Date(1901 + node.startDate.getYear(), 0, 1);
-      var startIdx = parseInt(
-        (secondYear.getTime() - node.startDate.getTime()) / aDay()
-      );
-      var unit = 365;
-      var prevOffset = 0;
-      var prevIndex = 0;
-      for (var trange = startIdx; trange < numDays + unit; trange += unit) {
-        var grad = gradColour(node, prevIndex, Math.min(numDays, trange));
-        // console.log("grad", grad);
-        d3.selectAll('radialGradient#grad' + node.id)
-          .append('stop')
-          .attr('offset', `${prevOffset + smoothness}%`)
-          .style('stop-color', grad[1]);
-        d3.selectAll('radialGradient#grad' + node.id)
-          .append('stop')
-          .attr('offset', `${grad[0] - smoothness}%`)
-          .style('stop-color', grad[1]);
-        prevIndex = trange;
-        prevOffset = grad[0];
-      }
-    });
-
     node
       .append('circle')
       .call(drag(simulation))
@@ -887,6 +846,66 @@ class AttentionFlow extends Component {
   }
 }
 
+function gradColour(d, ts, te) {
+  const nPoints = d.dailyView.length;
+  const curRange = getTimeSelection();
+  const minTime = chart_xScale_minimum.getTime();
+  const startR = parseInt(
+    Math.max(0, (curRange[0].getTime() - d.startDate.getTime()) / aDay())
+  );
+  const endR = parseInt(
+    Math.min(
+      d.dailyView.length,
+      (curRange[1].getTime() - d.startDate.getTime()) / aDay()
+    )
+  );
+  const viewColourScale = d3
+    .scaleSequential(d3.interpolateSpectral)
+    .domain([chart_xScale_minimum.getYear(), chart_xScale_maximum.getYear()]);
+  const currentTime = new Date(
+    d.startDate.getTime() + te * (1000 * 60 * 60 * 24)
+  );
+  const nTotalViews = d.dailyView
+    .slice(startR, endR)
+    .reduce((a, b) => a + b, 0);
+  const nViews = d.dailyView.slice(startR, te).reduce((a, b) => a + b, 0);
+  const offset = Math.min(100, 100 * Math.sqrt(nViews / nTotalViews));
+  // if (d.name == "Adele - Rolling in the Deep")
+  //   console.log(d.name, d.startDate.getYear(), startR, endR, te, offset, currentTime.getYear()+1900);
+  return [offset, viewColourScale(currentTime.getYear())];
+}
+
+function changeNodeGradient() {
+  var smoothness = 3;
+  nodes.forEach(function(node) {
+    var numDays = node.dailyView.length;
+    var secondYear = new Date(1901 + node.startDate.getYear(), 0, 1);
+    var startIdx = parseInt(
+      (secondYear.getTime() - node.startDate.getTime()) / aDay()
+    );
+    var unit = 365;
+    var prevOffset = 0;
+    var prevIndex = 0;
+    d3.selectAll('radialGradient#grad' + node.id)
+      .selectAll('*')
+      .remove();
+    for (var trange = startIdx; trange < numDays + unit; trange += unit) {
+      // console.log("trange", prevIndex, trange, numDays);
+      var grad = gradColour(node, prevIndex, Math.min(numDays, trange));
+      d3.selectAll('radialGradient#grad' + node.id)
+        .append('stop')
+        .attr('offset', `${prevOffset + smoothness}%`)
+        .style('stop-color', grad[1]);
+      d3.selectAll('radialGradient#grad' + node.id)
+        .append('stop')
+        .attr('offset', `${grad[0] - smoothness}%`)
+        .style('stop-color', grad[1]);
+      prevIndex = trange;
+      prevOffset = grad[0];
+    }
+  });
+}
+
 function getTimePositionX() {
   var mouseX = Math.max(0, mouse.x - getWindowLeftMargin());
   var trange = getTimeSelection();
@@ -897,6 +916,7 @@ function getTimePositionX() {
 
 function getTimeSelection() {
   var tSlider = document.getElementById('timeRange');
+  if (tSlider == null) return [chart_xScale_minimum, chart_xScale_maximum];
   var range = tSlider.noUiSlider.get('range');
   return [new Date(parseInt(range[0])), new Date(parseInt(range[1]) - aDay())];
 }
@@ -1126,6 +1146,7 @@ function updateTimeSlider(values, handle, unencoded, isTap, positions) {
   }
   calculateViewCount(values[0], egoTime);
   filterNodes();
+  changeNodeGradient();
   simulation.restart();
 }
 
