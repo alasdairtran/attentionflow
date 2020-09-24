@@ -859,9 +859,18 @@ function gradColour(d, ts, te) {
       (curRange[1].getTime() - d.startDate.getTime()) / aDay()
     )
   );
+  // var step = d3.scaleLinear().domain([1, 5])
+  //   .range([chart_xScale_minimum.getYear(), chart_xScale_maximum.getYear()]);
+  // const viewColourScale = d3.scaleLinear()
+  //   .range(['#f78ca0', '#FFE1E6', '#FFFFFF', '#B5DCFF', 'steelblue'])
+  //   .domain([step(1), step(2), step(3), step(4), step(5)])
+  //   .interpolate(d3.interpolateHcl);
   const viewColourScale = d3
-    .scaleSequential(d3.interpolateSpectral)
-    .domain([chart_xScale_minimum.getYear(), chart_xScale_maximum.getYear()]);
+    .scaleSequential(d3.interpolateYlGnBu)
+    .domain([
+      chart_xScale_minimum.getYear(),
+      chart_xScale_maximum.getYear() + 3,
+    ]);
   const currentTime = new Date(
     d.startDate.getTime() + te * (1000 * 60 * 60 * 24)
   );
@@ -876,7 +885,7 @@ function gradColour(d, ts, te) {
 }
 
 function changeNodeGradient() {
-  var smoothness = 3;
+  var smoothness = 0;
   nodes.forEach(function(node) {
     var numDays = node.dailyView.length;
     var secondYear = new Date(1901 + node.startDate.getYear(), 0, 1);
