@@ -81,6 +81,9 @@ let rightMargin = 80;
 let chart_yScale_minimum = 1000000;
 let chart_xScale_minimum = new Date('2009-11-01');
 let chart_xScale_maximum = new Date('2018-11-01');
+const viewColourScale = d3
+  .scaleSequential(d3.interpolateYlGnBu)
+  .domain([chart_xScale_minimum.getYear(), chart_xScale_maximum.getYear() + 3]);
 let egoNode, egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, infSlider;
 let graphSortingOpts = [
@@ -437,6 +440,22 @@ class AttentionFlow extends Component {
         return d.date;
       })
     );
+
+    // coloring legend\
+    var secondYear = chart_xScale_minimum.getYear() + 1;
+    var st = chart_xScale_minimum;
+    for (var y = secondYear; y <= chart_xScale_maximum.getYear() + 1; y++) {
+      var et = Math.min(chart_xScale_maximum, new Date(y + 1900, 0, 1));
+      viewcount
+        .append('rect')
+        .attr('y', this.chartHeight)
+        .attr('x', xScale(st))
+        .attr('width', xScale(et) - xScale(st))
+        .attr('height', 20)
+        .attr('fill', viewColourScale(y));
+      st = et;
+    }
+
     // viewcount
     //   .append('g')
     //   .attr('transform', 'translate(0,' + this.chartHeight + ')')
@@ -865,12 +884,6 @@ function gradColour(d, ts, te) {
   //   .range(['#f78ca0', '#FFE1E6', '#FFFFFF', '#B5DCFF', 'steelblue'])
   //   .domain([step(1), step(2), step(3), step(4), step(5)])
   //   .interpolate(d3.interpolateHcl);
-  const viewColourScale = d3
-    .scaleSequential(d3.interpolateYlGnBu)
-    .domain([
-      chart_xScale_minimum.getYear(),
-      chart_xScale_maximum.getYear() + 3,
-    ]);
   const currentTime = new Date(
     d.startDate.getTime() + te * (1000 * 60 * 60 * 24)
   );
