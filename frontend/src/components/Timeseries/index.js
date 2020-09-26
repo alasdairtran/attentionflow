@@ -458,7 +458,7 @@ class AttentionFlow extends Component {
         .attr('x', xScale(award_time) - award_width)
         .attr('width', award_width * 2)
         .attr('height', this.chartHeight)
-        .attr('fill', '#dddddd')
+        .attr('fill', '#4682B433')
         .on('mouseover', function() {
           setMousePosition();
           award_tooltip.innerText = this.getAttribute('title');
