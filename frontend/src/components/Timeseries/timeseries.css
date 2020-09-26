@@ -107,12 +107,12 @@ text.node {
 
 div.tooltip {
   position: absolute;
-  text-align: center;
+  text-align: left;
   vertical-align: middle;
-  width: 170px;
-  height: 28px;
+  width: auto;
+  height: auto;
   padding: 2px;
-  font: 12px sans-serif;
+  font: 10px sans-serif;
   background: lightsteelblue;
   border: 0.5px solid steelblue;
   border-radius: 5px;

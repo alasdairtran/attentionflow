@@ -441,7 +441,39 @@ class AttentionFlow extends Component {
       })
     );
 
-    // coloring legend\
+    var award_tooltip = document.createElement('div');
+    award_tooltip.setAttribute('data-toggle', 'tooltip');
+    award_tooltip.setAttribute('data-placement', 'right');
+    award_tooltip.className = 'tooltip';
+    this.divTimeline.append(award_tooltip);
+
+    // drawing awards
+    var award_width = 3;
+    for (var a in egoNode.awards) {
+      var award_time = new Date(a);
+      var award = viewcount
+        .append('rect')
+        .attr('title', egoNode.awards[a])
+        .attr('y', 0)
+        .attr('x', xScale(award_time) - award_width)
+        .attr('width', award_width * 2)
+        .attr('height', this.chartHeight)
+        .attr('fill', '#dddddd')
+        .on('mouseover', function() {
+          setMousePosition();
+          award_tooltip.innerText = this.getAttribute('title');
+          award_tooltip.style.opacity = 1;
+          award_tooltip.style.left =
+            mouse.x - getWindowLeftMargin() + 35 + 'px';
+          award_tooltip.style.top = mouse.y - 148 + 'px';
+          award_tooltip.style.display = 'block';
+        })
+        .on('mouseout', function() {
+          award_tooltip.style.display = 'none';
+        });
+    }
+
+    // coloring legend
     var secondYear = chart_xScale_minimum.getYear() + 1;
     var st = chart_xScale_minimum;
     for (var y = secondYear; y <= chart_xScale_maximum.getYear() + 1; y++) {
@@ -456,14 +488,6 @@ class AttentionFlow extends Component {
       st = et;
     }
 
-    // viewcount
-    //   .append('g')
-    //   .attr('transform', 'translate(0,' + this.chartHeight + ')')
-    //   .call(d3.axisBottom(xScale).tickFormat(''));
-    // yAxis = viewcount
-    //   .append('g')
-    //   .attr('transform', 'translate(' + startPos + ',0)')
-    //   .call(d3.axisLeft(yScale).tickFormat(numFormatter));
     viewCountPath = viewcount
       .append('path')
       .datum(data)
@@ -479,20 +503,6 @@ class AttentionFlow extends Component {
             return yScale(d.value);
           })
       );
-
-    var div = document.createElement('div');
-    div.setAttribute('data-toggle', 'tooltip');
-    div.setAttribute('data-placement', 'right');
-    div.className = 'tooltip';
-    this.divTimeline.append(div);
-    viewcount.on('mouseover', function() {
-      console.log('MOUSEOVER');
-      setMousePosition();
-      div.innerText = '54th Annual Grammy Awards';
-      div.style.opacity = 1;
-      div.style.left = mouse.x - getWindowLeftMargin() + 'px';
-      div.style.top = mouse.y - 178 + 'px';
-    });
   }
 
   drawEgoNetwork() {

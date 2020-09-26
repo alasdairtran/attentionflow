@@ -1,4 +1,4 @@
-import os
+import os, csv
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -85,6 +85,20 @@ def get_artist_info(request):
     return JsonResponse(output)
 
 
+def read_music_awards(artist_id):
+    creader = csv.reader(open("data/music_awards_data.csv"))
+    awards = {};
+    for r in creader:
+        if r[3] == artist_id:
+            title = "{} - {} ({})".format(r[0], r[6], r[4]) if r[4] else "{} - {}".format(r[0], r[6])
+            if r[1] in awards:
+                awards[r[1]] += "\n" + title
+            else:
+                awards[r[1]] = title
+        else:
+            continue
+    return awards
+
 @csrf_exempt
 def get_video_info(request):
     video_id = request.GET['videoID']
@@ -96,6 +110,8 @@ def get_video_info(request):
     # video_id = "yXQViqx6GMY" # all i want for christmas is you
     # video_id = "nfWlot6h_JM" # shake it off
     output = search_video_basicinfo(video_id)
+    output["awards"] = read_music_awards(output["channelId"])
+
     videos = search_1hop_videos(video_id)
     output["nodes"] = videos["videos"]
     output["links"] = videos["links"]
