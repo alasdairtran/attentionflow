@@ -80,6 +80,7 @@ def get_artist_info(request):
     topvideos = search_artist_topvideos(channel_id)
     artists = search_1hop_artists(channel_id)
     output["topvideos"] = topvideos
+    output["awards"] = read_music_awards(channel_id)
     output["nodes"] = artists["artists"]
     output["links"] = artists["links"]
     return JsonResponse(output)
