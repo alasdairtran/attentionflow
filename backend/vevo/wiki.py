@@ -100,6 +100,8 @@ def search_wiki_info(graph_id):
     node_dict = {}
     output = {}
     neigh_views = []
+    if len(r['nodes']) == 0:
+        raise TitleDoesNotExist
     for n in r['nodes']:
         if int(n['id']) in node_dict:
             continue
