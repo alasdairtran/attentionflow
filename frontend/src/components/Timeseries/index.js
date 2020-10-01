@@ -1294,11 +1294,14 @@ function showOtherSongViewCount(othersong) {
         xpos_infoText +
         '" dy="15">Contribute <tspan style="fill:blue">' +
         viewToEgo +
-        '</tspan> views</tspan><tspan x="' +
-        xpos_infoText +
-        '" dy="15">Receive <tspan style="fill:red">' +
-        viewFromEgo +
-        '</tspan> views</tspan>'
+        '</tspan> views</tspan>' +
+        (parseInt(viewFromEgo) > 0
+          ? '<tspan x="' +
+            xpos_infoText +
+            '" dy="15">Receive <tspan style="fill:red">' +
+            viewFromEgo +
+            '</tspan> views</tspan>'
+          : '')
     );
 
   var textWidth = infotext.node().getBBox().width;
