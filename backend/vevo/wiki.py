@@ -71,12 +71,28 @@ def search_wiki_info(graph_id):
             AND EXISTS (r.attention)
             RETURN
                 apoc.coll.toSet(
+                    collect(DISTINCT u.id) +
+                    collect(DISTINCT v.id)
+                ) as node_ids
+            ''',
+            graph_id=str(graph_id))
+        r = r.single()
+        relevant_ids = r['node_ids']
+        print(relevant_ids)
+
+        r = session.run(
+            '''
+            MATCH (u:Page)-[r]->(v:Page)
+            WHERE u.id in $relevant_ids AND v.id in $relevant_ids
+            AND EXISTS (r.attention)
+            RETURN
+                apoc.coll.toSet(
                     collect(DISTINCT u) +
                     collect(DISTINCT v)
                 ) as nodes,
                 collect([u.id, v.id, r.startDates, r.endDates, r.attention]) as edges
             ''',
-            graph_id=str(graph_id))
+            relevant_ids=relevant_ids)
         r = r.single()
     driver.close()
 
@@ -85,6 +101,9 @@ def search_wiki_info(graph_id):
     output = {}
     neigh_views = []
     for n in r['nodes']:
+        if int(n['id']) in node_dict:
+            continue
+
         desktop_views = forward_fill_missing(n['desktop'])
         mobile_views = forward_fill_missing(n['mobile'])
         app_views = forward_fill_missing(n['app'])
