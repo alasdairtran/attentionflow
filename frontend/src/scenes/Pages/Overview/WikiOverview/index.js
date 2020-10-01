@@ -99,7 +99,7 @@ export default class WikiOverview extends Component {
   render() {
     if (!this.state.graphID) {
       console.log('redirecting');
-      return <Redirect push to={`/overview/wiki/283508`} />;
+      return <Redirect push to={`/overview/wiki/318487`} />;
     }
     return (
       <>
