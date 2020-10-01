@@ -49,3 +49,24 @@ CALL apoc.periodic.iterate(
          r.endDates = [i in split(map.endDates,";") | date(i)]
      ',
     {batchSize:1000});
+
+// Loading attention scores
+CALL apoc.periodic.iterate(
+    'CALL apoc.load.csv("file:///wiki_attention_test.csv") YIELD map',
+    'MATCH (source:Page { id: map.neighbour })
+     MATCH (dest:Page { id: map.graphid })
+     MERGE (source)-[r:LINKS_TO]->(dest)
+     ON MATCH
+     SET r.attention = [i in split(map.attention,";") | toFloat(i)]
+     ',
+    {batchSize:1000});
+
+CALL apoc.periodic.iterate(
+    'CALL apoc.load.csv("file:///wiki_attention_train.csv") YIELD map',
+    'MATCH (source:Page { id: map.neighbour })
+     MATCH (dest:Page { id: map.graphid })
+     MERGE (source)-[r:LINKS_TO]->(dest)
+     ON MATCH
+     SET r.attention = [i in split(map.attention,";") | toFloat(i)]
+     ',
+    {batchSize:1000});
