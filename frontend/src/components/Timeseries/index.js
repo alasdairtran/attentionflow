@@ -79,11 +79,9 @@ let radiusScale, strokeScale;
 let padding_x = 15;
 let rightMargin = 80;
 let chart_yScale_minimum = 1000000;
-let chart_xScale_minimum = new Date('2009-11-01');
-let chart_xScale_maximum = new Date('2018-11-01');
-const viewColourScale = d3
-  .scaleSequential(d3.interpolateYlGnBu)
-  .domain([chart_xScale_minimum.getYear(), chart_xScale_maximum.getYear() + 3]);
+let chart_xScale_minimum;
+let chart_xScale_maximum;
+let viewColourScale;
 let egoNode, egoID, egoType, egoTime, simulation, nodes, links;
 let graphSorting, infSlider;
 let graphSortingOpts = [
@@ -145,6 +143,20 @@ class AttentionFlow extends Component {
     visinfo = outer.append('g');
     defs = outer.append('defs');
 
+    if (egoType === 'W') {
+      chart_xScale_minimum = new Date('2014-07-01');
+      chart_xScale_maximum = new Date('2020-07-01');
+    } else {
+      chart_xScale_minimum = new Date('2009-11-01');
+      chart_xScale_maximum = new Date('2018-11-01');
+    }
+    viewColourScale = d3
+      .scaleSequential(d3.interpolateYlGnBu)
+      .domain([
+        chart_xScale_minimum.getYear(),
+        chart_xScale_maximum.getYear() + 3,
+      ]);
+
     this.drawEgoInfoCard();
     this.drawEgoViewCount();
     this.drawEgoNetwork();
@@ -153,6 +165,7 @@ class AttentionFlow extends Component {
 
     if (egoType === 'V') infSlider.noUiSlider.set(1);
     else if (egoType === 'A') infSlider.noUiSlider.set(5);
+    else if (egoType === 'W') infSlider.noUiSlider.set(1);
   }
 
   drawAxes() {
@@ -666,6 +679,7 @@ class AttentionFlow extends Component {
       .text(function(d) {
         if (egoType === 'V') return d.name.split('-')[1];
         if (egoType === 'A') return d.name;
+        if (egoType === 'W') return d.name;
       })
       .attr('x', function(d) {
         return -2.5 * (1 + !d.name ? 0 : d.name.length);
