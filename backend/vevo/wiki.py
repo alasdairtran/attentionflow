@@ -60,15 +60,6 @@ def forward_fill_missing(arr):
 
 
 def search_wiki_info(graph_id):
-    # try:
-    #     pos = graphid2pos[graph_id]
-    # except KeyError:
-    #     raise TitleDoesNotExist
-
-    # neigh_ids = test_set['neigh_keys'][pos]
-    # match_ids = [graph_id] + neigh_ids
-    # match_ids = [str(i) for i in match_ids]
-
     driver = GraphDatabase.driver("bolt://neo4j:7687",
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
@@ -77,19 +68,20 @@ def search_wiki_info(graph_id):
             '''
             MATCH (u:Page)-[r]->(v:Page)
             WHERE v.id = $graph_id
-            AND r.endDates[-1] = date({year:2020,month:6,day:30})
+            AND EXISTS (r.attention)
             RETURN
                 apoc.coll.toSet(
                     collect(DISTINCT u) +
                     collect(DISTINCT v)
                 ) as nodes,
-                collect([u.id, v.id, r.startDates, r.endDates]) as edges
+                collect([u.id, v.id, r.startDates, r.endDates, r.attention]) as edges
             ''',
             graph_id=str(graph_id))
         r = r.single()
     driver.close()
 
     nodes = []
+    node_dict = {}
     output = {}
     neigh_views = []
     for n in r['nodes']:
@@ -102,12 +94,13 @@ def search_wiki_info(graph_id):
             n['id'],
             n['title'],
             int(sum(total_views)),
-            10000,
+            10000,  # indegree
             total_views.tolist(),
             'no-artist',
             unix_time_millis(n['startDate']),
             unix_time_millis(n['startDate']),
         ]
+        node_dict[int(n['id'])] = node
         if int(n['id']) == graph_id:
             output = {
                 'id': n['id'],
@@ -126,23 +119,27 @@ def search_wiki_info(graph_id):
             neigh_views.append(int(sum(total_views)))
 
     # Keep only 20 random neighbours
-    top_idx = np.argsort(np.array(neigh_views))[::-1][:20]
-    nodes = np.array(nodes)[top_idx].tolist() + [ego_node]
+    # top_idx = np.argsort(np.array(neigh_views))[::-1][:20]
+    # nodes = np.array(nodes)[top_idx].tolist() + [ego_node]
     # nodes = nodes[:20] + [ego_node]
-    kept_ids = set([n[0] for n in nodes])
+    # kept_ids = set([n[0] for n in nodes])
+    nodes = nodes + [ego_node]
 
     output['nodes'] = nodes
 
     edges = []
     for e in r['edges']:
-        if e[0] not in kept_ids:
-            continue
+        attns = e[4]
+        attns = np.concatenate([attns[:1], attns])
+        view = np.array(node_dict[int(e[1])][4])
+        flux = attns[-len(view):] * view
+        flux = flux.tolist()
         edges.append([
             e[0],
             e[1],
-            1000,
+            np.sum(flux),  # total flux
             unix_time_millis(e[2][0]),
-            [100] * len(total_views),
+            flux,  # daily flux
         ])
     output['links'] = edges
 
