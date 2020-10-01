@@ -1,4 +1,5 @@
-import os, csv
+import csv
+import os
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -88,10 +89,11 @@ def get_artist_info(request):
 
 def read_music_awards(artist_id):
     creader = csv.reader(open("data/music_awards_data.csv"))
-    awards = {};
+    awards = {}
     for r in creader:
         if r[3] == artist_id:
-            title = "{} - {} ({})".format(r[0], r[6], r[4]) if r[4] else "{} - {}".format(r[0], r[6])
+            title = "{} - {} ({})".format(r[0], r[6], r[4]
+                                          ) if r[4] else "{} - {}".format(r[0], r[6])
             if r[1] in awards:
                 awards[r[1]] += "\n" + title
             else:
@@ -99,6 +101,7 @@ def read_music_awards(artist_id):
         else:
             continue
     return awards
+
 
 @csrf_exempt
 def get_video_info(request):
@@ -400,7 +403,7 @@ def get_wiki_info(request):
     try:
         graph_id = int(graph_id)
         output = search_wiki_info(graph_id)
-    except (ValueError, TitleDoesNotExist):
+    except (TitleDoesNotExist):
         output = {'error': f'Graph ID {graph_id} does not exist.'}
 
     return JsonResponse(output)
