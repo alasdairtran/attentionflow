@@ -61,6 +61,7 @@ CALL apoc.periodic.iterate(
      ',
     {batchSize:1000});
 
+// Takes 5.5 hours
 CALL apoc.periodic.iterate(
     'CALL apoc.load.csv("file:///wiki_attention_train.csv") YIELD map',
     'MATCH (source:Page { id: map.neighbour })
