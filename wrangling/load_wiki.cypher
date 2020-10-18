@@ -50,7 +50,7 @@ CALL apoc.periodic.iterate(
      ',
     {batchSize:1000});
 
-// Loading attention scores
+// Loading attention scores. Takes 9 minutes
 CALL apoc.periodic.iterate(
     'CALL apoc.load.csv("file:///wiki_attention_test.csv") YIELD map',
     'MATCH (source:Page { id: map.neighbour })
@@ -70,4 +70,4 @@ CALL apoc.periodic.iterate(
      ON MATCH
      SET r.attention = [i in split(map.attention,";") | toFloat(i)]
      ',
-    {batchSize:1000});
+    {batchSize:100});
