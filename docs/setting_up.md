@@ -6,7 +6,7 @@ the virtual machine.
 ```sh
 # Install essential packages on Centos
 sudo yum install -y git tmux zsh util-linux-user gcc-c++ make nodejs nginx \
-    ufw rsync vim certbot python3-certbot-nginx autossh
+    ufw rsync vim certbot python3-certbot-nginx autossh htop
 sudo systemctl enable nginx
 sudo systemctl start nginx
 
