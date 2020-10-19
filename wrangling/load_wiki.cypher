@@ -38,7 +38,7 @@ CALL apoc.periodic.iterate(
      ',
     {batchSize:1000});
 
-// Takes 7 minutes
+// Takes 10 minutes
 CALL apoc.periodic.iterate(
     'CALL apoc.load.csv("file:///cat_links.csv") YIELD map',
     'MATCH (source:Page { id: map.startID })
@@ -50,7 +50,7 @@ CALL apoc.periodic.iterate(
      ',
     {batchSize:1000});
 
-// Loading attention scores. Takes 9 minutes
+// Loading attention scores. Takes 4 minutes
 CALL apoc.periodic.iterate(
     'CALL apoc.load.csv("file:///wiki_attention_test.csv") YIELD map',
     'MATCH (source:Page { id: map.neighbour })
@@ -61,7 +61,7 @@ CALL apoc.periodic.iterate(
      ',
     {batchSize:1000});
 
-// Takes 5.5 hours
+// Takes 12.6 hours
 CALL apoc.periodic.iterate(
     'CALL apoc.load.csv("file:///wiki_attention_train.csv") YIELD map',
     'MATCH (source:Page { id: map.neighbour })
@@ -70,4 +70,4 @@ CALL apoc.periodic.iterate(
      ON MATCH
      SET r.attention = [i in split(map.attention,";") | toFloat(i)]
      ',
-    {batchSize:100});
+    {batchSize:1000});
