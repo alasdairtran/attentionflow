@@ -71,3 +71,6 @@ CALL apoc.periodic.iterate(
      SET r.attention = [i in split(map.attention,";") | toFloat(i)]
      ',
     {batchSize:1000});
+
+// Create index for search box
+CALL db.index.fulltext.createNodeIndex("wikiTitles",["Page"],["title"]);

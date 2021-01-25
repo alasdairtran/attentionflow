@@ -121,3 +121,6 @@ CREATE (b)-[r:GA]->(a);
 
 // update index
 CREATE INDEX FOR (n:V) ON (n.videoId);
+
+// Create index for search box
+CALL db.index.fulltext.createNodeIndex("titleAndArtist",["V", "A"],["title", "artistName"]);
