@@ -289,8 +289,15 @@ class AttentionFlow extends Component {
       infocard.append(infocardtext);
       this.divInfo.append(infocard);
     } else if (egoType === 'W') {
-      egoInfoText += '<br/>Published: ' + published.toShortFormat();
-      egoInfoText += '<br/>Total Views: ' + numFormatter(egoNode.totalView);
+      this.addWikiScreenshot(infocard);
+      if (egoNode.extract) {
+        egoInfoText += '<br/> ' + egoNode.extract;
+      }
+      egoInfoText +=
+        '<br/><br/>Total Views: ' + numFormatter(egoNode.totalView);
+      infocardtext.innerHTML = egoInfoText;
+      infocard.append(infocardtext);
+      this.divInfo.append(infocard);
     }
 
     var controlPanel = document.createElement('div');
@@ -361,6 +368,16 @@ class AttentionFlow extends Component {
     embvideo.src +=
       '?controls=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
     div.append(embvideo);
+  }
+
+  addWikiScreenshot(div) {
+    if (egoNode.image_url) {
+      var thumb = document.createElement('img');
+      thumb.src = egoNode.image_url;
+      thumb.class = 'center';
+      console.log(egoNode.image_url);
+      div.append(thumb);
+    }
   }
 
   addTopVideos(div) {

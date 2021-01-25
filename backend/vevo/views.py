@@ -1,8 +1,11 @@
 import csv
 import os
 
+import bs4
+import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
 from neo4j import GraphDatabase
 
 from .search import (search_1hop_artists, search_1hop_videos,
@@ -405,5 +408,24 @@ def get_wiki_info(request):
         output = search_wiki_info(graph_id)
     except (TitleDoesNotExist):
         output = {'error': f'Graph ID {graph_id} does not exist.'}
+
+    title = output['title'].replace(' ', '_')
+    res = requests.get(f'https://en.wikipedia.org/wiki/{title}')
+    soup = bs4.BeautifulSoup(res.text)
+    table = soup.find('table', {'class': 'infobox'})
+    if table:
+        a = table.find('a', {'class': 'image'})
+        if a:
+            img = a.find('img')
+            if img:
+                src = img.get('src')
+                if src:
+                    url = f'http:{src}'
+                    output['image_url'] = url
+
+    r = requests.get(
+        f"https://en.wikipedia.org/api/rest_v1/page/summary/{title}")
+    page = r.json()
+    output['extract'] = page["extract"]
 
     return JsonResponse(output)
