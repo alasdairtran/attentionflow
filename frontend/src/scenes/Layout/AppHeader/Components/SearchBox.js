@@ -6,14 +6,16 @@ import '../../../Pages/Overview/Basic';
 let titles = [];
 
 class Video {
-  constructor(title) {
+  constructor(title, id) {
     this.title = title;
+    this.id = id;
   }
 }
 
 class Artist {
-  constructor(artist) {
+  constructor(artist, id) {
     this.artist = artist;
+    this.id = id;
   }
 }
 
@@ -49,6 +51,7 @@ class SearchBox extends React.Component {
     this.state = {
       activeSearch: false,
       suggestions: [],
+      value: '',
     };
   }
 
@@ -78,10 +81,10 @@ class SearchBox extends React.Component {
         const result = res.data.title;
         const artist = res.data.artist;
         for (let i = 0; i < artist.length && i < 3; i++) {
-          titles.push({ name: new Artist(artist[i]) });
+          titles.push({ name: new Artist(artist[i].name, artist[i].id) });
         }
         for (let i = 0; i < result.length && i < 5; i++) {
-          titles.push({ name: new Video(result[i]) });
+          titles.push({ name: new Video(result[i].name, result[i].id) });
         }
         if (inputLength > 0) {
           this.setState({
