@@ -64,8 +64,7 @@ def get_suggestions(request):
     with driver.session() as session:
         result2 = session.run("CALL db.index.fulltext.queryNodes(\"titleAndArtist\", \"" + title +
                               "\") YIELD node, score RETURN node.title AS title, node.artist AS artist ORDER BY node.totalView DESC")
-        key = result2.keys()
-        value = list(result2.records())
+        value = list(result2.values())
         result_title = [v[0] for v in value if not v[0] is None]
         result_artist = list({v[1] for v in value if not v[1] is None})
     driver.close()
@@ -73,6 +72,25 @@ def get_suggestions(request):
     output = {
         "title": result_title,
         "artist": result_artist
+    }
+    return JsonResponse(output)
+
+
+@csrf_exempt
+def get_wiki_suggestions(request):
+    driver = GraphDatabase.driver("bolt://neo4j:7687",
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
+
+    title = request.GET["title"]
+    with driver.session() as session:
+        result2 = session.run("CALL db.index.fulltext.queryNodes(\"wikiTitles\", \"" + title +
+                              "\") YIELD node, score RETURN node.title AS title")
+        value = list(result2.values())
+        result_title = [v[0] for v in value if not v[0] is None]
+    driver.close()
+
+    output = {
+        "title": result_title,
     }
     return JsonResponse(output)
 
