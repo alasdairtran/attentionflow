@@ -375,6 +375,7 @@ class AttentionFlow extends Component {
       var thumb = document.createElement('img');
       thumb.src = egoNode.image_url;
       thumb.class = 'center';
+      thumb.style = `max-height:150px`;
       console.log(egoNode.image_url);
       div.append(thumb);
     }
