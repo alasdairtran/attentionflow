@@ -5,8 +5,9 @@ import time
 from datetime import date, datetime
 
 import numpy as np
-from jina.clients import py_client
-from jina.drivers.helper import pb2array
+
+# from jina.clients import py_client
+# from jina.drivers.helper import pb2array
 from neo4j import GraphDatabase
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
