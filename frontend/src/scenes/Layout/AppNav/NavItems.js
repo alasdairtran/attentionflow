@@ -26,9 +26,9 @@ export const ComponentsNav = [
     label: 'Wiki',
     to: '#/overview/wiki',
   },
-  {
-    icon: 'pe-7s-share',
-    label: 'What-Ifs',
-    to: '#/overview/whatifs',
-  },
+  // {
+  //   icon: 'pe-7s-share',
+  //   label: 'What-Ifs',
+  //   to: '#/overview/whatifs',
+  // },
 ];

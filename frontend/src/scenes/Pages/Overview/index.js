@@ -10,7 +10,6 @@ import BasicOverview from './Basic';
 import GenreNetwork from './GenreNetwork';
 import GenreOverview from './GenreOverview';
 import VideoOverview from './VideoOverview';
-import WhatIfsOverview from './WhatIfsOverview';
 import WikiOverview from './WikiOverview';
 
 const Overview = ({ match }) => (
@@ -27,10 +26,10 @@ const Overview = ({ match }) => (
           {/* <Route path={`${match.url}/artist/:id`} component={ArtistEgo} /> */}
           <Route path={`${match.url}/video/:id?`} component={VideoOverview} />
           <Route path={`${match.url}/wiki/:id?`} component={WikiOverview} />
-          <Route
+          {/* <Route
             path={`${match.url}/whatifs/:id?`}
             component={WhatIfsOverview}
-          />
+          /> */}
           {/* <Route path={`${match.url}/video/:id`} component={VideoEgo} /> */}
         </div>
         <AppFooter />
