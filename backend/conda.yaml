@@ -2,6 +2,7 @@ name: base
 channels:
   - defaults
 dependencies:
+  - beautifulsoup4
   - python=3.8.5
   - pip=20.2.2
   - psycopg2 # connects to Postgres
