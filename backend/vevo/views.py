@@ -430,7 +430,8 @@ def get_wiki_info(request):
         output = {'error': f'Graph ID {graph_id} does not exist.'}
 
     title = output['title'].replace(' ', '_')
-    res = requests.get(f'https://en.wikipedia.org/wiki/{title}')
+    page_url = f'https://en.wikipedia.org/wiki/{title}'
+    res = requests.get(page_url)
     soup = bs4.BeautifulSoup(res.text)
     table = soup.find('table', {'class': 'infobox'})
     if table:
@@ -443,9 +444,10 @@ def get_wiki_info(request):
                     url = f'http:{src}'
                     output['image_url'] = url
 
-    r = requests.get(
-        f"https://en.wikipedia.org/api/rest_v1/page/summary/{title}")
+    url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
+    r = requests.get(url)
     page = r.json()
     output['extract'] = page["extract"]
+    output['url'] = page_url
 
     return JsonResponse(output)

@@ -291,7 +291,10 @@ class AttentionFlow extends Component {
     } else if (egoType === 'W') {
       this.addWikiScreenshot(infocard);
       if (egoNode.extract) {
-        egoInfoText += '<br/> ' + egoNode.extract;
+        egoInfoText +=
+          '<br/> ' +
+          egoNode.extract +
+          ` <b><a target="_blank" href="${egoNode.url}"> Wikipedia Page.</a></b>`;
       }
       egoInfoText +=
         '<br/><br/>Total Views: ' + numFormatter(egoNode.totalView);
