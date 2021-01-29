@@ -60,7 +60,7 @@ export default class AnalyticsDashboard1 extends Component {
 
   componentDidMount() {
     document.body.classList.add('bg-light');
-    this.fetchExample();
+    //    this.fetchExample();
   }
 
   toggle() {
