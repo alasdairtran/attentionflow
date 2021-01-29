@@ -40,7 +40,7 @@ class HeaderLogo extends React.Component {
     return (
       <>
         <div className="app-header__logo">
-          <div className="logo-name">VevoViz</div>
+          <div className="logo-name">AttentionFlow</div>
           <div className="header__pane ml-auto">
             <div onClick={this.toggleEnableClosedSidebar}>
               <Hamburger

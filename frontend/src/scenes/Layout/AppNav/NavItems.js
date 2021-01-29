@@ -1,16 +1,21 @@
+//export const MainNav = [
+//  {
+//    icon: 'pe-7s-rocket',
+//    label: 'Dashboard Example',
+//    to: '#/overview/basic',
+//  },
+//];
 export const MainNav = [
   {
     icon: 'pe-7s-rocket',
-    label: 'Dashboard Example',
+    label: 'Home',
     to: '#/overview/basic',
   },
-];
-export const ComponentsNav = [
-  {
-    icon: 'pe-7s-radio',
-    label: 'Genre',
-    to: '#/overview/genre',
-  },
+  //  {
+  //    icon: 'pe-7s-radio',
+  //    label: 'Genre',
+  //    to: '#/overview/genre',
+  //  },
   {
     icon: 'pe-7s-users',
     label: 'Artist',

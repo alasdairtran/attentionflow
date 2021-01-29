@@ -9,7 +9,7 @@ class AppFooter extends React.Component {
             <div className="app-footer-left">
               Developed by Minjeong Shin, Alasdair Tran, Siqi Wu, Alexander
               Mathews, Rong Wang, Georgiana Lyall, and Lexing Xie @{' '}
-              <a href="http://cm.cecs.anu.edu.au/">
+              <a href="http://cm.cecs.anu.edu.au/" target="_blank">
                 ANU Computational Media Lab
               </a>
               .
