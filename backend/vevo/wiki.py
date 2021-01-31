@@ -17,7 +17,7 @@ with open('data/test_set.json') as rf:
 
 graphid2pos = {graphid: pos for pos, graphid in
                enumerate(test_set['keys'])}
-
+data_source = "bolt://neo4j:7687"
 
 def unix_time_millis(d):
     d = d.to_native()
@@ -61,7 +61,7 @@ def forward_fill_missing(arr):
 
 
 def search_wiki_info(graph_id):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
@@ -178,7 +178,7 @@ def search_for_wiki_page(graph_id):
     match_ids = [graph_id] + neigh_ids
     match_ids = [str(i) for i in match_ids]
 
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:

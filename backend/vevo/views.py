@@ -14,7 +14,7 @@ from .search import (search_1hop_artists, search_1hop_videos,
 from .wiki import TitleDoesNotExist, search_for_wiki_page, search_wiki_info
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
-
+data_source = "bolt://neo4j:7687"
 
 # @csrf_exempt
 # def get_video(request):
@@ -32,7 +32,7 @@ NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
 
 @csrf_exempt
 def get_video_incoming_outgoing(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     title = request.GET['title']
@@ -57,7 +57,7 @@ def get_video_incoming_outgoing(request):
 
 @csrf_exempt
 def get_suggestions(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     title = request.GET["title"]
@@ -80,7 +80,7 @@ def get_suggestions(request):
 
 @csrf_exempt
 def get_wiki_suggestions(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     title = request.GET["title"]
@@ -128,6 +128,8 @@ def read_music_awards(artist_id):
 
 @csrf_exempt
 def get_video_info(request):
+    if not request.GET:
+        return JsonResponse({})
     video_id = request.GET['videoID']
     # video_id = "rYEDA3JcQqw" # rolling in the deep
     # video_id = "hLQl3WQQoQ0" # someone like you
@@ -147,7 +149,7 @@ def get_video_info(request):
 
 @csrf_exempt
 def get_genre(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
@@ -167,7 +169,7 @@ def get_genre(request):
 
 @csrf_exempt
 def get_genre_incoming_outgoing(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     genre = request.GET['genre']
@@ -206,7 +208,7 @@ def get_genre_incoming_outgoing(request):
 
 @csrf_exempt
 def get_artist_incoming_outgoing(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     channel_id = request.GET['artist']
@@ -242,7 +244,7 @@ def get_videos_by_artist(request):
 
 @csrf_exempt
 def get_genre_bubbles(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
@@ -259,7 +261,7 @@ def get_genre_bubbles(request):
 
 @csrf_exempt
 def get_genre_top_artists(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     genre = request.GET['genre']
@@ -282,7 +284,7 @@ def get_genre_top_artists(request):
 
 @csrf_exempt
 def get_genre_top_50_artists(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     genre = request.GET['genre']
@@ -308,7 +310,7 @@ def get_genre_top_50_artists(request):
 
 @csrf_exempt
 def get_genre_artist_top_videos(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     genre = request.GET['genre']
@@ -330,7 +332,7 @@ def get_genre_artist_top_videos(request):
 
 @csrf_exempt
 def get_top_50_videos(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
@@ -358,7 +360,7 @@ def get_top_50_videos(request):
 
 @csrf_exempt
 def get_top_50_artists(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:
@@ -385,7 +387,7 @@ def get_top_50_artists(request):
 
 @csrf_exempt
 def get_genre_bubbles_single(request):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     with driver.session() as session:

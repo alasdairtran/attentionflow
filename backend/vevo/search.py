@@ -5,10 +5,10 @@ from datetime import date, datetime
 from neo4j import GraphDatabase
 
 NEO4J_PASS = os.environ['NEO4J_AUTH'][6:]
-
+data_source = "bolt://neo4j:7687"
 
 def search_artist_topvideos(channel_id):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
     with driver.session() as session:
         results = session.run("MATCH (v:V {channelId: $channelId}) "
@@ -21,7 +21,7 @@ def search_artist_topvideos(channel_id):
 
 
 def search_artist_basicinfo(channel_id):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
     with driver.session() as session:
         results = session.run("MATCH (a:A {channelId: $channelId}) "
@@ -50,7 +50,7 @@ def search_artist_basicinfo(channel_id):
 
 
 def search_video_basicinfo(video_id):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
     with driver.session() as session:
         results = session.run("MATCH (v:V {videoId: $videoId}) "
@@ -83,7 +83,7 @@ def search_video_basicinfo(video_id):
 
 
 def search_videos_by_artist(channel_id):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
     with driver.session() as session:
         results = session.run("MATCH (a:A {channelId: $channelId}) "
@@ -109,7 +109,7 @@ def search_videos_by_artist(channel_id):
 
 
 def search_1hop_artists(channel_id):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
     with driver.session() as session:
         results = session.run("MATCH (v:A {channelId: $channelId}) "
@@ -129,7 +129,7 @@ def search_1hop_artists(channel_id):
 
 
 def search_1hop_videos(video_id):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
     with driver.session() as session:
         results = session.run("MATCH (v:V {videoId: $videoId}) "
@@ -149,7 +149,7 @@ def search_1hop_videos(video_id):
 
 
 def search_2hop_videos(video_id):
-    driver = GraphDatabase.driver("bolt://neo4j:7687",
+    driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
     with driver.session() as session:
         results = session.run("MATCH (v:V {videoId: $videoId}) "
