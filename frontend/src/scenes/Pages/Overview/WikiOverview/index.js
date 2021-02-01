@@ -111,42 +111,40 @@ export default class WikiOverview extends Component {
           transitionEnter={false}
           transitionLeave={false}
         >
-          <div>
-            <button id="display" hidden="hidden" onClick={this.display} />
-            {this.state.hasError ? (
-              <div className="alert alert-danger" role="alert">
-                {this.state.errorMessage}
-              </div>
-            ) : (
-              <Card className="mb-3" id="attentionFlow">
-                <Row>
-                  <Col md="12" lg="12" id="egoTitle"></Col>
-                </Row>
-                <Row>
-                  <Col md="3" lg="3" id="egoInfo"></Col>
-                  <Col md="9" lg="9" id="egoTimeline">
-                    <div id="graphContainer">
-                      {this.state.isLoading ? (
-                        <div
-                          style={{
-                            width: '50px',
-                            height: '50px',
-                            border: '10px solid #f3f3f3',
-                            borderRadius: '50%',
-                            borderTop: '10px solid #3498db',
-                            animation: 'spin 2s linear infinite',
-                            margin: '100px auto',
-                          }}
-                        />
-                      ) : (
-                        <Timeseries egoType="W" egoInfo={this.state.wikiInfo} />
-                      )}
-                    </div>
-                  </Col>
-                </Row>
-              </Card>
-            )}
-          </div>
+          <button id="display" hidden="hidden" onClick={this.display} />
+          {this.state.hasError ? (
+            <div className="alert alert-danger" role="alert">
+              {this.state.errorMessage}
+            </div>
+          ) : (
+            <div id="attentionFlow">
+              <Row>
+                <Col md="12" lg="12" id="egoTitle"></Col>
+              </Row>
+              <Row>
+                <Col md="3" lg="3" id="egoInfo"></Col>
+                <Col md="9" lg="9" id="egoTimeline">
+                  <div id="graphContainer">
+                    {this.state.isLoading ? (
+                      <div
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          border: '10px solid #f3f3f3',
+                          borderRadius: '50%',
+                          borderTop: '10px solid #3498db',
+                          animation: 'spin 2s linear infinite',
+                          margin: '100px auto',
+                        }}
+                      />
+                    ) : (
+                      <Timeseries egoType="W" egoInfo={this.state.wikiInfo} />
+                    )}
+                  </div>
+                </Col>
+              </Row>
+            </div>
+          )}
         </ReactCSSTransitionGroup>
       </>
     );

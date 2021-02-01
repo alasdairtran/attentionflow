@@ -110,14 +110,13 @@ export default class AnalyticsDashboard1 extends Component {
           transitionEnter={false}
           transitionLeave={false}
         >
-          <div>
-            <button id="display" hidden="hidden" onClick={this.display} />
-            {this.state.hasError && (
-              <div className="alert alert-danger" role="alert">
-                {this.state.errorMessage}
-              </div>
-            )}
-            <Card className="mb-3" id="attentionFlow">
+          <button id="display" hidden="hidden" onClick={this.display} />
+          {this.state.hasError ? (
+            <div className="alert alert-danger" role="alert">
+              {this.state.errorMessage}
+            </div>
+          ) : (
+            <div id="attentionFlow">
               <Row>
                 <Col md="12" lg="12" id="egoTitle"></Col>
               </Row>
@@ -143,8 +142,8 @@ export default class AnalyticsDashboard1 extends Component {
                   </div>
                 </Col>
               </Row>
-            </Card>
-          </div>
+            </div>
+          )}
         </ReactCSSTransitionGroup>
       </>
     );
