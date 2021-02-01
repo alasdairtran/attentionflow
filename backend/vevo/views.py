@@ -63,12 +63,14 @@ def get_suggestions(request):
     title = request.GET["title"]
     with driver.session() as session:
         result2 = session.run("CALL db.index.fulltext.queryNodes(\"titleAndArtist\", \"" + title +
-                              "\") YIELD node, score RETURN node.videoId AS videoId, node.channelId AS channelId, node.title AS title, node.artist AS artist ORDER BY node.totalView DESC")
+                              "\") YIELD node, score RETURN node.videoId AS videoId, node.channelId AS channelId," +
+                              "node.title AS title, node.artistName AS artist ORDER BY node.totalView DESC")
         value = list(result2.values())
         result_title = [{'id': v[0], 'name': v[2]}
                         for v in value if not v[2] is None]
-        result_artist = [{'id': v[1], 'name': v[3]}
-                         for v in value if not v[3] is None]
+        artist_set = {v[1]: v[3] for v in value if not v[3] is None and isinstance(v[3], str)}
+        result_artist = [{'id': k, 'name': v} for k, v in artist_set.items()]
+
     driver.close()
 
     output = {
