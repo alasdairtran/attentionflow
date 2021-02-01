@@ -91,7 +91,7 @@ class SearchBox extends React.Component {
             suggestions: titles,
           });
         }
-        console.log(result);
+        // console.log(result);
       })
       .catch(function(error) {
         console.error(error);
@@ -112,9 +112,23 @@ class SearchBox extends React.Component {
       className: 'search-input',
       id: 'search-text',
       placeholder: 'Type the title',
-      value,
+      value: this.state.value,
       onChange: this.onChangeValue,
     };
+
+    for (let i = 0; i < titles.length; i++) {
+      if (
+        titles[i].name.title === this.state.value ||
+        titles[i].name.artist === this.state.value
+      ) {
+        inputProps.type = titles[
+          i
+        ].name.__proto__.constructor.name.toLowerCase();
+        inputProps.searchid = titles[i].name.id;
+        break;
+      }
+    }
+    // console.log("inputProps", inputProps)
 
     return (
       <>

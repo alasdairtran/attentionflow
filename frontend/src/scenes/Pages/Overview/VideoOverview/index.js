@@ -91,13 +91,24 @@ export default class AnalyticsDashboard1 extends Component {
   display = d => {
     this.setState({
       clickedOnSong: true,
+      videoID: document.getElementById('search-text').getAttribute('searchid'),
+      clickedType: document.getElementById('search-text').getAttribute('type'),
+      videoInfo: undefined,
       title: document.getElementById('search-text').value,
     });
   };
 
   render() {
-    if (!this.state.videoID) {
-      console.log('redirecting');
+    if (this.state.clickedOnSong === true) {
+      console.log('redirecting', this.state);
+      return (
+        <Redirect
+          push
+          to={`/overview/${this.state.clickedType}/${this.state.videoID}`}
+        />
+      );
+    } else if (!this.state.videoID) {
+      console.log('redirecting to default video page');
       return <Redirect push to={`/overview/video/rYEDA3JcQqw`} />;
     }
     return (

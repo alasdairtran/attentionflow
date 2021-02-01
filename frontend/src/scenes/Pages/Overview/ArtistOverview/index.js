@@ -91,13 +91,24 @@ export default class AnalyticsDashboard1 extends Component {
   display = d => {
     this.setState({
       clickedOnSong: true,
+      artistID: document.getElementById('search-text').getAttribute('searchid'),
+      clickedType: document.getElementById('search-text').getAttribute('type'),
+      artistInfo: undefined,
       title: document.getElementById('search-text').value,
     });
   };
 
   render() {
-    if (!this.state.artistID) {
-      console.log('redirecting');
+    if (this.state.clickedOnSong === true) {
+      console.log('redirecting', this.state);
+      return (
+        <Redirect
+          push
+          to={`/overview/${this.state.clickedType}/${this.state.artistID}`}
+        />
+      );
+    } else if (!this.state.artistID) {
+      console.log('redirecting to default artist page');
       return <Redirect push to={`/overview/artist/UComP_epzeKzvBX156r6pm1Q`} />;
     }
     return (
