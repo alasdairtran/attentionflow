@@ -37,10 +37,10 @@ class Header extends React.Component {
         */}
 
             <div className="header-right">
-              <a href="/#/overview/video/rYEDA3JcQqw">Vevo video</a>
               <a href="/#/overview/artist/UComP_epzeKzvBX156r6pm1Q">
                 Vevo artist
               </a>
+              <a href="/#/overview/video/rYEDA3JcQqw">Vevo video</a>
               <a href="/#/overview/wiki/318487">Wiki traffic</a>
             </div>
           </div>

@@ -182,32 +182,40 @@ export default class AnalyticsDashboard1 extends Component {
             </Col>
           </Row>
 
-          <div className="row">
-            <div className="column">
-              <div className="single-image">
-                <h5> Vevo artists </h5>
-                <a href="/#/overview/artist/UComP_epzeKzvBX156r6pm1Q">
-                  <img width="100%" src={artist} />
-                </a>
+          <Row>
+            <Col md="12" lg="12">
+              <div className="column">
+                <div className="single-image">
+                  <div className="header-block">
+                    <h5> Vevo artist </h5>
+                  </div>
+                  <a href="/#/overview/artist/UComP_epzeKzvBX156r6pm1Q">
+                    <img width="100%" src={artist} />
+                  </a>
+                </div>
               </div>
-            </div>
-            <div className="column">
-              <div className="single-image">
-                <h5> Vevo videos </h5>
-                <a href="/#/overview/video/rYEDA3JcQqw">
-                  <img width="100%" src={video} />
-                </a>
+              <div className="column">
+                <div className="single-image">
+                  <div className="header-block">
+                    <h5> Vevo video </h5>
+                  </div>
+                  <a href="/#/overview/video/rYEDA3JcQqw">
+                    <img width="100%" src={video} />
+                  </a>
+                </div>
               </div>
-            </div>
-            <div className="column">
-              <h5> Wiki traffic </h5>
-              <div className="single-image">
-                <a href="/#/overview/wiki/318487">
-                  <img width="100%" src={wiki} />
-                </a>
+              <div className="column">
+                <div className="header-block">
+                  <h5> Wiki traffic </h5>
+                </div>
+                <div className="single-image">
+                  <a href="/#/overview/wiki/318487">
+                    <img width="100%" src={wiki} />
+                  </a>
+                </div>
               </div>
-            </div>
-          </div>
+            </Col>
+          </Row>
         </ReactCSSTransitionGroup>
       </>
     );

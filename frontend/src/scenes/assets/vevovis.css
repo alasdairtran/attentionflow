@@ -33,16 +33,21 @@
   margin: 30px 10px 10px 30px;
 }
 
+.header-block {
+  margin-top: 2px;
+  margin-left: 10px;
+}
+
 .video-block {
   margin: 75px 20px 10px 0px;
 }
 
 .column {
   float: left;
-  width: 32%;
-  height: 350px;
+  width: 30%;
+  height: 330px;
   border: 1px solid #000000;
-  margin: 5px 10px 10px 10px;
+  margin: 5px 10px 10px 40px;
 }
 
 .row:after {
