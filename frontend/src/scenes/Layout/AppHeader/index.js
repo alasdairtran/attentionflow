@@ -2,8 +2,8 @@ import cx from 'classnames';
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { connect } from 'react-redux';
-import HeaderLogo from '../AppLogo';
 import SearchBox from './Components/SearchBox';
+import '../../assets/vevovis.css';
 
 class Header extends React.Component {
   render() {
@@ -25,15 +25,23 @@ class Header extends React.Component {
           transitionEnter={false}
           transitionLeave={false}
         >
-          <HeaderLogo />
+          <div className="header">
+            <a href="/" class="logo">
+              AttentionFlow
+            </a>
 
-          <div
-            className={cx('app-header__content', {
-              'header-mobile-open': enableMobileMenuSmall,
-            })}
-          >
-            <div className="app-header-left">
-              <SearchBox />
+            {/*
+        <div className="app-header-left">
+          <SearchBox />
+        </div>
+        */}
+
+            <div className="header-right">
+              <a href="/#/overview/video/rYEDA3JcQqw">Vevo video</a>
+              <a href="/#/overview/artist/UComP_epzeKzvBX156r6pm1Q">
+                Vevo artist
+              </a>
+              <a href="/#/overview/wiki/318487">Wiki traffic</a>
             </div>
           </div>
         </ReactCSSTransitionGroup>

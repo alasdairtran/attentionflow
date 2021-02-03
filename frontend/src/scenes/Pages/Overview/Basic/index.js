@@ -1,34 +1,16 @@
-import {
-  faAngleDown,
-  faAngleUp,
-  faArrowLeft,
-  faArrowRight,
-} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import classnames from 'classnames';
 import React, { Component } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { Redirect } from 'react-router-dom';
-import {
-  Button,
-  Card,
-  CardHeader,
-  Col,
-  Row,
-  TabContent,
-  TabPane,
-} from 'reactstrap';
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-} from 'recharts';
+import { Card, Col, Row } from 'reactstrap';
+import '../../../assets/vevovis.css';
+
 import PageTitle from '../../../Layout/AppMain/PageTitle';
+import artist from '../../../assets/utils/images/vevo_artist.png';
+import video from '../../../assets/utils/images/vevo_video.png';
+import wiki from '../../../assets/utils/images/wiki_traffic.png';
 
 export default class AnalyticsDashboard1 extends Component {
   constructor(props) {
@@ -86,10 +68,10 @@ export default class AnalyticsDashboard1 extends Component {
   };
 
   render() {
-    //    if (this.state.clickedOnSong === true) {
-    //      console.log('redirecting');
-    //      return <Redirect push to={`/overview/video/${this.state.videoId}`} />;
-    //    }
+    if (this.state.clickedOnSong === true) {
+      console.log('redirecting');
+      return <Redirect push to={`/overview/video/${this.state.videoId}`} />;
+    }
     return (
       <>
         <ReactCSSTransitionGroup
@@ -100,13 +82,131 @@ export default class AnalyticsDashboard1 extends Component {
           transitionEnter={false}
           transitionLeave={false}
         >
-          <div>
-            <button id="display" hidden="hidden" onClick={this.display} />
-            <PageTitle
-              heading="AttentionFlow"
-              subheading="An interactive visualisation exploring how YouTube music videos drive attention to each other."
-              icon="pe-7s-car icon-gradient bg-mean-fruit"
-            />
+          <button id="display" hidden="hidden" onClick={this.display} />
+
+          <Row>
+            <Col md="8" lg="8">
+              <div className="text-block">
+                <h3>
+                  AttentionFlow: Visualising Influence in Networks of Time
+                  Series{' '}
+                </h3>
+
+                <div>
+                  <p>
+                    {' '}
+                    <b>Abstract:</b> The collective attention on online items
+                    such as web pages, search terms, and videos reflects trends
+                    that are of social, cultural, and economic interest.
+                    Moreover, attention trends of different items exhibit mutual
+                    influence via mechanisms such as hyperlinks or
+                    recommendations. Many visualisation tools exist for time
+                    series, network evolution, or network influence; however,
+                    few systems connect all three. In this work, we present
+                    AttentionFlow, a new system to visualise networks of time
+                    series and the dynamic influence they have on one another.
+                    Centred around an ego node, our system simultaneously
+                    presents the time series on each node using two visual
+                    encodings: a tree ring for an overview and a line chart for
+                    details. AttentionFlow supports interactions such as
+                    overlaying time series of influence, and filtering
+                    neighbours by time or flux. We demonstrate AttentionFlow
+                    using two real-world datasets, Vevo and Wiki. We show that
+                    attention spikes in songs can be explained by external
+                    events such as major awards, or changes in the network such
+                    as the release of a new song. Separate case studies also
+                    demonstrate how an artist's influence changes over their
+                    career, and that correlated Wikipedia traffic is driven by
+                    cultural interests. More broadly, AttentionFlow can be
+                    generalised to visualise networks of time series on physical
+                    infrastructures such as road networks, or natural phenomena
+                    such as weather and geological measurements.
+                  </p>
+                </div>
+
+                <p>
+                  {' '}
+                  <b>Team:</b> Minjeong Shin, Alasdair Tran, Siqi Wu, Alexander
+                  Mathews, Rong Wang, Georgiana Lyall, and Lexing Xie @
+                  <a href="http://cm.cecs.anu.edu.au/" target="_blank">
+                    ANU Computational Media Lab
+                  </a>
+                </p>
+
+                <p>
+                  {' '}
+                  <b>Paper:</b>{' '}
+                  <a href="http://cm.cecs.anu.edu.au/" target="_blank">
+                    Arxiv link
+                  </a>
+                </p>
+
+                <p>
+                  {' '}
+                  <b>Reference:</b> Minjeong Shin, Alasdair Tran, Siqi Wu,
+                  Alexander Mathews, Rong Wang, Georgiana Lyall, Lexing Xie.
+                  2021. AttentionFlow: Visualising Influence in Networks of Time
+                  Series. In the Proceedings of the Fourteenth ACM International
+                  Conference on Web Search and Data Mining (WSDM ’21), March
+                  8–12, 2021, Virtual Event, Israel. ACM, New York, NY, USA, 4
+                  pages.{' '}
+                  <a href="https://doi.org/10.1145/3437963.3441703">
+                    https://doi.org/10.1145/3437963.3441703
+                  </a>
+                </p>
+              </div>
+            </Col>
+
+            <Col md="4" lg="4">
+              <div className="video-block">
+                <iframe
+                  width="100%"
+                  height="320"
+                  src="https://www.youtube.com/embed/tgbNymZ7vqY"
+                ></iframe>
+              </div>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col md="8" lg="8">
+              <div className="text-block">
+                <h4>Use cases</h4>
+
+                <p>
+                  {' '}
+                  Exploring how a network of (a) musicians, (b) music videos,
+                  and (c)Wikipedia pages drive attention to each other.
+                </p>
+              </div>
+            </Col>
+          </Row>
+
+          <div className="row">
+            <div className="column">
+              <div className="single-image">
+                <h5> Vevo artists </h5>
+                <a href="/#/overview/artist/UComP_epzeKzvBX156r6pm1Q">
+                  <img width="100%" src={artist} />
+                </a>
+              </div>
+            </div>
+            <div className="column">
+              <div className="single-image">
+                <h5> Vevo videos </h5>
+                <a href="/#/overview/video/rYEDA3JcQqw">
+                  <img width="100%" src={video} />
+                </a>
+              </div>
+            </div>
+            <div className="column">
+              <h5> Wiki traffic </h5>
+              <div className="single-image">
+                <a href="/#/overview/wiki/318487">
+                  <img width="100%" src={wiki} />
+                </a>
+              </div>
+            </div>
           </div>
         </ReactCSSTransitionGroup>
       </>

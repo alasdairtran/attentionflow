@@ -11,6 +11,81 @@
   width: 90%;
   height: 24px;
 }
+
 .egohops-label {
   padding: 2px;
+}
+
+.three-images {
+  width: 32.2%;
+  height: 350px;
+  border: 1px solid #000000;
+  margin: 20px 10px 10px 10px;
+}
+
+.singe-image {
+  width: 90%;
+  margin: auto;
+  margin-top: 5px;
+}
+
+.text-block {
+  margin: 30px 10px 10px 30px;
+}
+
+.video-block {
+  margin: 75px 20px 10px 0px;
+}
+
+.column {
+  float: left;
+  width: 32%;
+  height: 350px;
+  border: 1px solid #000000;
+  margin: 5px 10px 10px 10px;
+}
+
+.row:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.left {
+  float: left;
+}
+
+.header {
+  width: 95%;
+  overflow: hidden;
+  padding: 20px 10px;
+}
+
+.header a {
+  float: left;
+  color: black;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 25px;
+  border-radius: 4px;
+}
+
+.header a:hover {
+  color: black;
+}
+
+.header a.active {
+  background-color: dodgerblue;
+  color: white;
+}
+
+.header a.logo {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.header-right {
+  float: right;
 }

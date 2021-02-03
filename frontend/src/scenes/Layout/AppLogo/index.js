@@ -40,7 +40,9 @@ class HeaderLogo extends React.Component {
     return (
       <>
         <div className="app-header__logo">
-          <div className="logo-name">AttentionFlow</div>
+          <a href="/">
+            <div className="logo-name">AttentionFlow</div>
+          </a>
           <div className="header__pane ml-auto">
             <div onClick={this.toggleEnableClosedSidebar}>
               <Hamburger
