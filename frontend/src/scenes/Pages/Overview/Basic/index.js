@@ -162,7 +162,7 @@ export default class AnalyticsDashboard1 extends Component {
                 <iframe
                   width="100%"
                   height="320"
-                  src="https://www.youtube.com/embed/tgbNymZ7vqY"
+                  src="https://www.youtube.com/embed/8hAVa4LK254"
                 ></iframe>
               </div>
             </Col>
