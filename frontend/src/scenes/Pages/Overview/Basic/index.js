@@ -176,7 +176,7 @@ export default class AnalyticsDashboard1 extends Component {
                 <p>
                   {' '}
                   Exploring how a network of (a) musicians, (b) music videos,
-                  and (c)Wikipedia pages drive attention to each other.
+                  and (c) Wikipedia pages drive attention to each other.
                 </p>
               </div>
             </Col>
@@ -185,10 +185,10 @@ export default class AnalyticsDashboard1 extends Component {
           <Row>
             <Col md="12" lg="12">
               <div className="column">
+                <div className="header-block">
+                  <p> (a) Which artists influence "Adele"? </p>
+                </div>
                 <div className="single-image">
-                  <div className="header-block">
-                    <h5> Vevo artist </h5>
-                  </div>
                   <a href="/#/overview/artist/UComP_epzeKzvBX156r6pm1Q">
                     <img width="100%" src={artist} />
                   </a>
@@ -197,7 +197,10 @@ export default class AnalyticsDashboard1 extends Component {
               <div className="column">
                 <div className="single-image">
                   <div className="header-block">
-                    <h5> Vevo video </h5>
+                    <p>
+                      {' '}
+                      (b) Which videos influence "Adele - Rolling in the Deep"?{' '}
+                    </p>
                   </div>
                   <a href="/#/overview/video/rYEDA3JcQqw">
                     <img width="100%" src={video} />
@@ -205,10 +208,10 @@ export default class AnalyticsDashboard1 extends Component {
                 </div>
               </div>
               <div className="column">
-                <div className="header-block">
-                  <h5> Wiki traffic </h5>
-                </div>
                 <div className="single-image">
+                  <div className="header-block">
+                    <p> (c) Which Wiki pages drive traffic to "Kylo Ren"? </p>
+                  </div>
                   <a href="/#/overview/wiki/318487">
                     <img width="100%" src={wiki} />
                   </a>

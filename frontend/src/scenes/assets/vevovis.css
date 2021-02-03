@@ -26,7 +26,7 @@
 .singe-image {
   width: 90%;
   margin: auto;
-  margin-top: 5px;
+  margin-top: 3px;
 }
 
 .text-block {
@@ -34,7 +34,7 @@
 }
 
 .header-block {
-  margin-top: 2px;
+  margin-top: 3px;
   margin-left: 10px;
 }
 
@@ -45,7 +45,7 @@
 .column {
   float: left;
   width: 30%;
-  height: 330px;
+  height: 340px;
   border: 1px solid #000000;
   margin: 5px 10px 10px 40px;
 }
@@ -61,20 +61,20 @@
 }
 
 .header {
-  width: 95%;
+  width: 98%;
   overflow: hidden;
-  padding: 20px 10px;
+  padding: 0px 10px;
 }
 
 .header a {
   float: left;
-  color: black;
+  color: #444;
   text-align: center;
   padding: 12px;
+  padding-right: 50px;
   text-decoration: none;
   font-size: 18px;
   line-height: 25px;
-  border-radius: 4px;
 }
 
 .header a:hover {
@@ -87,8 +87,12 @@
 }
 
 .header a.logo {
-  font-size: 25px;
+  color: black;
+  font-size: 20px;
   font-weight: bold;
+  line-height: 40px;
+  padding: 5px;
+  padding-left: 15px;
 }
 
 .header-right {
