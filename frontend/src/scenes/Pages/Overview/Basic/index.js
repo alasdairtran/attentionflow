@@ -1,16 +1,11 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import axios from 'axios';
-import classnames from 'classnames';
 import React, { Component } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { Redirect } from 'react-router-dom';
-import { Card, Col, Row } from 'reactstrap';
-import '../../../assets/vevovis.css';
-
-import PageTitle from '../../../Layout/AppMain/PageTitle';
+import { Col, Row } from 'reactstrap';
 import artist from '../../../assets/utils/images/vevo_artist.png';
 import video from '../../../assets/utils/images/vevo_video.png';
 import wiki from '../../../assets/utils/images/wiki_traffic.png';
+import '../../../assets/vevovis.css';
 
 export default class AnalyticsDashboard1 extends Component {
   constructor(props) {
@@ -136,8 +131,8 @@ export default class AnalyticsDashboard1 extends Component {
                 <p>
                   {' '}
                   <b>Paper:</b>{' '}
-                  <a href="http://cm.cecs.anu.edu.au/" target="_blank">
-                    Arxiv link
+                  <a href="http://arxiv.org/abs/2102.01974" target="_blank">
+                    Arxiv Link
                   </a>
                 </p>
 
