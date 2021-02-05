@@ -1,3 +1,12 @@
+.mainpage {
+  padding: 0px 5% 25px 5%;
+}
+
+.searchbox {
+  float: right;
+  margin-top: 26px;
+}
+
 .egohops {
   position: absolute;
   text-align: center;
@@ -24,18 +33,25 @@
 }
 
 .singe-image {
-  width: 90%;
   margin: auto;
-  margin-top: 3px;
+  margin-top: 5px;
 }
 
 .text-block {
-  margin: 30px 10px 10px 30px;
+  margin: 20px 10px 10px 10px;
 }
 
 .header-block {
-  margin-top: 3px;
-  margin-left: 10px;
+  padding: 3px 0 5px 5px;
+  margin-bottom: 3px;
+  color: black;
+  background: #c9ccd3;
+  background-image: linear-gradient(
+    -180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(100, 100, 100, 0.5) 100%
+  );
+  background-blend-mode: lighten;
 }
 
 .video-block {
@@ -43,11 +59,10 @@
 }
 
 .column {
-  float: left;
-  width: 30%;
-  height: 340px;
-  border: 1px solid #000000;
-  margin: 5px 10px 10px 40px;
+  height: 100%;
+  /* border: 1px solid #000000; */
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  margin: 5px 15px;
 }
 
 .row:after {
@@ -61,14 +76,14 @@
 }
 
 .header {
-  width: 98%;
+  width: 100%;
   overflow: hidden;
-  padding: 0px 10px;
+  padding: 0px 4%;
 }
 
 .header a {
   float: left;
-  color: #444;
+  /* color: #444; */
   text-align: center;
   padding: 12px;
   padding-right: 50px;
@@ -87,7 +102,7 @@
 }
 
 .header a.logo {
-  color: black;
+  color: white;
   font-size: 20px;
   font-weight: bold;
   line-height: 40px;
@@ -97,4 +112,8 @@
 
 .header-right {
   float: right;
+}
+
+.search-wrapper {
+  z-index: 300;
 }

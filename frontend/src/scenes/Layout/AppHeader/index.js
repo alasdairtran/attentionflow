@@ -16,7 +16,7 @@ class Header extends React.Component {
       <>
         <ReactCSSTransitionGroup
           component="div"
-          className={cx('app-header', headerBackgroundColor, {
+          className={cx('app-header', 'bg-aqua-splash', {
             'header-shadow': enableHeaderShadow,
           })}
           transitionName="HeaderAnimation"

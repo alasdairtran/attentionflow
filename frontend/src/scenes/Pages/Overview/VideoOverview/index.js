@@ -4,6 +4,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { Redirect } from 'react-router-dom';
 import { Card, Col, Row } from 'reactstrap';
 import Timeseries from '../../../../components/Timeseries';
+import SearchBox from '../../../Layout/AppHeader/Components/SearchBox';
 
 export default class AnalyticsDashboard1 extends Component {
   constructor(props) {
@@ -121,40 +122,52 @@ export default class AnalyticsDashboard1 extends Component {
           transitionEnter={false}
           transitionLeave={false}
         >
-          <button id="display" hidden="hidden" onClick={this.display} />
-          {this.state.hasError ? (
-            <div className="alert alert-danger" role="alert">
-              {this.state.errorMessage}
-            </div>
-          ) : (
-            <div id="attentionFlow">
-              <Row>
-                <Col md="12" lg="12" id="egoTitle"></Col>
-              </Row>
-              <Row>
-                <Col md="3" lg="3" id="egoInfo"></Col>
-                <Col md="9" lg="9" id="egoTimeline">
-                  <div id="graphContainer">
-                    {this.state.isLoading ? (
-                      <div
-                        style={{
-                          width: '50px',
-                          height: '50px',
-                          border: '10px solid #f3f3f3',
-                          borderRadius: '50%',
-                          borderTop: '10px solid #3498db',
-                          animation: 'spin 2s linear infinite',
-                          margin: '100px auto',
-                        }}
-                      />
-                    ) : (
-                      <Timeseries egoType="V" egoInfo={this.state.videoInfo} />
-                    )}
-                  </div>
-                </Col>
-              </Row>
-            </div>
-          )}
+          <div class="mainpage">
+            <button id="display" hidden="hidden" onClick={this.display} />
+            {this.state.hasError ? (
+              <div className="alert alert-danger" role="alert">
+                {this.state.errorMessage}
+              </div>
+            ) : (
+              <div id="attentionFlow">
+                <Row>
+                  <Col md="9" lg="9">
+                    <div id="egoTitle"></div>
+                  </Col>
+                  <Col md="3" lg="3">
+                    <div class="searchbox">
+                      <SearchBox />
+                    </div>
+                  </Col>
+                </Row>
+                {this.state.isLoading ? (
+                  <div
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      border: '15px solid #f3f3f3',
+                      borderRadius: '50%',
+                      borderTop: '15px solid #80d0c7',
+                      animation: 'spin 2s linear infinite',
+                      margin: '100px auto',
+                    }}
+                  />
+                ) : (
+                  <Row>
+                    <Col md="3" lg="3" id="egoInfo"></Col>
+                    <Col md="9" lg="9" id="egoTimeline">
+                      <div id="graphContainer">
+                        <Timeseries
+                          egoType="V"
+                          egoInfo={this.state.videoInfo}
+                        />
+                      </div>
+                    </Col>
+                  </Row>
+                )}
+              </div>
+            )}
+          </div>
         </ReactCSSTransitionGroup>
       </>
     );
