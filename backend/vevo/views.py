@@ -6,6 +6,7 @@ import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+import neo4j
 from neo4j import GraphDatabase
 
 from .search import (search_1hop_artists, search_1hop_videos,
@@ -62,11 +63,14 @@ def get_video_suggestions(request):
 
     title = request.GET["title"]
     with driver.session() as session:
-        result2 = session.run("CALL db.index.fulltext.queryNodes(\"videoTitle\", \"" + title +
-                              "\") YIELD node, score RETURN node.videoId AS videoId," +
-                              "node.title AS title ORDER BY node.totalView DESC")
-        value = list(result2.values())
-        result_title = [{'id': v[0], 'name': v[1]} for v in value]
+        try:
+            result2 = session.run('CALL db.index.fulltext.queryNodes("videoTitle", "' + title +
+                                  '") YIELD node, score RETURN node.videoId AS videoId,' +
+                                  "node.title AS title ORDER BY node.totalView DESC")
+            value = list(result2.values())
+            result_title = [{'id': v[0], 'name': v[1]} for v in value]
+        except neo4j.exceptions.ClientError:
+            result_title = []
 
     driver.close()
     output = {
@@ -82,12 +86,16 @@ def get_artist_suggestions(request):
 
     title = request.GET["title"]
     with driver.session() as session:
-        result2 = session.run("CALL db.index.fulltext.queryNodes(\"artistName\", \"" + title +
-                              "\") YIELD node, score RETURN node.channelId AS channelId," +
-                              "node.artistName AS artist ORDER BY node.totalView DESC")
-        value = list(result2.values())
-        artist_set = {v[0]: v[1] for v in value}
-        result_artist = [{'id': k, 'name': v} for k, v in artist_set.items()]
+        try:
+            result2 = session.run('CALL db.index.fulltext.queryNodes("artistName", "' + title +
+                                  '") YIELD node, score RETURN node.channelId AS channelId,' +
+                                  "node.artistName AS artist ORDER BY node.totalView DESC")
+            value = list(result2.values())
+            artist_set = {v[0]: v[1] for v in value}
+            result_artist = [{'id': k, 'name': v}
+                             for k, v in artist_set.items()]
+        except neo4j.exceptions.ClientError:
+            result_artist = []
 
     driver.close()
 
@@ -104,11 +112,14 @@ def get_wiki_suggestions(request):
 
     title = request.GET["title"]
     with driver.session() as session:
-        result2 = session.run("CALL db.index.fulltext.queryNodes(\"wikiTitles\", \"" + title +
-                              "\") YIELD node, score RETURN node.id as id, node.title AS title")
-        value = list(result2.values())
-        result_title = [{'id': v[0], 'name': v[1]}
-                        for v in value if not v[0] is None]
+        try:
+            result2 = session.run('CALL db.index.fulltext.queryNodes("wikiTitles", "' + title +
+                                  '") YIELD node, score RETURN node.id as id, node.title AS title')
+            value = list(result2.values())
+            result_title = [{'id': v[0], 'name': v[1]}
+                            for v in value if not v[0] is None]
+        except neo4j.exceptions.ClientError:
+            result_title = []
     driver.close()
 
     output = {
