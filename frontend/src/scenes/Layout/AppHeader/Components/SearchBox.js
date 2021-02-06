@@ -26,7 +26,11 @@ const onSuggestionSelected = (
   event,
   { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }
 ) => {
-  document.getElementById('display').click();
+  if (
+    document.getElementById('search-text').getAttribute('searchid') !== null
+  ) {
+    document.getElementById('display').click();
+  }
 };
 
 class SearchBox extends React.Component {
@@ -133,7 +137,13 @@ class SearchBox extends React.Component {
 
             <button
               onClick={() => {
-                document.getElementById('display').click();
+                if (
+                  document
+                    .getElementById('search-text')
+                    .getAttribute('searchid') !== null
+                ) {
+                  document.getElementById('display').click();
+                }
               }}
               className="search-icon"
             >
