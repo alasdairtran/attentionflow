@@ -2,7 +2,6 @@ import cx from 'classnames';
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { connect } from 'react-redux';
-import SearchBox from './Components/SearchBox';
 import '../../assets/vevovis.css';
 
 class Header extends React.Component {
@@ -38,10 +37,10 @@ class Header extends React.Component {
 
             <div className="header-right">
               <a href="/#/overview/artist/UComP_epzeKzvBX156r6pm1Q">
-                Vevo artist
+                Vevo Artist
               </a>
-              <a href="/#/overview/video/rYEDA3JcQqw">Vevo video</a>
-              <a href="/#/overview/wiki/318487">Wiki traffic</a>
+              <a href="/#/overview/video/rYEDA3JcQqw">Vevo Video</a>
+              <a href="/#/overview/wiki/318487">Wiki Traffic</a>
             </div>
           </div>
         </ReactCSSTransitionGroup>
