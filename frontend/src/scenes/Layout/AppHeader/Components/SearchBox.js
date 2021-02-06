@@ -26,7 +26,7 @@ const onSuggestionSelected = (
   event,
   { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }
 ) => {
-  console.log(suggestionValue);
+  document.getElementById('display').click();
 };
 
 class SearchBox extends React.Component {
@@ -133,10 +133,7 @@ class SearchBox extends React.Component {
 
             <button
               onClick={() => {
-                if (this.state.activeSearch) {
-                  document.getElementById('display').click();
-                }
-                this.setState({ activeSearch: !this.state.activeSearch });
+                document.getElementById('display').click();
               }}
               className="search-icon"
             >
