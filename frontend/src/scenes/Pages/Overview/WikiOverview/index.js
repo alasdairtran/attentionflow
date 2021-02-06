@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { Component } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { Redirect } from 'react-router-dom';
-import { Card, Col, Row } from 'reactstrap';
+import { Col, Row } from 'reactstrap';
 import Timeseries from '../../../../components/Timeseries';
 import SearchBox from '../../../Layout/AppHeader/Components/SearchBox';
 
@@ -93,12 +93,21 @@ export default class WikiOverview extends Component {
   display = d => {
     this.setState({
       clickedOnSong: true,
-      title: document.getElementById('search-text').value,
+      title: document.getElementById('search-text').getAttribute('searchid'),
+      clickedType: document.getElementById('search-text').getAttribute('type'),
     });
   };
 
   render() {
-    if (!this.state.graphID) {
+    if (this.state.clickedOnSong === true) {
+      console.log('redirecting', this.state);
+      return (
+        <Redirect
+          push
+          to={`/overview/${this.state.clickedType}/${this.state.title}`}
+        />
+      );
+    } else if (!this.state.graphID) {
       console.log('redirecting');
       return <Redirect push to={`/overview/wiki/318487`} />;
     }
@@ -126,7 +135,7 @@ export default class WikiOverview extends Component {
                   </Col>
                   <Col md="3" lg="3">
                     <div class="searchbox">
-                      <SearchBox />
+                      <SearchBox page="wiki" />
                     </div>
                   </Col>
                 </Row>

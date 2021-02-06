@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { Component } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { Redirect } from 'react-router-dom';
-import { Card, Col, Row } from 'reactstrap';
+import { Col, Row } from 'reactstrap';
 import Timeseries from '../../../../components/Timeseries';
 import SearchBox from '../../../Layout/AppHeader/Components/SearchBox';
 
@@ -136,7 +136,7 @@ export default class AnalyticsDashboard1 extends Component {
                   </Col>
                   <Col md="3" lg="3">
                     <div class="searchbox">
-                      <SearchBox />
+                      <SearchBox page="video" />
                     </div>
                   </Col>
                 </Row>

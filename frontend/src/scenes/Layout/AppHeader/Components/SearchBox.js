@@ -5,36 +5,21 @@ import '../../../Pages/Overview/Basic';
 
 let titles = [];
 
-class Video {
+class SearchResult {
   constructor(title, id) {
     this.title = title;
     this.id = id;
   }
 }
 
-class Artist {
-  constructor(artist, id) {
-    this.artist = artist;
-    this.id = id;
-  }
-}
-
 // suggestion to output(in the text)
 const getSuggestionValue = suggestion => {
-  if (suggestion.name instanceof Artist) {
-    return suggestion.name.artist;
-  } else {
-    return suggestion.name.title;
-  }
+  return suggestion.name.title;
 };
 
 // render suggestion list
 const renderSuggestion = suggestion => {
-  if (suggestion.name instanceof Artist) {
-    return <div>A:{suggestion.name.artist}</div>;
-  } else {
-    return <div>V:{suggestion.name.title}</div>;
-  }
+  return <div>{suggestion.name.title}</div>;
 };
 
 const onSuggestionSelected = (
@@ -48,10 +33,21 @@ class SearchBox extends React.Component {
   constructor(props) {
     super(props);
 
+    let url = '';
+    if (props.page === 'wiki') {
+      url = '/vevo/wiki_suggestions/';
+    } else if (props.page === 'artist') {
+      url = '/vevo/artist_suggestions/';
+    } else if (props.page === 'video') {
+      url = '/vevo/video_suggestions/';
+    }
+
     this.state = {
       activeSearch: false,
       suggestions: [],
       value: '',
+      page: props.page,
+      url: url,
     };
   }
 
@@ -75,23 +71,20 @@ class SearchBox extends React.Component {
       },
     };
     axios
-      .get('/vevo/suggestions/', options)
+      .get(this.state.url, options)
       .then(res => {
         titles = [];
-        const result = res.data.title;
-        const artist = res.data.artist;
-        for (let i = 0; i < artist.length && i < 3; i++) {
-          titles.push({ name: new Artist(artist[i].name, artist[i].id) });
-        }
-        for (let i = 0; i < result.length && i < 5; i++) {
-          titles.push({ name: new Video(result[i].name, result[i].id) });
+        const results = res.data.results;
+        for (let i = 0; i < results.length && i < 10; i++) {
+          titles.push({
+            name: new SearchResult(results[i].name, results[i].id),
+          });
         }
         if (inputLength > 0) {
           this.setState({
             suggestions: titles,
           });
         }
-        // console.log(result);
       })
       .catch(function(error) {
         console.error(error);
@@ -117,18 +110,12 @@ class SearchBox extends React.Component {
     };
 
     for (let i = 0; i < titles.length; i++) {
-      if (
-        titles[i].name.title === this.state.value ||
-        titles[i].name.artist === this.state.value
-      ) {
-        inputProps.type = titles[
-          i
-        ].name.__proto__.constructor.name.toLowerCase();
+      if (titles[i].name.title === this.state.value) {
+        inputProps.type = this.state.page;
         inputProps.searchid = titles[i].name.id;
         break;
       }
     }
-    // console.log("inputProps", inputProps)
 
     return (
       <>
