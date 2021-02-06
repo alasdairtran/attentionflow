@@ -56,26 +56,43 @@ def get_video_incoming_outgoing(request):
 
 
 @csrf_exempt
-def get_suggestions(request):
+def get_video_suggestions(request):
     driver = GraphDatabase.driver(data_source,
                                   auth=("neo4j", NEO4J_PASS), encrypted=False)
 
     title = request.GET["title"]
     with driver.session() as session:
-        result2 = session.run("CALL db.index.fulltext.queryNodes(\"titleAndArtist\", \"" + title +
-                              "\") YIELD node, score RETURN node.videoId AS videoId, node.channelId AS channelId," +
-                              "node.title AS title, node.artistName AS artist ORDER BY node.totalView DESC")
+        result2 = session.run("CALL db.index.fulltext.queryNodes(\"videoTitle\", \"" + title +
+                              "\") YIELD node, score RETURN node.videoId AS videoId," +
+                              "node.title AS title ORDER BY node.totalView DESC")
         value = list(result2.values())
-        result_title = [{'id': v[0], 'name': v[2]}
-                        for v in value if not v[2] is None]
-        artist_set = {v[1]: v[3] for v in value if not v[3] is None and isinstance(v[3], str)}
+        result_title = [{'id': v[0], 'name': v[1]} for v in value]
+
+    driver.close()
+    output = {
+        "results": result_title,
+    }
+    return JsonResponse(output)
+
+
+@csrf_exempt
+def get_artist_suggestions(request):
+    driver = GraphDatabase.driver(data_source,
+                                  auth=("neo4j", NEO4J_PASS), encrypted=False)
+
+    title = request.GET["title"]
+    with driver.session() as session:
+        result2 = session.run("CALL db.index.fulltext.queryNodes(\"artistName\", \"" + title +
+                              "\") YIELD node, score RETURN node.channelId AS channelId," +
+                              "node.artistName AS artist ORDER BY node.totalView DESC")
+        value = list(result2.values())
+        artist_set = {v[0]: v[1] for v in value}
         result_artist = [{'id': k, 'name': v} for k, v in artist_set.items()]
 
     driver.close()
 
     output = {
-        "title": result_title,
-        "artist": result_artist
+        "results": result_artist
     }
     return JsonResponse(output)
 
@@ -88,13 +105,14 @@ def get_wiki_suggestions(request):
     title = request.GET["title"]
     with driver.session() as session:
         result2 = session.run("CALL db.index.fulltext.queryNodes(\"wikiTitles\", \"" + title +
-                              "\") YIELD node, score RETURN node.title AS title")
+                              "\") YIELD node, score RETURN node.id as id, node.title AS title")
         value = list(result2.values())
-        result_title = [v[0] for v in value if not v[0] is None]
+        result_title = [{'id': v[0], 'name': v[1]}
+                        for v in value if not v[0] is None]
     driver.close()
 
     output = {
-        "title": result_title,
+        "results": result_title,
     }
     return JsonResponse(output)
 
@@ -225,10 +243,10 @@ def get_artist_incoming_outgoing(request):
     results = results.single()
     driver.close()
 
-    print('get_artist_incoming_outgoing')
-    print('num of central', len(results['central']))
-    print('num of incoming', len(results['incoming']))
-    print('num of outgoing', len(results['outgoing']))
+    # print('get_artist_incoming_outgoing')
+    # print('num of central', len(results['central']))
+    # print('num of incoming', len(results['incoming']))
+    # print('num of outgoing', len(results['outgoing']))
 
     output = {
         "central": results['central'],
@@ -349,9 +367,9 @@ def get_top_50_videos(request):
     result = results.single()
     driver.close()
 
-    print('get_top_50_videos')
-    print('num of videos', len(result['videos']))
-    print('num of links', len(result['links']))
+    # print('get_top_50_videos')
+    # print('num of videos', len(result['videos']))
+    # print('num of links', len(result['links']))
 
     output = {
         "videos": result['videos'],
@@ -376,9 +394,9 @@ def get_top_50_artists(request):
     result = results.single()
     driver.close()
 
-    print('get_top_50_artists')
-    print('num of artists', len(result['artists']))
-    print('num of links', len(result['links']))
+    # print('get_top_50_artists')
+    # print('num of artists', len(result['artists']))
+    # print('num of links', len(result['links']))
 
     output = {
         "artists": result['artists'],

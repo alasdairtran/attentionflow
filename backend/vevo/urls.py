@@ -4,8 +4,9 @@ from vevo import views
 urlpatterns = [
     # path('egonet_video/', views.get_video),
     path('video_incoming_outgoing/', views.get_video_incoming_outgoing),
-    path('suggestions/', views.get_suggestions),
-    path('wikisuggestions/', views.get_wiki_suggestions),
+    path('video_suggestions/', views.get_video_suggestions),
+    path('artist_suggestions/', views.get_artist_suggestions),
+    path('wiki_suggestions/', views.get_wiki_suggestions),
     path('video_info/', views.get_video_info),
     path('artist_info/', views.get_artist_info),
     path('genre/', views.get_genre),
