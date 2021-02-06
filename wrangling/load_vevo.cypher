@@ -124,3 +124,5 @@ CREATE INDEX FOR (n:V) ON (n.videoId);
 
 // Create index for search box
 CALL db.index.fulltext.createNodeIndex("titleAndArtist",["V", "A"],["title", "artistName"]);
+CALL db.index.fulltext.createNodeIndex("videoTitle",["V"],["title"]);
+CALL db.index.fulltext.createNodeIndex("artistName",["A"],["artistName"]);
