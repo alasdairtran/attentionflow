@@ -19,11 +19,12 @@ graphid2pos = {graphid: pos for pos, graphid in
                enumerate(test_set['keys'])}
 data_source = "bolt://neo4j:7687"
 
+
 def unix_time_millis(d):
     d = d.to_native()
     dt = datetime.combine(d, datetime.min.time())
     diff = (dt - datetime.utcfromtimestamp(0))
-    print(diff, type(diff))
+    # print(diff, type(diff))
     return diff.total_seconds() * 1000.0
 
 
@@ -79,7 +80,7 @@ def search_wiki_info(graph_id):
             graph_id=str(graph_id))
         r = r.single()
         relevant_ids = r['node_ids']
-        print(relevant_ids)
+        # print(relevant_ids)
 
         r = session.run(
             '''
