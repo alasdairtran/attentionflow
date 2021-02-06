@@ -140,6 +140,17 @@ export default class AnalyticsDashboard1 extends Component {
 
                   <p>
                     {' '}
+                    <b>Source:</b>{' '}
+                    <a
+                      href="https://github.com/alasdairtran/attentionflow"
+                      target="_blank"
+                    >
+                      GitHub Repo
+                    </a>
+                  </p>
+
+                  <p>
+                    {' '}
                     <b>Reference:</b> Minjeong Shin, Alasdair Tran, Siqi Wu,
                     Alexander Mathews, Rong Wang, Georgiana Lyall, Lexing Xie.
                     2021. AttentionFlow: Visualising Influence in Networks of
