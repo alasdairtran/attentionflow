@@ -31,7 +31,7 @@ Please cite with the following BibTeX:
   year      = {2021},
   publisher = {Association for Computing Machinery},
   doi       = {10.1145/3437963.3441703},
-  booktitle = {Proceedings of the 14th International Conference on Web Search and Data Mining},
+  booktitle = {Proceedings of the 14th International Conference on Web Search and Data Mining, Demo},
   series    = {WSDM '21}
 }
 ```
