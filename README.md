@@ -38,11 +38,11 @@ Please cite with the following BibTeX:
 
 ## Service overview
 
-| Service       | Production                      | Development                     | Local                       |
-| ------------- | ------------------------------- | ------------------------------- | --------------------------- |
-| Frontend App  | https://attentionflow.ml        | https://dev.attentionflow.ml    | http://localhost:3002       |
-| Neo4j Browser | http://43.240.97.170:7474       | http://43.240.97.170:7475       | http://localhost:7475       |
-| Django server | http://43.240.97.170:8001/admin | http://43.240.97.170:8002/admin | http://localhost:8002/admin |
+| Service       | Production                       | Development                      | Local                       |
+| ------------- | -------------------------------- | -------------------------------- | --------------------------- |
+| Frontend App  | https://attentionflow.ml         | https://dev.attentionflow.ml     | http://localhost:3002       |
+| Neo4j Browser | http://115.146.86.190:7474       | http://115.146.86.190:7475       | http://localhost:7475       |
+| Django server | http://115.146.86.190:8001/admin | http://115.146.86.190:8002/admin | http://localhost:8002/admin |
 
 ## Getting Started
 
@@ -92,7 +92,7 @@ docker-compose down
 docker-compose build --no-cache
 
 # Download the backup
-rsync -rlptzhe ssh --info=progress2 <username>@43.240.97.170:/mnt/vevoviz_prod/neo4j/data/backups neo4j/data/
+rsync -rlptzhe ssh --info=progress2 <username>@115.146.86.190:/mnt/vevoviz_prod/neo4j/data/backups neo4j/data/
 
 ## if you see this error: "rsync: --info=progress2: unknown option"
 ## make sure rsync is with the latest version (>=3.1.3)

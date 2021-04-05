@@ -25,6 +25,10 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
+# Create file system on empty external drive and mount it
+sudo mkfs -t xfs /dev/vdb
+sudo mount /dev/vdb /mnt
+
 # Move Docker cache to external drive (which has more storage)
 sudo service docker stop
 sudo mkdir /mnt/cache
