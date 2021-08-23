@@ -151,28 +151,36 @@ export default class AnalyticsDashboard1 extends Component {
 
                   <p>
                     {' '}
-                    <b>References:</b></br> 
-                    Minjeong Shin, Alasdair Tran, Siqi Wu,
-                    Alexander Mathews, Rong Wang, Georgiana Lyall, Lexing Xie.
-                    2021. AttentionFlow: Visualising Influence in Networks of
-                    Time Series. In the Proceedings of the Fourteenth ACM
-                    International Conference on Web Search and Data Mining (WSDM
-                    ’21), March 8–12, 2021, Virtual Event, Israel. ACM. 4 pages.{' '}
+                    <b>References:</b>
+                    <br />
+                    Minjeong Shin, Alasdair Tran, Siqi Wu, Alexander Mathews,
+                    Rong Wang, Georgiana Lyall, Lexing Xie. 2021. AttentionFlow:
+                    Visualising Influence in Networks of Time Series. In the
+                    Proceedings of the Fourteenth ACM International Conference
+                    on Web Search and Data Mining (WSDM ’21), March 8–12, 2021,
+                    Virtual Event, Israel. ACM. 4 pages.{' '}
                     <a href="https://doi.org/10.1145/3437963.3441703">
                       https://doi.org/10.1145/3437963.3441703
                     </a>
-                    (VevoMusic data set and the ARNet algorithm) Estimating Attention Flow in Online Video Networks, 
-                    Siqi Wu, Marian-Andrei Rizoiu, and Lexing Xie, 
-                    ACM Conference on Computer-Supported Cooperative Work and Social Computing (CSCW '19), 2019
+                    <br />
+                    <br />
+                    (VevoMusic dataset and the ARNet algorithm) Estimating
+                    Attention Flow in Online Video Networks, Siqi Wu,
+                    Marian-Andrei Rizoiu, and Lexing Xie, ACM Conference on
+                    Computer-Supported Cooperative Work and Social Computing
+                    (CSCW '19), 2019.{' '}
                     <a href="https://doi.org/10.1145/3359285">
                       https://doi.org/10.1145/3359285
-                    </a> </br>
-                    (WikiTraffic data set and the Radflow algorithm) Radflow: A Recurrent, Aggregated, and Decomposable Model for Networks of Time Series, 
-                    Alasdair Tran, Alexander Mathews, Cheng Soon Ong, and Lexing Xie, Proceedings of The Web Conference 2021. 
+                    </a>{' '}
+                    <br />
+                    <br />
+                    (WikiTraffic dataset and the Radflow algorithm) Radflow: A
+                    Recurrent, Aggregated, and Decomposable Model for Networks
+                    of Time Series, Alasdair Tran, Alexander Mathews, Cheng Soon
+                    Ong, and Lexing Xie, Proceedings of The Web Conference 2021.{' '}
                     <a href="https://doi.org/10.1145/3442381.3449945">
                       https://doi.org/10.1145/3442381.3449945
                     </a>
-                    
                   </p>
                 </div>
               </Col>
