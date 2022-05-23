@@ -36,13 +36,7 @@ Please cite with the following BibTeX:
 }
 ```
 
-## Service overview
-
-| Service       | Production                       | Development                      | Local                       |
-| ------------- | -------------------------------- | -------------------------------- | --------------------------- |
-| Frontend App  | https://attentionflow.ml         | https://dev.attentionflow.ml     | http://localhost:3002       |
-| Neo4j Browser | http://115.146.86.190:7474       | http://115.146.86.190:7475       | http://localhost:7475       |
-| Django server | http://115.146.86.190:8001/admin | http://115.146.86.190:8002/admin | http://localhost:8002/admin |
+For the live demo, visit https://attentionflow.cmlab.dev
 
 ## Getting Started
 
