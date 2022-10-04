@@ -53,20 +53,20 @@ brew install yarn
 
 # Clone the repo
 mkdir $HOME/projects && cd $HOME/projects
-git clone git@github.com:alasdairtran/vevoviz.git
+git clone git@github.com:alasdairtran/attentionflow.git
 
 # Download the dependencies on the front-end
-cd $HOME/projects/vevoviz/frontend && yarn
+cd $HOME/projects/attentionflow/frontend && yarn
 
 # Migrate the postgres database
-cd $HOME/projects/vevoviz && docker-compose run backend python manage.py migrate --noinput
+cd $HOME/projects/attentionflow && docker-compose run backend python manage.py migrate --noinput
 
 # Make you you have the apoc plugin (useful Cypher helper functions)
 cd neo4j/plugins
 sudo wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/4.1.0.2/apoc-4.1.0.2-all.jar
 
 # Start the frontend app and Neo4j database
-cd $HOME/projects/vevoviz
+cd $HOME/projects/attentionflow
 docker-compose up
 ```
 
@@ -74,7 +74,7 @@ The frontend app is available at [http://localhost:3002/](http://localhost:3002/
 Note that the local Neo4j database needs restore the data dump from the remote server.
 
 ```sh
-cd $HOME/projects/vevoviz
+cd $HOME/projects/attentionflow
 
 # Delete old database
 rm -rf neo4j/data/*
@@ -94,7 +94,7 @@ rsync -rlptzhe ssh --info=progress2 <username>@115.146.86.190:/mnt/vevoviz_prod/
 # Restore
 docker run \
 --name neo4j-restore \
---mount type=bind,source=$HOME/projects/vevoviz/neo4j/data,target=/data \
+--mount type=bind,source=$HOME/projects/attentionflow/neo4j/data,target=/data \
 neo4j:4.1.1 bin/neo4j-admin load --database=neo4j --from=/data/backups/neo4j.dump --force
 
 # Delete the restore container
@@ -111,7 +111,7 @@ Before making a commit, make sure that you format the code properly:
 isort **/*.py && autoflake --remove-all-unused-imports --ignore-init-module-imports -i -r . && autopep8 -i **/*.py
 
 # Format JavaScript code
-cd $HOME/projects/vevoviz/frontend && yarn pretty
+cd $HOME/projects/attentionflow/frontend && yarn pretty
 ```
 
 ## Working Remotely
